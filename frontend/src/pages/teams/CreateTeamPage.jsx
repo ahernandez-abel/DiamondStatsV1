@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 
-
 import { createTeam } from '../../api/teams.api'
 
 import DashboardLayout from '../../layouts/DashboardLayout'
@@ -15,9 +14,7 @@ import './CreateTeamPage.css'
 
 function CreateTeamPage() {
 
-  const navigate = useNavigate()
-
-  const [form, setForm] = useState({
+  const initialForm = {
     name: '',
     short_name: '',
     city: '',
@@ -25,10 +22,11 @@ function CreateTeamPage() {
     logo_url: '',
     primary_color: '#16a34a',
     secondary_color: '#ffffff',
-  })
+  }
+
+  const [form, setForm] = useState(initialForm)
 
   const handleChange = (e) => {
-
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -36,27 +34,16 @@ function CreateTeamPage() {
   }
 
   const handleSubmit = async (e) => {
-
     e.preventDefault()
 
     try {
-
       await createTeam(form)
 
-alert('Equipo creado correctamente')
+      alert('Equipo creado correctamente')
 
-setForm({
-  name: '',
-  short_name: '',
-  city: '',
-  manager_name: '',
-  logo_url: '',
-  primary_color: '#06b6d4',
-  secondary_color: '#ffffff',
-})
+      setForm(initialForm)
 
     } catch (error) {
-
       console.log(error)
       alert('Error creando equipo')
     }

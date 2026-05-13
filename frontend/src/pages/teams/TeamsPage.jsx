@@ -19,21 +19,23 @@ function TeamsPage() {
   }, [])
 
   const loadData = async () => {
-    try {
-      const teamsRes = await getTeams()
-      const gamesRes = await getGames()
+  try {
+    const teamsRes = await getTeams()
+    const gamesRes = await getGames()
 
-      setTeams(teamsRes.data.teams || [])
+    setTeams(teamsRes.data.teams || [])
 
-      const gamesData = Array.isArray(gamesRes.data)
-        ? gamesRes.data
-        : gamesRes.data.games || []
+    const gamesData =
+      gamesRes.data.games ||
+      gamesRes.data.data ||
+      gamesRes.data ||
+      []
 
-      setGames(gamesData)
-    } catch (error) {
-      console.log(error)
-    }
+    setGames(Array.isArray(gamesData) ? gamesData : [])
+  } catch (error) {
+    console.log(error)
   }
+}
 
   const mainTeam = teams.find(
     (team) => Number(team.id) === MAIN_TEAM_ID

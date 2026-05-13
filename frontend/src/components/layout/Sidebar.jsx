@@ -171,20 +171,32 @@ function Sidebar() {
 
         <div className="sidebar-footer">
 
-          <button
-            onClick={handleLogout}
-            className="sidebar-logout-btn"
-          >
+  <div className="abeldev-badge">
 
-            <LogOut size={18} />
+    <span className="abeldev-title">
+      AbelDev
+    </span>
 
-            <span>
-              Cerrar Sesión
-            </span>
+    <span className="abeldev-subtitle">
+      DiamondStats System
+    </span>
 
-          </button>
+  </div>
 
-        </div>
+  <button
+    onClick={handleLogout}
+    className="sidebar-logout-btn"
+  >
+
+    <LogOut size={18} />
+
+    <span>
+      Cerrar Sesión
+    </span>
+
+  </button>
+
+</div>
 
       </aside>
 

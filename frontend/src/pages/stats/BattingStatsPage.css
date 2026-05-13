@@ -1,137 +1,203 @@
 .batting-page {
-  min-height: 100vh;
-
-  padding: 50px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #020617 0%,
-      #0f172a 100%
-    );
-
-  color: white;
+  width: 100%;
+  padding: 28px 34px 50px;
 }
 
 .batting-header {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .batting-title {
-  font-size: 52px;
+  color: #ffffff;
 
+  font-size: 42px;
   font-weight: 900;
 
-  margin-bottom: 12px;
-
-  color: #22c55e;
+  line-height: 1.1;
 }
 
 .batting-subtitle {
-  font-size: 18px;
+  margin-top: 10px;
 
   color: #94a3b8;
+
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .batting-table-wrapper {
+  width: 100%;
+
   overflow-x: auto;
 
   border-radius: 24px;
 
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #ffffff;
 
-  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 
-  backdrop-filter: blur(12px);
+  box-shadow:
+    0 18px 35px rgba(0, 0, 0, 0.35);
 }
 
 .batting-table {
   width: 100%;
 
+  min-width: 1450px;
+
   border-collapse: collapse;
 
-  min-width: 1000px;
+  background: #ffffff;
+
+  color: #4b5563;
 }
 
 .batting-table thead {
-  background:
-    linear-gradient(
-      135deg,
-      #14532d,
-      #166534
-    );
+  background: #ffffff;
 }
 
 .batting-table th {
-  padding: 18px;
+  height: 48px;
 
-  text-align: center;
+  padding: 0 10px;
+
+  color: #404040;
 
   font-size: 14px;
+  font-weight: 900;
 
-  font-weight: 800;
+  text-align: right;
 
-  letter-spacing: 0.5px;
+  white-space: nowrap;
 
-  color: white;
+  border-bottom: 1px solid #d6d6d6;
+
+  cursor: pointer;
+
+  user-select: none;
+}
+
+.batting-table th span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.batting-table th small {
+  font-size: 13px;
+  text-decoration: none;
 }
 
 .batting-table td {
-  padding: 18px;
+  height: 50px;
 
-  text-align: center;
+  padding: 0 10px;
 
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: #6b7280;
 
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 500;
+
+  text-align: right;
+
+  border-bottom: 1px solid #eeeeee;
+
+  white-space: nowrap;
 }
 
-.batting-table tbody tr {
-  transition: all 0.2s ease;
+.batting-table tbody tr:nth-child(even) {
+  background: #fafafa;
 }
 
 .batting-table tbody tr:hover {
-  background: rgba(34, 197, 94, 0.08);
+  background: #f3f7fb;
 }
 
-.player-cell {
+.rank-column {
+  width: 50px;
+
   text-align: left !important;
 }
 
-.player-info {
-  display: flex;
+.player-column {
+  min-width: 300px;
 
+  text-align: left !important;
+
+  border-right: 1px solid #d9d9d9;
+}
+
+.position-column {
+  width: 70px;
+
+  text-align: center !important;
+
+  border-right: 1px solid #e2e2e2;
+}
+
+.player-table-info {
+  display: flex;
   align-items: center;
 
-  gap: 14px;
+  gap: 10px;
 }
 
 .player-photo {
-  width: 52px;
-  height: 52px;
+  width: 34px;
+  height: 34px;
 
   border-radius: 50%;
 
   object-fit: cover;
 
-  border: 2px solid rgba(34, 197, 94, 0.4);
+  border: 1px solid #d1d5db;
 }
 
-.avg-cell {
-  font-weight: 900;
+.player-name-box {
+  display: flex;
+  align-items: center;
 
-  color: #4ade80;
-
-  font-size: 18px;
+  gap: 6px;
 }
 
-@media (max-width: 900px) {
+.player-name {
+  color: #006edb;
+
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.player-team {
+  color: #777777;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.highlight-column {
+  background: #dfeaf7 !important;
+}
+
+td.highlight-column {
+  color: #6b7280;
+
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
 
   .batting-page {
-    padding: 20px;
+    padding: 20px 16px 40px;
   }
 
   .batting-title {
-    font-size: 38px;
+    font-size: 32px;
+  }
+
+  .batting-subtitle {
+    font-size: 15px;
+  }
+
+  .batting-table-wrapper {
+    border-radius: 16px;
   }
 }

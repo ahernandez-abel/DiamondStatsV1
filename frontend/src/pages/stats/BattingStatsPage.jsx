@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
@@ -9,6 +9,10 @@ import './BattingStatsPage.css'
 function BattingStatsPage() {
 
   const [leaders, setLeaders] = useState([])
+  const [sortConfig, setSortConfig] = useState({
+    key: 'avg',
+    direction: 'desc',
+  })
 
   useEffect(() => {
     loadLeaders()
@@ -22,6 +26,64 @@ function BattingStatsPage() {
       console.log(error)
     }
   }
+
+  const formatDecimal = (value) => {
+    const number = Number(value || 0)
+
+    return number
+      .toFixed(3)
+      .replace(/^0/, '')
+  }
+
+  const formatStat = (key, value) => {
+    if (['avg', 'obp', 'slg', 'ops'].includes(key)) {
+      return formatDecimal(value)
+    }
+
+    return value || 0
+  }
+
+  const handleSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === 'desc'
+          ? 'asc'
+          : 'desc',
+    }))
+  }
+
+  const sortedLeaders = useMemo(() => {
+    return [...leaders].sort((a, b) => {
+      const aValue = Number(a[sortConfig.key] || 0)
+      const bValue = Number(b[sortConfig.key] || 0)
+
+      if (sortConfig.direction === 'asc') {
+        return aValue - bValue
+      }
+
+      return bValue - aValue
+    })
+  }, [leaders, sortConfig])
+
+  const columns = [
+    { key: 'games_played', label: 'GP' },
+    { key: 'ab', label: 'AB' },
+    { key: 'runs', label: 'R' },
+    { key: 'h', label: 'H' },
+    { key: 'avg', label: 'AVG', highlight: true },
+    { key: 'doubles', label: '2B' },
+    { key: 'triples', label: '3B' },
+    { key: 'hr', label: 'HR' },
+    { key: 'rbi', label: 'RBI' },
+    { key: 'tb', label: 'TB' },
+    { key: 'bb', label: 'BB' },
+    { key: 'so', label: 'K' },
+    { key: 'sb', label: 'SB' },
+    { key: 'obp', label: 'OBP' },
+    { key: 'slg', label: 'SLG' },
+    { key: 'ops', label: 'OPS' },
+  ]
 
   return (
     <PublicLayout>
@@ -46,36 +108,55 @@ function BattingStatsPage() {
 
             <thead>
               <tr>
-                <th>Jugador</th>
-                <th>G</th>
-                <th>AB</th>
-                <th>H</th>
-                <th>AVG</th>
-                <th>OBP</th>
-                <th>SLG</th>
-                <th>OPS</th>
-                <th>2B</th>
-                <th>3B</th>
-                <th>HR</th>
-                <th>RBI</th>
-                <th>R</th>
-                <th>BB</th>
-                <th>SO</th>
-                <th>SB</th>
-                <th>CS</th>
-                <th>TB</th>
+
+                <th className="rank-column">
+                  POS
+                </th>
+
+                <th className="player-column">
+                  NOMBRE
+                </th>
+
+                <th className="position-column">
+                  POS
+                </th>
+
+                {columns.map((column) => (
+
+                  <th
+                    key={column.key}
+                    className={column.highlight ? 'highlight-column' : ''}
+                    onClick={() => handleSort(column.key)}
+                  >
+                    <span>
+                      {column.label}
+
+                      {sortConfig.key === column.key && (
+                        <small>
+                          {sortConfig.direction === 'desc' ? ' ↓' : ' ↑'}
+                        </small>
+                      )}
+                    </span>
+                  </th>
+
+                ))}
+
               </tr>
             </thead>
 
             <tbody>
 
-              {leaders.map((player) => (
+              {sortedLeaders.map((player, index) => (
 
                 <tr key={player.id}>
 
-                  <td className="player-cell">
+                  <td className="rank-column">
+                    {index + 1}
+                  </td>
 
-                    <div className="player-info">
+                  <td className="player-column">
+
+                    <div className="player-table-info">
 
                       <img
                         src={
@@ -86,39 +167,36 @@ function BattingStatsPage() {
                         className="player-photo"
                       />
 
-                      <span>
-                        {player.full_name}
-                      </span>
+                      <div className="player-name-box">
+
+                        <span className="player-name">
+                          {player.full_name}
+                        </span>
+
+                        <span className="player-team">
+                          {player.team_name || ''}
+                        </span>
+
+                      </div>
 
                     </div>
 
                   </td>
 
-                  <td>{player.games_played}</td>
-                  <td>{player.ab}</td>
-                  <td>{player.h}</td>
-
-                  <td className="avg-cell">
-                    {player.avg}
+                  <td className="position-column">
+                    {player.position || '-'}
                   </td>
 
-                  <td>{player.obp}</td>
-                  <td>{player.slg}</td>
+                  {columns.map((column) => (
 
-                  <td className="ops-cell">
-                    {player.ops}
-                  </td>
+                    <td
+                      key={column.key}
+                      className={column.highlight ? 'highlight-column' : ''}
+                    >
+                      {formatStat(column.key, player[column.key])}
+                    </td>
 
-                  <td>{player.doubles}</td>
-                  <td>{player.triples}</td>
-                  <td>{player.hr}</td>
-                  <td>{player.rbi}</td>
-                  <td>{player.runs}</td>
-                  <td>{player.bb}</td>
-                  <td>{player.so}</td>
-                  <td>{player.sb}</td>
-                  <td>{player.cs}</td>
-                  <td>{player.tb}</td>
+                  ))}
 
                 </tr>
 

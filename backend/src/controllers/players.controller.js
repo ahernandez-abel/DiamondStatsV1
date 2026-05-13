@@ -83,7 +83,7 @@ export const getPlayerById = async (req, res, next) => {
         ROUND(
           CASE
             WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
-            ELSE SUM(h)::numeric / SUM(ab)
+            ELSE COALESCE(SUM(h), 0)::numeric / NULLIF(SUM(ab), 0)
           END,
           3
         ) AS avg,
@@ -97,18 +97,19 @@ export const getPlayerById = async (req, res, next) => {
               + COALESCE(SUM(sf), 0)
             ) = 0 THEN 0
             ELSE (
-              (
-                COALESCE(SUM(h), 0)
-                + COALESCE(SUM(bb), 0)
-                + COALESCE(SUM(hbp), 0)
-              )::numeric
-              /
+              COALESCE(SUM(h), 0)
+              + COALESCE(SUM(bb), 0)
+              + COALESCE(SUM(hbp), 0)
+            )::numeric
+            /
+            NULLIF(
               (
                 COALESCE(SUM(ab), 0)
                 + COALESCE(SUM(bb), 0)
                 + COALESCE(SUM(hbp), 0)
                 + COALESCE(SUM(sf), 0)
-              )
+              ),
+              0
             )
           END,
           3
@@ -126,11 +127,14 @@ export const getPlayerById = async (req, res, next) => {
                 + (SUM(triples) * 3)
                 + (SUM(hr) * 4),
                 0
-              )::numeric / SUM(ab)
+              )::numeric
+              /
+              NULLIF(SUM(ab), 0)
             )
           END,
           3
         ) AS slg
+
       FROM batting_stats
       WHERE player_id = $1
       `,
@@ -148,10 +152,12 @@ export const getPlayerById = async (req, res, next) => {
       `
       SELECT
         COALESCE(SUM(outs_recorded), 0) AS outs,
+
         ROUND(
           COALESCE(SUM(outs_recorded), 0)::numeric / 3,
           1
         ) AS ip,
+
         COALESCE(SUM(so), 0) AS strikeouts,
         COALESCE(SUM(bb), 0) AS walks,
         COALESCE(SUM(er), 0) AS earned_runs,
@@ -163,7 +169,7 @@ export const getPlayerById = async (req, res, next) => {
         ROUND(
           CASE
             WHEN COALESCE(SUM(outs_recorded), 0) = 0 THEN 0
-            ELSE (SUM(er)::numeric * 21) / SUM(outs_recorded)
+            ELSE (COALESCE(SUM(er), 0)::numeric * 21) / NULLIF(SUM(outs_recorded), 0)
           END,
           2
         ) AS era,
@@ -171,10 +177,18 @@ export const getPlayerById = async (req, res, next) => {
         ROUND(
           CASE
             WHEN COALESCE(SUM(outs_recorded), 0) = 0 THEN 0
-            ELSE ((SUM(bb) + SUM(hits_allowed))::numeric * 3) / SUM(outs_recorded)
+            ELSE (
+              (
+                COALESCE(SUM(bb), 0)
+                + COALESCE(SUM(hits_allowed), 0)
+              )::numeric * 3
+            )
+            /
+            NULLIF(SUM(outs_recorded), 0)
           END,
           2
         ) AS whip
+
       FROM pitching_stats
       WHERE player_id = $1
       `,
@@ -202,20 +216,22 @@ export const getPlayerById = async (req, res, next) => {
               + COALESCE(SUM(errors), 0)
             ) = 0 THEN 0
             ELSE (
-              (
-                COALESCE(SUM(putouts), 0)
-                + COALESCE(SUM(assists), 0)
-              )::numeric
-              /
+              COALESCE(SUM(putouts), 0)
+              + COALESCE(SUM(assists), 0)
+            )::numeric
+            /
+            NULLIF(
               (
                 COALESCE(SUM(putouts), 0)
                 + COALESCE(SUM(assists), 0)
                 + COALESCE(SUM(errors), 0)
-              )
+              ),
+              0
             )
           END,
           3
         ) AS fielding_pct
+
       FROM fielding_stats
       WHERE player_id = $1
       `,

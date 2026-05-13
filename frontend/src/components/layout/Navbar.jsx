@@ -13,6 +13,9 @@ function Navbar() {
     setMenuOpen(false)
   }
 
+  const navClass = ({ isActive }) =>
+    isActive ? 'navbar-link active' : 'navbar-link'
+
   return (
     <header className="navbar">
 
@@ -59,31 +62,67 @@ function Navbar() {
 
       <nav className={menuOpen ? 'navbar-links open' : 'navbar-links'}>
 
-        <NavLink to="/" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Inicio
         </NavLink>
 
-        <NavLink to="/players" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/players"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Jugadores
         </NavLink>
 
-        <NavLink to="/teams" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/comparar"
+          onClick={closeMenu}
+          className={navClass}
+        >
+          Comparar
+        </NavLink>
+
+        <NavLink
+          to="/teams"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Equipos
         </NavLink>
 
-        <NavLink to="/games" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/games"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Juegos
         </NavLink>
 
-        <NavLink to="/stats/batting" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/stats/batting"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Bateo
         </NavLink>
 
-        <NavLink to="/stats/pitching" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/stats/pitching"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Pitcher
         </NavLink>
 
-        <NavLink to="/stats/fielding" onClick={closeMenu} className={({ isActive }) => isActive ? 'navbar-link active' : 'navbar-link'}>
+        <NavLink
+          to="/stats/fielding"
+          onClick={closeMenu}
+          className={navClass}
+        >
           Defensa
         </NavLink>
 

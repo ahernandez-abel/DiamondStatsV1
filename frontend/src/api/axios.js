@@ -4,6 +4,7 @@ const API = axios.create({
   baseURL: 'https://manor-hasty-lasso.ngrok-free.dev/api',
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 })
 

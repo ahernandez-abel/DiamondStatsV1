@@ -1,0 +1,147 @@
+.fielding-page {
+  min-height: 100vh;
+
+  padding: 50px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #020617 0%,
+      #0f172a 100%
+    );
+
+  color: white;
+}
+
+.fielding-header {
+  margin-bottom: 40px;
+}
+
+.fielding-title {
+  font-size: 52px;
+
+  font-weight: 900;
+
+  margin-bottom: 12px;
+
+  color: #38bdf8;
+}
+
+.fielding-subtitle {
+  font-size: 18px;
+
+  color: #94a3b8;
+}
+
+.fielding-table-wrapper {
+  overflow-x: auto;
+
+  border-radius: 24px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  background: rgba(15, 23, 42, 0.9);
+
+  backdrop-filter: blur(12px);
+}
+
+.fielding-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  min-width: 700px;
+}
+
+.fielding-table thead {
+  background:
+    linear-gradient(
+      135deg,
+      #0369a1,
+      #0284c7
+    );
+}
+
+.fielding-table th {
+  padding: 18px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  color: white;
+}
+
+.fielding-table td {
+  padding: 18px;
+
+  text-align: center;
+
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+
+  font-size: 15px;
+}
+
+.fielding-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.fielding-table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.player-cell {
+  text-align: left !important;
+}
+
+.player-info {
+  display: flex;
+
+  align-items: center;
+}
+
+.player-name {
+  font-size: 16px;
+
+  font-weight: 700;
+}
+
+.fielding-pct {
+  font-size: 18px;
+
+  font-weight: 900;
+
+  color: #38bdf8;
+}
+
+@media (max-width: 900px) {
+
+  .fielding-page {
+    padding: 20px;
+  }
+
+  .fielding-title {
+    font-size: 38px;
+  }
+}
+
+.player-photo {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border: 2px solid rgba(56, 189, 248, 0.4);
+}
+
+.rf-cell {
+  color: #facc15;
+
+  font-weight: 900;
+
+  font-size: 17px;
+}

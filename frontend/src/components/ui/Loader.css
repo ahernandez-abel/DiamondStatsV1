@@ -1,0 +1,77 @@
+/* src/components/ui/Loader.css */
+
+.loader-container {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 80px 20px;
+
+  text-align: center;
+}
+
+.loader-spinner {
+  width: 75px;
+  height: 75px;
+
+  border-radius: 50%;
+
+  border: 6px solid rgba(34, 197, 94, 0.18);
+  border-top: 6px solid #22c55e;
+
+  animation: softballSpin 1s linear infinite;
+
+  box-shadow:
+    0 0 25px rgba(34, 197, 94, 0.18);
+
+  margin-bottom: 28px;
+}
+
+.loader-title {
+  color: #f8fafc;
+
+  font-size: 24px;
+  font-weight: 900;
+
+  margin-bottom: 10px;
+
+  letter-spacing: 0.5px;
+}
+
+.loader-text {
+  color: #94a3b8;
+
+  font-size: 15px;
+
+  letter-spacing: 0.3px;
+}
+
+@keyframes softballSpin {
+
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+
+  .loader-spinner {
+    width: 60px;
+    height: 60px;
+  }
+
+  .loader-title {
+    font-size: 20px;
+  }
+
+  .loader-text {
+    font-size: 14px;
+  }
+}

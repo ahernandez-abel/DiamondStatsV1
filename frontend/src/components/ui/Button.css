@@ -1,0 +1,105 @@
+/* src/components/ui/Button.css */
+
+.custom-button {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 14px 26px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background: linear-gradient(
+    135deg,
+    #22c55e,
+    #15803d
+  );
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  letter-spacing: 0.4px;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition: all 0.3s ease;
+
+  box-shadow:
+    0 10px 24px rgba(34, 197, 94, 0.25);
+}
+
+.custom-button::before {
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: -100%;
+
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+
+  transition: left 0.6s ease;
+}
+
+.custom-button:hover::before {
+  left: 100%;
+}
+
+.custom-button:hover {
+  transform: translateY(-3px);
+
+  background: linear-gradient(
+    135deg,
+    #4ade80,
+    #16a34a
+  );
+
+  box-shadow:
+    0 14px 30px rgba(34, 197, 94, 0.35);
+}
+
+.custom-button:active {
+  transform: scale(0.98);
+}
+
+.custom-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+.custom-button-text {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 600px) {
+
+  .custom-button {
+    width: 100%;
+
+    padding: 15px 20px;
+  }
+}

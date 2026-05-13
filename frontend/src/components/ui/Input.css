@@ -1,0 +1,58 @@
+/* src/components/ui/Input.css */
+
+.custom-input-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-input-label {
+  margin-bottom: 10px;
+
+  color: #f8fafc;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  letter-spacing: 0.3px;
+}
+
+.custom-input {
+  width: 100%;
+
+  padding: 15px 18px;
+
+  border-radius: 16px;
+
+  border: 1px solid #334155;
+
+  background: #020617;
+
+  color: #f8fafc;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  outline: none;
+
+  transition: all 0.25s ease;
+}
+
+.custom-input::placeholder {
+  color: #64748b;
+}
+
+.custom-input:focus {
+  border-color: #22c55e;
+
+  background: #0f172a;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.12),
+    0 0 18px rgba(34, 197, 94, 0.18);
+}
+
+.custom-input:hover {
+  border-color: #475569;
+}

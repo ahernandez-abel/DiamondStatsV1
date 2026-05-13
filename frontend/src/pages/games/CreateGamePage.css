@@ -1,0 +1,150 @@
+/* src/pages/games/CreateGamePage.css */
+
+.create-game-page {
+  width: 100%;
+
+  padding: 30px;
+}
+
+.create-game-container {
+  margin-top: 30px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.create-game-form {
+  width: 100%;
+  max-width: 1000px;
+
+  padding: 35px;
+
+  border-radius: 28px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.96) 0%,
+    rgba(17, 24, 39, 0.98) 100%
+  );
+
+  border: 1px solid rgba(34, 197, 94, 0.15);
+
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.35);
+
+  backdrop-filter: blur(10px);
+}
+
+.game-teams-grid,
+.game-info-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 22px;
+
+  margin-bottom: 24px;
+}
+
+.game-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.game-label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #f8fafc;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  letter-spacing: 0.3px;
+}
+
+.game-select {
+  width: 100%;
+
+  padding: 15px 18px;
+
+  border-radius: 16px;
+
+  border: 1px solid #334155;
+
+  background: #020617;
+
+  color: #f8fafc;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  outline: none;
+
+  transition: all 0.25s ease;
+}
+
+.game-select:focus {
+  border-color: #22c55e;
+
+  background: #0f172a;
+
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.12),
+    0 0 18px rgba(34, 197, 94, 0.18);
+}
+
+.game-select option {
+  background: #0f172a;
+
+  color: white;
+}
+
+.full-width {
+  margin-bottom: 24px;
+}
+
+.game-button-container {
+  margin-top: 30px;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+.game-button-container button {
+  min-width: 240px;
+}
+
+@media (max-width: 900px) {
+
+  .game-teams-grid,
+  .game-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .create-game-form {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .create-game-page {
+    padding: 18px;
+  }
+
+  .create-game-form {
+    padding: 22px;
+
+    border-radius: 22px;
+  }
+
+  .game-button-container {
+    justify-content: center;
+  }
+
+  .game-button-container button {
+    width: 100%;
+  }
+}

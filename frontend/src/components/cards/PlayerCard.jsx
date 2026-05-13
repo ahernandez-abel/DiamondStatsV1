@@ -30,13 +30,17 @@ function PlayerCard({ player }) {
 
         <div className="player-info">
 
-          <h2 className="player-name">
-            {player.full_name}
-          </h2>
+          <div className="player-main-line">
 
-          <p className="player-position">
-            {player.position || 'Sin Posición'}
-          </p>
+  <h2 className="player-name">
+    {player.full_name}
+  </h2>
+
+  <p className="player-position">
+    {player.position || 'Sin Posición'}
+  </p>
+
+</div>
 
           <div className="player-meta">
 

@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
-import { getPlayers } from '../../api/players.api'
-import { getPlayerById } from '../../api/players.api'
+import { getBattingLeaders } from '../../api/leaders.api'
 
 import './ComparePlayersPage.css'
 
@@ -12,47 +11,50 @@ function ComparePlayersPage() {
   const [players, setPlayers] = useState([])
   const [playerOneId, setPlayerOneId] = useState('')
   const [playerTwoId, setPlayerTwoId] = useState('')
-  const [playerOne, setPlayerOne] = useState(null)
-  const [playerTwo, setPlayerTwo] = useState(null)
 
   useEffect(() => {
     loadPlayers()
   }, [])
 
-  useEffect(() => {
-    loadComparison()
-  }, [playerOneId, playerTwoId])
-
   const loadPlayers = async () => {
     try {
-      const res = await getPlayers()
-      setPlayers(res.data.players || [])
+      const res = await getBattingLeaders()
+      setPlayers(res.data.leaders || [])
     } catch (error) {
       console.log(error)
     }
   }
 
-  const loadComparison = async () => {
-    try {
-      if (!playerOneId || !playerTwoId) return
+  const playerOne = useMemo(() => {
+    return players.find(
+      (player) => String(player.id) === String(playerOneId)
+    )
+  }, [players, playerOneId])
 
-      const [resOne, resTwo] = await Promise.all([
-        getPlayerById(playerOneId),
-        getPlayerById(playerTwoId),
-      ])
-
-      setPlayerOne(resOne.data.player)
-      setPlayerTwo(resTwo.data.player)
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  const playerTwo = useMemo(() => {
+    return players.find(
+      (player) => String(player.id) === String(playerTwoId)
+    )
+  }, [players, playerTwoId])
 
   const formatDecimal = (value) => {
     const number = Number(value || 0)
 
-    return number.toFixed(3)
+    return number
+      .toFixed(3)
+      .replace(/^0/, '')
+  }
+
+  const formatValue = (value, format) => {
+    if (format === 'decimal') {
+      return formatDecimal(value)
+    }
+
+    if (format === 'two') {
+      return Number(value || 0).toFixed(2)
+    }
+
+    return value || 0
   }
 
   const getWinnerClass = (valueOne, valueTwo, lowerIsBetter = false) => {
@@ -87,108 +89,97 @@ function ComparePlayersPage() {
     return [
       {
         label: 'AVG',
-        one: playerOne.batting?.avg,
-        two: playerTwo.batting?.avg,
+        one: playerOne.avg,
+        two: playerTwo.avg,
         format: 'decimal',
       },
       {
         label: 'OBP',
-        one: playerOne.batting?.obp,
-        two: playerTwo.batting?.obp,
+        one: playerOne.obp,
+        two: playerTwo.obp,
         format: 'decimal',
       },
       {
         label: 'SLG',
-        one: playerOne.batting?.slg,
-        two: playerTwo.batting?.slg,
+        one: playerOne.slg,
+        two: playerTwo.slg,
         format: 'decimal',
       },
       {
         label: 'OPS',
-        one: playerOne.batting?.ops,
-        two: playerTwo.batting?.ops,
+        one: playerOne.ops,
+        two: playerTwo.ops,
         format: 'decimal',
+      },
+      {
+        label: 'G',
+        one: playerOne.games_played,
+        two: playerTwo.games_played,
+      },
+      {
+        label: 'AB',
+        one: playerOne.ab,
+        two: playerTwo.ab,
       },
       {
         label: 'H',
-        one: playerOne.batting?.hits,
-        two: playerTwo.batting?.hits,
+        one: playerOne.h,
+        two: playerTwo.h,
+      },
+      {
+        label: '2B',
+        one: playerOne.doubles,
+        two: playerTwo.doubles,
+      },
+      {
+        label: '3B',
+        one: playerOne.triples,
+        two: playerTwo.triples,
       },
       {
         label: 'HR',
-        one: playerOne.batting?.hr,
-        two: playerTwo.batting?.hr,
+        one: playerOne.hr,
+        two: playerTwo.hr,
       },
       {
         label: 'RBI',
-        one: playerOne.batting?.rbi,
-        two: playerTwo.batting?.rbi,
+        one: playerOne.rbi,
+        two: playerTwo.rbi,
       },
       {
         label: 'R',
-        one: playerOne.batting?.runs,
-        two: playerTwo.batting?.runs,
+        one: playerOne.runs,
+        two: playerTwo.runs,
+      },
+      {
+        label: 'BB',
+        one: playerOne.bb,
+        two: playerTwo.bb,
+      },
+      {
+        label: 'SO',
+        one: playerOne.so,
+        two: playerTwo.so,
+        lowerIsBetter: true,
       },
       {
         label: 'SB',
-        one: playerOne.batting?.sb,
-        two: playerTwo.batting?.sb,
+        one: playerOne.sb,
+        two: playerTwo.sb,
       },
       {
-        label: 'ERA',
-        one: playerOne.pitching?.era,
-        two: playerTwo.pitching?.era,
-        format: 'two',
+        label: 'CS',
+        one: playerOne.cs,
+        two: playerTwo.cs,
         lowerIsBetter: true,
       },
       {
-        label: 'WHIP',
-        one: playerOne.pitching?.whip,
-        two: playerTwo.pitching?.whip,
-        format: 'two',
-        lowerIsBetter: true,
-      },
-      {
-        label: 'SO Pitching',
-        one: playerOne.pitching?.strikeouts,
-        two: playerTwo.pitching?.strikeouts,
-      },
-      {
-        label: 'FLD%',
-        one: playerOne.fielding?.fielding_pct,
-        two: playerTwo.fielding?.fielding_pct,
-        format: 'decimal',
-      },
-      {
-        label: 'PO',
-        one: playerOne.fielding?.putouts,
-        two: playerTwo.fielding?.putouts,
-      },
-      {
-        label: 'AST',
-        one: playerOne.fielding?.assists,
-        two: playerTwo.fielding?.assists,
-      },
-      {
-        label: 'ERR',
-        one: playerOne.fielding?.errors,
-        two: playerTwo.fielding?.errors,
-        lowerIsBetter: true,
+        label: 'TB',
+        one: playerOne.tb,
+        two: playerTwo.tb,
       },
     ]
   }, [playerOne, playerTwo])
-
-  const formatValue = (stat) => {
-    if (stat.format === 'decimal') {
-      return formatDecimal(stat.value)
-    }
-
-    if (stat.format === 'two') {
-      return Number(stat.value || 0).toFixed(2)
-    }
-
-    return stat.value || 0
-  }
 
   const score = useMemo(() => {
     let one = 0
@@ -224,7 +215,7 @@ function ComparePlayersPage() {
           </h1>
 
           <p>
-            Elige dos jugadores y compara sus estadísticas frente a frente.
+            Elige dos jugadores y compara sus estadísticas ofensivas frente a frente.
           </p>
 
         </div>
@@ -390,10 +381,7 @@ function ComparePlayersPage() {
                           stat.lowerIsBetter
                         )}
                       >
-                        {formatValue({
-                          value: stat.one,
-                          format: stat.format,
-                        })}
+                        {formatValue(stat.one, stat.format)}
                       </td>
 
                       <td className="stat-label">
@@ -407,10 +395,7 @@ function ComparePlayersPage() {
                           stat.lowerIsBetter
                         )}
                       >
-                        {formatValue({
-                          value: stat.two,
-                          format: stat.format,
-                        })}
+                        {formatValue(stat.two, stat.format)}
                       </td>
 
                     </tr>

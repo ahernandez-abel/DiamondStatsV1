@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
@@ -10,23 +10,72 @@ function FieldingStatsPage() {
 
   const [leaders, setLeaders] = useState([])
 
+  const [sortConfig, setSortConfig] = useState({
+    key: 'fielding_pct',
+    direction: 'desc',
+  })
+
   useEffect(() => {
     loadLeaders()
   }, [])
 
   const loadLeaders = async () => {
-
     try {
-
       const res = await getFieldingLeaders()
-
       setLeaders(res.data.leaders || [])
-
     } catch (error) {
-
       console.log(error)
     }
   }
+
+  const handleSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === 'desc'
+          ? 'asc'
+          : 'desc',
+    }))
+  }
+
+  const formatDecimal = (value) => {
+    const number = Number(value || 0)
+
+    return number
+      .toFixed(3)
+      .replace(/^0/, '')
+  }
+
+  const formatStat = (key, value) => {
+    if (key === 'fielding_pct' || key === 'range_factor') {
+      return formatDecimal(value)
+    }
+
+    return value || 0
+  }
+
+  const sortedLeaders = useMemo(() => {
+    return [...leaders].sort((a, b) => {
+      const aValue = Number(a[sortConfig.key] || 0)
+      const bValue = Number(b[sortConfig.key] || 0)
+
+      if (sortConfig.direction === 'asc') {
+        return aValue - bValue
+      }
+
+      return bValue - aValue
+    })
+  }, [leaders, sortConfig])
+
+  const columns = [
+    { key: 'fielding_pct', label: 'FLD%', highlight: true },
+    { key: 'putouts', label: 'PO' },
+    { key: 'assists', label: 'AST' },
+    { key: 'errors', label: 'ERR' },
+    { key: 'passed_balls', label: 'PB' },
+    { key: 'total_chances', label: 'TC' },
+    { key: 'range_factor', label: 'RF' },
+  ]
 
   return (
     <PublicLayout>
@@ -53,37 +102,38 @@ function FieldingStatsPage() {
 
               <tr>
 
-                <th>
-                  Jugador
+                <th className="rank-column">
+                  POS
                 </th>
 
-                <th>
-                  FLD%
+                <th className="player-column">
+                  JUGADOR
                 </th>
 
-                <th>
-                  PO
+                <th className="position-column">
+                  POS
                 </th>
 
-                <th>
-                  AST
-                </th>
+                {columns.map((column) => (
 
-                <th>
-                  ERR
-                </th>
+                  <th
+                    key={column.key}
+                    className={column.highlight ? 'highlight-column' : ''}
+                    onClick={() => handleSort(column.key)}
+                  >
+                    <span>
+                      {column.label}
 
-                <th>
-                  PB
-                </th>
+                      {sortConfig.key === column.key && (
+                        <small>
+                          {sortConfig.direction === 'desc' ? ' ↓' : ' ↑'}
+                        </small>
+                      )}
 
-                <th>
-                  TC
-                </th>
+                    </span>
+                  </th>
 
-                <th>
-                  RF
-                </th>
+                ))}
 
               </tr>
 
@@ -91,11 +141,15 @@ function FieldingStatsPage() {
 
             <tbody>
 
-              {leaders.map((player) => (
+              {sortedLeaders.map((player, index) => (
 
                 <tr key={player.id}>
 
-                  <td className="player-cell">
+                  <td className="rank-column">
+                    {index + 1}
+                  </td>
+
+                  <td className="player-column">
 
                     <div className="player-info">
 
@@ -108,41 +162,36 @@ function FieldingStatsPage() {
                         className="player-photo"
                       />
 
-                      <span className="player-name">
-                        {player.full_name}
-                      </span>
+                      <div className="player-name-box">
+
+                        <span className="player-name">
+                          {player.full_name}
+                        </span>
+
+                        <span className="player-team">
+                          {player.team_name || ''}
+                        </span>
+
+                      </div>
 
                     </div>
 
                   </td>
 
-                  <td className="fielding-pct">
-                    {player.fielding_pct}
+                  <td className="position-column">
+                    {player.position || '-'}
                   </td>
 
-                  <td>
-                    {player.putouts}
-                  </td>
+                  {columns.map((column) => (
 
-                  <td>
-                    {player.assists}
-                  </td>
+                    <td
+                      key={column.key}
+                      className={column.highlight ? 'highlight-column' : ''}
+                    >
+                      {formatStat(column.key, player[column.key])}
+                    </td>
 
-                  <td>
-                    {player.errors}
-                  </td>
-
-                  <td>
-                    {player.passed_balls}
-                  </td>
-
-                  <td>
-                    {player.total_chances}
-                  </td>
-
-                  <td className="rf-cell">
-                    {player.range_factor}
-                  </td>
+                  ))}
 
                 </tr>
 

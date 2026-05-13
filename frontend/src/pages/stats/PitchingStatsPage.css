@@ -1,147 +1,173 @@
 .pitching-page {
-  min-height: 100vh;
-
-  padding: 50px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #020617 0%,
-      #0f172a 100%
-    );
-
-  color: white;
+  width: 100%;
+  padding: 28px 34px 50px;
 }
 
 .pitching-header {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .pitching-title {
-  font-size: 52px;
-
+  color: #ffffff;
+  font-size: 42px;
   font-weight: 900;
-
-  margin-bottom: 12px;
-
-  color: #f97316;
+  line-height: 1.1;
 }
 
 .pitching-subtitle {
-  font-size: 18px;
-
+  margin-top: 10px;
   color: #94a3b8;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .pitching-table-wrapper {
+  width: 100%;
   overflow-x: auto;
-
   border-radius: 24px;
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  background: rgba(15, 23, 42, 0.9);
-
-  backdrop-filter: blur(12px);
+  background: #0f172a;
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.38);
 }
 
 .pitching-table {
   width: 100%;
-
+  min-width: 1350px;
   border-collapse: collapse;
-
-  min-width: 800px;
+  background: #0f172a;
+  color: #f8fafc;
 }
 
 .pitching-table thead {
-  background:
-    linear-gradient(
-      135deg,
-      #ea580c,
-      #c2410c
-    );
+  background: linear-gradient(
+    135deg,
+    #ea580c,
+    #c2410c
+  );
 }
 
 .pitching-table th {
-  padding: 18px;
-
-  text-align: center;
-
+  height: 54px;
+  padding: 0 12px;
+  color: #ffffff;
   font-size: 14px;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.35);
+  cursor: pointer;
+  user-select: none;
+}
 
-  font-weight: 800;
+.pitching-table th span {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 
-  color: white;
+.pitching-table th small {
+  font-size: 13px;
+  text-decoration: none;
 }
 
 .pitching-table td {
-  padding: 18px;
-
-  text-align: center;
-
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-
-  font-size: 15px;
+  height: 58px;
+  padding: 0 12px;
+  color: #e5e7eb;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  white-space: nowrap;
 }
 
 .pitching-table tbody tr {
-  transition: all 0.2s ease;
+  background: #0f172a;
+}
+
+.pitching-table tbody tr:nth-child(even) {
+  background: #111827;
 }
 
 .pitching-table tbody tr:hover {
   background: rgba(249, 115, 22, 0.08);
 }
 
-.pitcher-cell {
+.rank-column {
+  width: 50px;
+  color: #94a3b8 !important;
   text-align: left !important;
+}
+
+.pitcher-column {
+  min-width: 300px;
+  text-align: left !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.position-column {
+  width: 70px;
+  color: #cbd5e1 !important;
+  text-align: center !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .pitcher-info {
   display: flex;
-
   align-items: center;
-}
-
-.pitcher-name {
-  font-size: 16px;
-
-  font-weight: 700;
-}
-
-.era-cell {
-  font-size: 18px;
-
-  font-weight: 900;
-
-  color: #fb923c;
-}
-
-@media (max-width: 900px) {
-
-  .pitching-page {
-    padding: 20px;
-  }
-
-  .pitching-title {
-    font-size: 38px;
-  }
+  gap: 10px;
 }
 
 .pitcher-photo {
-  width: 50px;
-  height: 50px;
-
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-
   object-fit: cover;
-
-  border: 2px solid rgba(249, 115, 22, 0.4);
+  border: 2px solid rgba(249, 115, 22, 0.45);
+  background: #020617;
 }
 
-.whip-cell {
-  color: #38bdf8;
+.pitcher-name-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
+.pitcher-name {
+  color: #fb923c;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pitcher-team {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.highlight-column {
+  background: rgba(249, 115, 22, 0.12) !important;
+}
+
+td.highlight-column {
+  color: #fb923c;
   font-weight: 900;
+}
 
-  font-size: 17px;
+@media (max-width: 768px) {
+
+  .pitching-page {
+    padding: 20px 16px 40px;
+  }
+
+  .pitching-title {
+    font-size: 32px;
+  }
+
+  .pitching-subtitle {
+    font-size: 15px;
+  }
+
+  .pitching-table-wrapper {
+    border-radius: 16px;
+  }
 }

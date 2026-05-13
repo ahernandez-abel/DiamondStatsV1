@@ -112,7 +112,7 @@ function HomePage() {
           <div className="home-hero-info">
 
             <span className="home-badge">
-              🥎 Sistema Oficial del Equipo
+              🥎 Sistema Oficial del Equipo Mahanain
             </span>
 
             <h1 className="home-title">

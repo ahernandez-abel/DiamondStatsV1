@@ -39,6 +39,15 @@ function PlayerDetailsPage() {
     }
   }
 
+  const formatAverage = (value) => {
+
+    const number = Number(value || 0)
+
+    return Math.round(number * 1000)
+      .toString()
+      .padStart(4, '0')
+  }
+
   if (loading) {
     return <Loader />
   }
@@ -62,10 +71,14 @@ function PlayerDetailsPage() {
 
         <PageHeader
           title={player.full_name}
-          subtitle="Perfil completo del jugador"
+          subtitle={`${player.team_name || 'Agente Libre'} • ${player.position || '-'}`}
         />
 
         <div className="player-details-card">
+
+          {/* ================================= */}
+          {/* PLAYER IMAGE */}
+          {/* ================================= */}
 
           <div className="player-image-section">
 
@@ -74,7 +87,7 @@ function PlayerDetailsPage() {
               <img
                 src={
                   player.photo_url ||
-                  'https://placehold.co/300x300?text=PLAYER'
+                  'https://placehold.co/500x500?text=PLAYER'
                 }
                 alt={player.full_name}
                 className="player-details-image"
@@ -88,21 +101,28 @@ function PlayerDetailsPage() {
 
           </div>
 
+          {/* ================================= */}
+          {/* PLAYER INFO */}
+          {/* ================================= */}
+
           <div className="player-info-section">
+
+            <div className="player-basic-header">
+
+              <h1>
+                {player.full_name}
+              </h1>
+
+              <p>
+                {player.nickname || 'Sin apodo'}
+              </p>
+
+            </div>
 
             <div className="player-info-grid">
 
               <div className="info-card">
-                <span className="info-label">
-                  Posición
-                </span>
 
-                <h3 className="info-value highlight">
-                  {player.position || '-'}
-                </h3>
-              </div>
-
-              <div className="info-card">
                 <span className="info-label">
                   Equipo
                 </span>
@@ -110,9 +130,23 @@ function PlayerDetailsPage() {
                 <h3 className="info-value">
                   {player.team_name || '-'}
                 </h3>
+
               </div>
 
               <div className="info-card">
+
+                <span className="info-label">
+                  Posición
+                </span>
+
+                <h3 className="info-value highlight">
+                  {player.position || '-'}
+                </h3>
+
+              </div>
+
+              <div className="info-card">
+
                 <span className="info-label">
                   Batea
                 </span>
@@ -120,9 +154,11 @@ function PlayerDetailsPage() {
                 <h3 className="info-value">
                   {player.batting_hand || '-'}
                 </h3>
+
               </div>
 
               <div className="info-card">
+
                 <span className="info-label">
                   Lanza
                 </span>
@@ -130,6 +166,7 @@ function PlayerDetailsPage() {
                 <h3 className="info-value">
                   {player.throwing_hand || '-'}
                 </h3>
+
               </div>
 
             </div>
@@ -138,21 +175,45 @@ function PlayerDetailsPage() {
 
         </div>
 
-        {/* ========================= */}
+        {/* ================================= */}
         {/* BATTING */}
-        {/* ========================= */}
+        {/* ================================= */}
 
         <div className="stats-section">
 
-          <h2 className="stats-title">
-            Estadísticas Ofensivas
-          </h2>
+          <div className="section-header">
+
+            <h2 className="stats-title">
+              Estadísticas Ofensivas
+            </h2>
+
+          </div>
 
           <div className="stats-grid">
 
-            <div className="stat-card">
+            <div className="stat-card featured">
+
               <span>AVG</span>
-              <h3>{player.batting?.avg || '.000'}</h3>
+
+              <h3>
+                {formatAverage(player.batting?.avg)}
+              </h3>
+
+            </div>
+
+            <div className="stat-card">
+              <span>OPS</span>
+              <h3>{player.batting?.ops || '0.000'}</h3>
+            </div>
+
+            <div className="stat-card">
+              <span>OBP</span>
+              <h3>{player.batting?.obp || '0.000'}</h3>
+            </div>
+
+            <div className="stat-card">
+              <span>SLG</span>
+              <h3>{player.batting?.slg || '0.000'}</h3>
             </div>
 
             <div className="stat-card">
@@ -176,6 +237,11 @@ function PlayerDetailsPage() {
             </div>
 
             <div className="stat-card">
+              <span>AB</span>
+              <h3>{player.batting?.ab || 0}</h3>
+            </div>
+
+            <div className="stat-card">
               <span>BB</span>
               <h3>{player.batting?.bb || 0}</h3>
             </div>
@@ -190,18 +256,13 @@ function PlayerDetailsPage() {
               <h3>{player.batting?.sb || 0}</h3>
             </div>
 
-            <div className="stat-card">
-              <span>AB</span>
-              <h3>{player.batting?.ab || 0}</h3>
-            </div>
-
           </div>
 
         </div>
 
-        {/* ========================= */}
+        {/* ================================= */}
         {/* PITCHING */}
-        {/* ========================= */}
+        {/* ================================= */}
 
         <div className="stats-section">
 
@@ -211,9 +272,14 @@ function PlayerDetailsPage() {
 
           <div className="stats-grid">
 
-            <div className="stat-card">
+            <div className="stat-card featured">
               <span>ERA</span>
               <h3>{player.pitching?.era || '0.00'}</h3>
+            </div>
+
+            <div className="stat-card">
+              <span>WHIP</span>
+              <h3>{player.pitching?.whip || '0.00'}</h3>
             </div>
 
             <div className="stat-card">
@@ -240,9 +306,9 @@ function PlayerDetailsPage() {
 
         </div>
 
-        {/* ========================= */}
+        {/* ================================= */}
         {/* FIELDING */}
-        {/* ========================= */}
+        {/* ================================= */}
 
         <div className="stats-section">
 
@@ -252,9 +318,14 @@ function PlayerDetailsPage() {
 
           <div className="stats-grid">
 
-            <div className="stat-card">
+            <div className="stat-card featured">
+
               <span>FLD%</span>
-              <h3>{player.fielding?.fielding_pct || '.000'}</h3>
+
+              <h3>
+                {formatAverage(player.fielding?.fielding_pct)}
+              </h3>
+
             </div>
 
             <div className="stat-card">

@@ -49,98 +49,125 @@ export const getPlayerById = async (req, res, next) => {
     }
 
     const battingResult = await pool.query(
-      `
-      SELECT
-        COALESCE(SUM(ab), 0) AS ab,
-        COALESCE(SUM(h), 0) AS hits,
-        COALESCE(SUM(doubles), 0) AS doubles,
-        COALESCE(SUM(triples), 0) AS triples,
-        COALESCE(SUM(hr), 0) AS hr,
-        COALESCE(SUM(r), 0) AS runs,
-        COALESCE(SUM(rbi), 0) AS rbi,
-        COALESCE(SUM(bb), 0) AS bb,
-        COALESCE(SUM(so), 0) AS so,
-        COALESCE(SUM(sb), 0) AS sb,
-        COALESCE(SUM(cs), 0) AS cs,
-        COALESCE(SUM(hbp), 0) AS hbp,
-        COALESCE(SUM(sf), 0) AS sf,
+  `
+  SELECT
+    COALESCE(SUM(ab), 0) AS ab,
 
-        COALESCE(
-          SUM(h) - SUM(doubles) - SUM(triples) - SUM(hr),
-          0
-        ) AS singles,
+    COALESCE(
+      GREATEST(
+        SUM(h),
+        SUM(doubles) + SUM(triples) + SUM(hr)
+      ),
+      0
+    ) AS hits,
 
-        COALESCE(
-          (
-            SUM(h) - SUM(doubles) - SUM(triples) - SUM(hr)
+    COALESCE(SUM(doubles), 0) AS doubles,
+    COALESCE(SUM(triples), 0) AS triples,
+    COALESCE(SUM(hr), 0) AS hr,
+    COALESCE(SUM(r), 0) AS runs,
+    COALESCE(SUM(rbi), 0) AS rbi,
+    COALESCE(SUM(bb), 0) AS bb,
+    COALESCE(SUM(so), 0) AS so,
+    COALESCE(SUM(sb), 0) AS sb,
+    COALESCE(SUM(cs), 0) AS cs,
+    COALESCE(SUM(hbp), 0) AS hbp,
+    COALESCE(SUM(sf), 0) AS sf,
+
+    COALESCE(
+      GREATEST(
+        SUM(h),
+        SUM(doubles) + SUM(triples) + SUM(hr)
+      )
+      - COALESCE(SUM(doubles), 0)
+      - COALESCE(SUM(triples), 0)
+      - COALESCE(SUM(hr), 0),
+      0
+    ) AS singles,
+
+    COALESCE(
+      (
+        GREATEST(
+          SUM(h),
+          SUM(doubles) + SUM(triples) + SUM(hr)
+        )
+        - COALESCE(SUM(doubles), 0)
+        - COALESCE(SUM(triples), 0)
+        - COALESCE(SUM(hr), 0)
+      )
+      + (COALESCE(SUM(doubles), 0) * 2)
+      + (COALESCE(SUM(triples), 0) * 3)
+      + (COALESCE(SUM(hr), 0) * 4),
+      0
+    ) AS tb,
+
+    ROUND(
+      CASE
+        WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
+        ELSE
+          GREATEST(
+            SUM(h),
+            SUM(doubles) + SUM(triples) + SUM(hr)
+          )::numeric / NULLIF(SUM(ab), 0)
+      END,
+      3
+    ) AS avg,
+
+    ROUND(
+      CASE
+        WHEN (
+          COALESCE(SUM(ab), 0)
+          + COALESCE(SUM(bb), 0)
+          + COALESCE(SUM(hbp), 0)
+          + COALESCE(SUM(sf), 0)
+        ) = 0 THEN 0
+        ELSE (
+          GREATEST(
+            SUM(h),
+            SUM(doubles) + SUM(triples) + SUM(hr)
           )
-          + (SUM(doubles) * 2)
-          + (SUM(triples) * 3)
-          + (SUM(hr) * 4),
+          + COALESCE(SUM(bb), 0)
+          + COALESCE(SUM(hbp), 0)
+        )::numeric
+        /
+        NULLIF(
+          (
+            COALESCE(SUM(ab), 0)
+            + COALESCE(SUM(bb), 0)
+            + COALESCE(SUM(hbp), 0)
+            + COALESCE(SUM(sf), 0)
+          ),
           0
-        ) AS tb,
+        )
+      END,
+      3
+    ) AS obp,
 
-        ROUND(
-          CASE
-            WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
-            ELSE COALESCE(SUM(h), 0)::numeric / NULLIF(SUM(ab), 0)
-          END,
-          3
-        ) AS avg,
-
-        ROUND(
-          CASE
-            WHEN (
-              COALESCE(SUM(ab), 0)
-              + COALESCE(SUM(bb), 0)
-              + COALESCE(SUM(hbp), 0)
-              + COALESCE(SUM(sf), 0)
-            ) = 0 THEN 0
-            ELSE (
-              COALESCE(SUM(h), 0)
-              + COALESCE(SUM(bb), 0)
-              + COALESCE(SUM(hbp), 0)
-            )::numeric
-            /
-            NULLIF(
-              (
-                COALESCE(SUM(ab), 0)
-                + COALESCE(SUM(bb), 0)
-                + COALESCE(SUM(hbp), 0)
-                + COALESCE(SUM(sf), 0)
-              ),
-              0
+    ROUND(
+      CASE
+        WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
+        ELSE (
+          (
+            GREATEST(
+              SUM(h),
+              SUM(doubles) + SUM(triples) + SUM(hr)
             )
-          END,
-          3
-        ) AS obp,
+            - COALESCE(SUM(doubles), 0)
+            - COALESCE(SUM(triples), 0)
+            - COALESCE(SUM(hr), 0)
+          )
+          + (COALESCE(SUM(doubles), 0) * 2)
+          + (COALESCE(SUM(triples), 0) * 3)
+          + (COALESCE(SUM(hr), 0) * 4)
+        )::numeric / NULLIF(SUM(ab), 0)
+      END,
+      3
+    ) AS slg
 
-        ROUND(
-          CASE
-            WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
-            ELSE (
-              COALESCE(
-                (
-                  SUM(h) - SUM(doubles) - SUM(triples) - SUM(hr)
-                )
-                + (SUM(doubles) * 2)
-                + (SUM(triples) * 3)
-                + (SUM(hr) * 4),
-                0
-              )::numeric
-              /
-              NULLIF(SUM(ab), 0)
-            )
-          END,
-          3
-        ) AS slg
-
-      FROM batting_stats
-      WHERE player_id = $1
-      `,
-      [id]
-    )
-
+  FROM batting_stats
+  WHERE player_id = $1
+  `,
+  [id]
+)
     const batting = battingResult.rows[0]
 
     batting.ops = (

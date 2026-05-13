@@ -31,3 +31,7 @@ export const getGameStats = (gameId) => {
 export const savePlayerGameStats = (gameId, data) => {
   return API.post(`/stats/game/${gameId}/player`, data)
 }
+
+export const getPlayerGameStats = (gameId, playerId) => {
+  return API.get(`/stats/games/${gameId}/player/${playerId}`)
+}

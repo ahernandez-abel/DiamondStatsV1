@@ -1,7 +1,7 @@
 // src/pages/teams/CreateTeamPage.jsx
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+
 
 import { createTeam } from '../../api/teams.api'
 
@@ -43,7 +43,17 @@ function CreateTeamPage() {
 
       await createTeam(form)
 
-      navigate('/teams')
+alert('Equipo creado correctamente')
+
+setForm({
+  name: '',
+  short_name: '',
+  city: '',
+  manager_name: '',
+  logo_url: '',
+  primary_color: '#06b6d4',
+  secondary_color: '#ffffff',
+})
 
     } catch (error) {
 

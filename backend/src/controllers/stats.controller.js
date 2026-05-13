@@ -207,3 +207,63 @@ export const savePlayerGameStats = async (req, res) => {
     client.release()
   }
 }
+
+export const getPlayerGameStats = async (req, res) => {
+  try {
+    const { gameId, playerId } = req.params
+
+    const batting = await pool.query(
+      `
+      SELECT *
+      FROM batting_stats
+      WHERE game_id = $1
+      AND player_id = $2
+      `,
+      [gameId, playerId]
+    )
+
+    const fielding = await pool.query(
+      `
+      SELECT *
+      FROM fielding_stats
+      WHERE game_id = $1
+      AND player_id = $2
+      `,
+      [gameId, playerId]
+    )
+
+    const pitching = await pool.query(
+      `
+      SELECT *
+      FROM pitching_stats
+      WHERE game_id = $1
+      AND player_id = $2
+      `,
+      [gameId, playerId]
+    )
+
+    const hasStats =
+      batting.rows.length > 0 ||
+      fielding.rows.length > 0 ||
+      pitching.rows.length > 0
+
+    res.json({
+      ok: true,
+      stats: hasStats
+        ? {
+            batting: batting.rows[0] || null,
+            fielding: fielding.rows[0] || null,
+            pitching: pitching.rows[0] || null,
+          }
+        : null,
+    })
+
+  } catch (error) {
+    console.log(error)
+
+    res.status(500).json({
+      ok: false,
+      message: 'Error obteniendo estadísticas del jugador en el juego',
+    })
+  }
+}

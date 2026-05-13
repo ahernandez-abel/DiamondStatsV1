@@ -180,3 +180,19 @@
     justify-content: center;
   }
 }
+
+.edit-alert {
+  margin-bottom: 22px;
+  padding: 14px 18px;
+
+  border-radius: 16px;
+
+  background: rgba(250, 204, 21, 0.12);
+
+  border: 1px solid rgba(250, 204, 21, 0.28);
+
+  color: #fde047;
+
+  font-size: 14px;
+  font-weight: 800;
+}

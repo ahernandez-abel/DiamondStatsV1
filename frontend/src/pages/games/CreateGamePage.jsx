@@ -1,7 +1,7 @@
 // src/pages/games/CreateGamePage.jsx
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+
 
 import { createGame } from '../../api/games.api'
 import { getTeams } from '../../api/teams.api'
@@ -63,8 +63,16 @@ function CreateGamePage() {
 
       await createGame(form)
 
-      navigate('/games')
+alert('Juego creado correctamente')
 
+setForm({
+  home_team_id: '',
+  away_team_id: '',
+  game_date: '',
+  game_time: '',
+  venue: '',
+  status: 'pending',
+})
     } catch (error) {
 
       console.log(error)
@@ -217,9 +225,9 @@ function CreateGamePage() {
                   En Vivo
                 </option>
 
-                <option value="finished">
-                  Finalizado
-                </option>
+                <option value="final">
+  Finalizado
+</option>
 
               </select>
 

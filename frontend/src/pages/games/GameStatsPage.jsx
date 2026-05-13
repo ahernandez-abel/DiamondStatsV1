@@ -1,17 +1,57 @@
-// src/pages/games/GameStatsPage.jsx
-
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { getGameById } from '../../api/games.api'
 import { getPlayers } from '../../api/players.api'
-import { savePlayerGameStats } from '../../api/stats.api'
+
+import {
+  savePlayerGameStats,
+  getPlayerGameStats,
+} from '../../api/stats.api'
 
 import DashboardLayout from '../../layouts/DashboardLayout'
 import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 
 import './GameStatsPage.css'
+
+const initialForm = {
+  batting: {
+    ab: 0,
+    h: 0,
+    doubles: 0,
+    triples: 0,
+    hr: 0,
+    rbi: 0,
+    r: 0,
+    sb: 0,
+    cs: 0,
+    so: 0,
+    bb: 0,
+    hbp: 0,
+    sf: 0,
+    sac: 0,
+  },
+  fielding: {
+    position: '',
+    putouts: 0,
+    assists: 0,
+    errors: 0,
+    passed_balls: 0,
+  },
+  pitching: {
+    pitched: false,
+    outs_recorded: 0,
+    hits_allowed: 0,
+    er: 0,
+    r_allowed: 0,
+    bb: 0,
+    so: 0,
+    hr_allowed: 0,
+    hbp: 0,
+    result: '',
+  },
+}
 
 function GameStatsPage() {
 
@@ -21,132 +61,141 @@ function GameStatsPage() {
   const [players, setPlayers] = useState([])
   const [selectedPlayer, setSelectedPlayer] = useState('')
   const [teamId, setTeamId] = useState('')
-
-  const [form, setForm] = useState({
-    batting: {
-      ab: 0,
-      h: 0,
-      doubles: 0,
-      triples: 0,
-      hr: 0,
-      rbi: 0,
-      r: 0,
-      sb: 0,
-      cs: 0,
-      so: 0,
-      bb: 0,
-      hbp: 0,
-      sf: 0,
-      sac: 0,
-    },
-    fielding: {
-      position: '',
-      putouts: 0,
-      assists: 0,
-      errors: 0,
-      passed_balls: 0,
-    },
-    pitching: {
-      pitched: false,
-      outs_recorded: 0,
-      hits_allowed: 0,
-      er: 0,
-      r_allowed: 0,
-      bb: 0,
-      so: 0,
-      hr_allowed: 0,
-      hbp: 0,
-      result: '',
-    },
-  })
+  const [form, setForm] = useState(initialForm)
+  const [editMode, setEditMode] = useState(false)
 
   useEffect(() => {
     loadData()
   }, [])
 
+  useEffect(() => {
+    if (selectedPlayer) {
+      loadPlayerStats(selectedPlayer)
+    }
+  }, [selectedPlayer])
+
+  const cleanNumber = (value) => {
+    if (value === '') return ''
+
+    const number = Number(value)
+
+    if (Number.isNaN(number)) return 0
+
+    return number < 0 ? 0 : number
+  }
+
   const loadData = async () => {
-
     try {
-
       const gameRes = await getGameById(id)
       const playersRes = await getPlayers()
 
+      const playersData = playersRes.data.players || []
+
       setGame(gameRes.data)
-      setPlayers(playersRes.data.players || [])
+      setPlayers(playersData)
 
-      if (playersRes.data.players?.length > 0) {
-
-        setSelectedPlayer(playersRes.data.players[0].id)
-        setTeamId(playersRes.data.players[0].team_id)
+      if (playersData.length > 0) {
+        setSelectedPlayer(playersData[0].id)
+        setTeamId(playersData[0].team_id)
       }
 
     } catch (error) {
-
       console.log(error)
     }
   }
 
+  const loadPlayerStats = async (playerId) => {
+    try {
+      const player = players.find(
+        (p) => String(p.id) === String(playerId)
+      )
+
+      setTeamId(player?.team_id || '')
+
+      const res = await getPlayerGameStats(id, playerId)
+
+      if (!res.data?.stats) {
+        setForm(initialForm)
+        setEditMode(false)
+        return
+      }
+
+      const stats = res.data.stats
+
+      setForm({
+        batting: {
+          ...initialForm.batting,
+          ...(stats.batting || {}),
+        },
+        fielding: {
+          ...initialForm.fielding,
+          ...(stats.fielding || {}),
+        },
+        pitching: {
+          ...initialForm.pitching,
+          ...(stats.pitching || {}),
+          pitched: Boolean(stats.pitching),
+        },
+      })
+
+      setEditMode(true)
+
+    } catch (error) {
+      setForm(initialForm)
+      setEditMode(false)
+    }
+  }
+
   const handleBattingChange = (e) => {
+    const { name, value } = e.target
 
     setForm({
       ...form,
       batting: {
         ...form.batting,
-        [e.target.name]: Number(e.target.value),
+        [name]: cleanNumber(value),
       },
     })
   }
 
   const handleFieldingChange = (e) => {
+    const { name, value } = e.target
 
     setForm({
       ...form,
       fielding: {
         ...form.fielding,
-        [e.target.name]:
-          e.target.name === 'position'
-            ? e.target.value
-            : Number(e.target.value),
+        [name]: name === 'position'
+          ? value
+          : cleanNumber(value),
       },
     })
   }
 
   const handlePitchingChange = (e) => {
-
     const { name, value, type, checked } = e.target
 
     setForm({
       ...form,
       pitching: {
         ...form.pitching,
-        [name]:
-          type === 'checkbox'
-            ? checked
-            : name === 'result'
-              ? value
-              : Number(value),
+        [name]: type === 'checkbox'
+          ? checked
+          : name === 'result'
+            ? value
+            : cleanNumber(value),
       },
     })
   }
 
   const handlePlayerChange = (e) => {
-
-    const playerId = e.target.value
-
-    const player = players.find(
-      (p) => String(p.id) === String(playerId)
-    )
-
-    setSelectedPlayer(playerId)
-    setTeamId(player?.team_id || '')
+    setSelectedPlayer(e.target.value)
   }
 
   const handleSubmit = async (e) => {
-
     e.preventDefault()
 
     try {
-
       await savePlayerGameStats(id, {
         player_id: selectedPlayer,
         team_id: teamId,
@@ -155,12 +204,17 @@ function GameStatsPage() {
         pitching: form.pitching,
       })
 
-      alert('Estadísticas guardadas correctamente')
+      alert(
+        editMode
+          ? 'Estadísticas actualizadas correctamente'
+          : 'Estadísticas guardadas correctamente'
+      )
+
+      setForm(initialForm)
+      setEditMode(false)
 
     } catch (error) {
-
       console.log(error)
-
       alert('Error guardando estadísticas')
     }
   }
@@ -172,11 +226,10 @@ function GameStatsPage() {
 
         <PageHeader
           title="Registrar Estadísticas"
-          subtitle="Carga el rendimiento individual de cada jugador"
+          subtitle="Selecciona un jugador, carga o modifica sus estadísticas del partido"
         />
 
         {game && (
-
           <div className="game-info-card">
 
             <h2 className="game-title">
@@ -188,7 +241,6 @@ function GameStatsPage() {
             </p>
 
           </div>
-
         )}
 
         <form
@@ -210,19 +262,23 @@ function GameStatsPage() {
             >
 
               {players.map((player) => (
-
                 <option
                   key={player.id}
                   value={player.id}
                 >
-                  #{player.jersey_number} - {player.full_name}
+                  #{player.jersey_number || '00'} - {player.full_name}
                 </option>
-
               ))}
 
             </select>
 
           </div>
+
+          {editMode && (
+            <div className="edit-alert">
+              Este jugador ya tiene estadísticas registradas en este juego. Puedes modificarlas y actualizar.
+            </div>
+          )}
 
           <section className="stats-section">
 
@@ -233,7 +289,6 @@ function GameStatsPage() {
             <div className="stats-grid">
 
               {Object.keys(form.batting).map((key) => (
-
                 <div
                   key={key}
                   className="form-group"
@@ -245,6 +300,8 @@ function GameStatsPage() {
 
                   <input
                     type="number"
+                    min="0"
+                    inputMode="numeric"
                     name={key}
                     value={form.batting[key]}
                     onChange={handleBattingChange}
@@ -252,7 +309,6 @@ function GameStatsPage() {
                   />
 
                 </div>
-
               ))}
 
             </div>
@@ -284,7 +340,6 @@ function GameStatsPage() {
               </div>
 
               {['putouts', 'assists', 'errors', 'passed_balls'].map((key) => (
-
                 <div
                   key={key}
                   className="form-group"
@@ -296,6 +351,8 @@ function GameStatsPage() {
 
                   <input
                     type="number"
+                    min="0"
+                    inputMode="numeric"
                     name={key}
                     value={form.fielding[key]}
                     onChange={handleFieldingChange}
@@ -303,7 +360,6 @@ function GameStatsPage() {
                   />
 
                 </div>
-
               ))}
 
             </div>
@@ -329,7 +385,6 @@ function GameStatsPage() {
             </div>
 
             {form.pitching.pitched && (
-
               <div className="stats-grid">
 
                 {[
@@ -342,7 +397,6 @@ function GameStatsPage() {
                   'hr_allowed',
                   'hbp',
                 ].map((key) => (
-
                   <div
                     key={key}
                     className="form-group"
@@ -354,6 +408,8 @@ function GameStatsPage() {
 
                     <input
                       type="number"
+                      min="0"
+                      inputMode="numeric"
                       name={key}
                       value={form.pitching[key]}
                       onChange={handlePitchingChange}
@@ -361,7 +417,6 @@ function GameStatsPage() {
                     />
 
                   </div>
-
                 ))}
 
                 <div className="form-group">
@@ -398,7 +453,6 @@ function GameStatsPage() {
                 </div>
 
               </div>
-
             )}
 
           </section>
@@ -406,7 +460,9 @@ function GameStatsPage() {
           <div className="submit-container">
 
             <Button type="submit">
-              Guardar estadísticas del jugador
+              {editMode
+                ? 'Actualizar estadísticas del jugador'
+                : 'Guardar estadísticas del jugador'}
             </Button>
 
           </div>

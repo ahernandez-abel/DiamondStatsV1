@@ -307,3 +307,56 @@
     font-size: 26px;
   }
 }
+
+.abeldev-badge {
+  margin-bottom: 18px;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(34, 197, 94, 0.08),
+      rgba(56, 189, 248, 0.08)
+    );
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  text-align: center;
+}
+
+.abeldev-title {
+  font-size: 18px;
+  font-weight: 900;
+
+  letter-spacing: 1px;
+
+  background: linear-gradient(
+    135deg,
+    #38bdf8,
+    #22c55e
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+}
+
+.abeldev-subtitle {
+  color: #94a3b8;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}

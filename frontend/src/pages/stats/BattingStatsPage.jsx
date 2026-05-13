@@ -50,6 +50,10 @@ function BattingStatsPage() {
                 <th>G</th>
                 <th>AB</th>
                 <th>H</th>
+                <th>AVG</th>
+                <th>OBP</th>
+                <th>SLG</th>
+                <th>OPS</th>
                 <th>2B</th>
                 <th>3B</th>
                 <th>HR</th>
@@ -60,10 +64,6 @@ function BattingStatsPage() {
                 <th>SB</th>
                 <th>CS</th>
                 <th>TB</th>
-                <th>AVG</th>
-                <th>OBP</th>
-                <th>SLG</th>
-                <th>OPS</th>
               </tr>
             </thead>
 

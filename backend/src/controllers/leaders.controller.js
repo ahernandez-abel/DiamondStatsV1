@@ -7,6 +7,9 @@ export const getBattingLeaders = async (req, res) => {
         players.id,
         players.full_name,
         players.photo_url,
+        players.position,
+        teams.name AS team_name,
+        teams.primary_color,
 
         COUNT(DISTINCT bs.game_id) AS games_played,
 
@@ -38,13 +41,13 @@ export const getBattingLeaders = async (req, res) => {
               SUM(bs.h),
               SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
             )
-            - SUM(bs.doubles)
-            - SUM(bs.triples)
-            - SUM(bs.hr)
+            - COALESCE(SUM(bs.doubles), 0)
+            - COALESCE(SUM(bs.triples), 0)
+            - COALESCE(SUM(bs.hr), 0)
           )
-          + (SUM(bs.doubles) * 2)
-          + (SUM(bs.triples) * 3)
-          + (SUM(bs.hr) * 4),
+          + (COALESCE(SUM(bs.doubles), 0) * 2)
+          + (COALESCE(SUM(bs.triples), 0) * 3)
+          + (COALESCE(SUM(bs.hr), 0) * 4),
           0
         ) AS tb,
 
@@ -55,7 +58,7 @@ export const getBattingLeaders = async (req, res) => {
               GREATEST(
                 SUM(bs.h),
                 SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
-              )::numeric / SUM(bs.ab)
+              )::numeric / NULLIF(SUM(bs.ab), 0)
           END,
           3
         ) AS avg,
@@ -77,11 +80,14 @@ export const getBattingLeaders = async (req, res) => {
               + COALESCE(SUM(bs.hbp), 0)
             )::numeric
             /
-            (
-              COALESCE(SUM(bs.ab), 0)
-              + COALESCE(SUM(bs.bb), 0)
-              + COALESCE(SUM(bs.hbp), 0)
-              + COALESCE(SUM(bs.sf), 0)
+            NULLIF(
+              (
+                COALESCE(SUM(bs.ab), 0)
+                + COALESCE(SUM(bs.bb), 0)
+                + COALESCE(SUM(bs.hbp), 0)
+                + COALESCE(SUM(bs.sf), 0)
+              ),
+              0
             )
           END,
           3
@@ -96,14 +102,14 @@ export const getBattingLeaders = async (req, res) => {
                   SUM(bs.h),
                   SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
                 )
-                - SUM(bs.doubles)
-                - SUM(bs.triples)
-                - SUM(bs.hr)
+                - COALESCE(SUM(bs.doubles), 0)
+                - COALESCE(SUM(bs.triples), 0)
+                - COALESCE(SUM(bs.hr), 0)
               )
-              + (SUM(bs.doubles) * 2)
-              + (SUM(bs.triples) * 3)
-              + (SUM(bs.hr) * 4)
-            )::numeric / SUM(bs.ab)
+              + (COALESCE(SUM(bs.doubles), 0) * 2)
+              + (COALESCE(SUM(bs.triples), 0) * 3)
+              + (COALESCE(SUM(bs.hr), 0) * 4)
+            )::numeric / NULLIF(SUM(bs.ab), 0)
           END,
           3
         ) AS slg
@@ -113,10 +119,16 @@ export const getBattingLeaders = async (req, res) => {
       JOIN players
       ON players.id = bs.player_id
 
+      LEFT JOIN teams
+      ON teams.id = players.team_id
+
       GROUP BY
         players.id,
         players.full_name,
-        players.photo_url
+        players.photo_url,
+        players.position,
+        teams.name,
+        teams.primary_color
 
       ORDER BY avg DESC, h DESC
     `)

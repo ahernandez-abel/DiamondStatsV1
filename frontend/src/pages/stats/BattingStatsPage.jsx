@@ -15,15 +15,10 @@ function BattingStatsPage() {
   }, [])
 
   const loadLeaders = async () => {
-
     try {
-
       const res = await getBattingLeaders()
-
       setLeaders(res.data.leaders || [])
-
     } catch (error) {
-
       console.log(error)
     }
   }
@@ -50,83 +45,26 @@ function BattingStatsPage() {
           <table className="batting-table">
 
             <thead>
-
               <tr>
-
-                <th>
-                  Jugador
-                </th>
-
-                <th>
-                  AVG
-                </th>
-
-                <th>
-                  OBP
-                </th>
-
-                <th>
-                  SLG
-                </th>
-
-                <th>
-                  OPS
-                </th>
-
-                <th>
-                  H
-                </th>
-
-                <th>
-                  1B
-                </th>
-
-                <th>
-                  2B
-                </th>
-
-                <th>
-                  3B
-                </th>
-
-                <th>
-                  HR
-                </th>
-
-                <th>
-                  RBI
-                </th>
-
-                <th>
-                  R
-                </th>
-
-                <th>
-                  BB
-                </th>
-
-                <th>
-                  SO
-                </th>
-
-                <th>
-                  SB
-                </th>
-
-                <th>
-                  CS
-                </th>
-
-                <th>
-                  TB
-                </th>
-
-                <th>
-                  AB
-                </th>
-
+                <th>Jugador</th>
+                <th>G</th>
+                <th>AB</th>
+                <th>H</th>
+                <th>AVG</th>
+                <th>OBP</th>
+                <th>SLG</th>
+                <th>OPS</th>
+                <th>2B</th>
+                <th>3B</th>
+                <th>HR</th>
+                <th>RBI</th>
+                <th>R</th>
+                <th>BB</th>
+                <th>SO</th>
+                <th>SB</th>
+                <th>CS</th>
+                <th>TB</th>
               </tr>
-
             </thead>
 
             <tbody>
@@ -156,73 +94,31 @@ function BattingStatsPage() {
 
                   </td>
 
+                  <td>{player.games_played}</td>
+                  <td>{player.ab}</td>
+                  <td>{player.h}</td>
+
                   <td className="avg-cell">
                     {player.avg}
                   </td>
 
-                  <td>
-                    {player.obp}
-                  </td>
-
-                  <td>
-                    {player.slg}
-                  </td>
+                  <td>{player.obp}</td>
+                  <td>{player.slg}</td>
 
                   <td className="ops-cell">
                     {player.ops}
                   </td>
 
-                  <td>
-                    {player.h}
-                  </td>
-
-                  <td>
-                    {player.singles}
-                  </td>
-
-                  <td>
-                    {player.doubles}
-                  </td>
-
-                  <td>
-                    {player.triples}
-                  </td>
-
-                  <td>
-                    {player.hr}
-                  </td>
-
-                  <td>
-                    {player.rbi}
-                  </td>
-
-                  <td>
-                    {player.runs}
-                  </td>
-
-                  <td>
-                    {player.bb}
-                  </td>
-
-                  <td>
-                    {player.so}
-                  </td>
-
-                  <td>
-                    {player.sb}
-                  </td>
-
-                  <td>
-                    {player.cs}
-                  </td>
-
-                  <td>
-                    {player.tb}
-                  </td>
-
-                  <td>
-                    {player.ab}
-                  </td>
+                  <td>{player.doubles}</td>
+                  <td>{player.triples}</td>
+                  <td>{player.hr}</td>
+                  <td>{player.rbi}</td>
+                  <td>{player.runs}</td>
+                  <td>{player.bb}</td>
+                  <td>{player.so}</td>
+                  <td>{player.sb}</td>
+                  <td>{player.cs}</td>
+                  <td>{player.tb}</td>
 
                 </tr>
 

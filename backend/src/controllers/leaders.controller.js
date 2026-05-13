@@ -2,64 +2,60 @@ import {pool} from '../config/db.js'
 
 export const getBattingLeaders = async (req, res) => {
   try {
-
     const result = await pool.query(`
       SELECT
         players.id,
         players.full_name,
         players.photo_url,
 
-        SUM(bs.ab) AS ab,
-        SUM(bs.h) AS h,
+        COUNT(DISTINCT bs.game_id) AS games_played,
 
-        SUM(bs.doubles) AS doubles,
-        SUM(bs.triples) AS triples,
-        SUM(bs.hr) AS hr,
+        COALESCE(SUM(bs.ab), 0) AS ab,
 
-        (
-          SUM(bs.h)
-          -
-          SUM(bs.doubles)
-          -
-          SUM(bs.triples)
-          -
-          SUM(bs.hr)
-        ) AS singles,
+        COALESCE(
+          GREATEST(
+            SUM(bs.h),
+            SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
+          ),
+          0
+        ) AS h,
 
-        SUM(bs.rbi) AS rbi,
-        SUM(bs.r) AS runs,
+        COALESCE(SUM(bs.doubles), 0) AS doubles,
+        COALESCE(SUM(bs.triples), 0) AS triples,
+        COALESCE(SUM(bs.hr), 0) AS hr,
+        COALESCE(SUM(bs.rbi), 0) AS rbi,
+        COALESCE(SUM(bs.r), 0) AS runs,
+        COALESCE(SUM(bs.bb), 0) AS bb,
+        COALESCE(SUM(bs.so), 0) AS so,
+        COALESCE(SUM(bs.sb), 0) AS sb,
+        COALESCE(SUM(bs.cs), 0) AS cs,
+        COALESCE(SUM(bs.hbp), 0) AS hbp,
+        COALESCE(SUM(bs.sf), 0) AS sf,
 
-        SUM(bs.bb) AS bb,
-        SUM(bs.so) AS so,
-
-        SUM(bs.sb) AS sb,
-        SUM(bs.cs) AS cs,
-
-        SUM(bs.hbp) AS hbp,
-        SUM(bs.sf) AS sf,
-
-        (
+        COALESCE(
           (
-            SUM(bs.h)
-            -
-            SUM(bs.doubles)
-            -
-            SUM(bs.triples)
-            -
-            SUM(bs.hr)
+            GREATEST(
+              SUM(bs.h),
+              SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
+            )
+            - SUM(bs.doubles)
+            - SUM(bs.triples)
+            - SUM(bs.hr)
           )
-          +
-          (SUM(bs.doubles) * 2)
-          +
-          (SUM(bs.triples) * 3)
-          +
-          (SUM(bs.hr) * 4)
+          + (SUM(bs.doubles) * 2)
+          + (SUM(bs.triples) * 3)
+          + (SUM(bs.hr) * 4),
+          0
         ) AS tb,
 
         ROUND(
           CASE
-            WHEN SUM(bs.ab) = 0 THEN 0
-            ELSE SUM(bs.h)::numeric / SUM(bs.ab)
+            WHEN COALESCE(SUM(bs.ab), 0) = 0 THEN 0
+            ELSE
+              GREATEST(
+                SUM(bs.h),
+                SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
+              )::numeric / SUM(bs.ab)
           END,
           3
         ) AS avg,
@@ -67,33 +63,25 @@ export const getBattingLeaders = async (req, res) => {
         ROUND(
           CASE
             WHEN (
-              SUM(bs.ab)
-              +
-              SUM(bs.bb)
-              +
-              SUM(bs.hbp)
-              +
-              SUM(bs.sf)
+              COALESCE(SUM(bs.ab), 0)
+              + COALESCE(SUM(bs.bb), 0)
+              + COALESCE(SUM(bs.hbp), 0)
+              + COALESCE(SUM(bs.sf), 0)
             ) = 0 THEN 0
-
             ELSE (
-              (
-                SUM(bs.h)
-                +
-                SUM(bs.bb)
-                +
-                SUM(bs.hbp)
-              )::numeric
-              /
-              (
-                SUM(bs.ab)
-                +
-                SUM(bs.bb)
-                +
-                SUM(bs.hbp)
-                +
-                SUM(bs.sf)
+              GREATEST(
+                SUM(bs.h),
+                SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
               )
+              + COALESCE(SUM(bs.bb), 0)
+              + COALESCE(SUM(bs.hbp), 0)
+            )::numeric
+            /
+            (
+              COALESCE(SUM(bs.ab), 0)
+              + COALESCE(SUM(bs.bb), 0)
+              + COALESCE(SUM(bs.hbp), 0)
+              + COALESCE(SUM(bs.sf), 0)
             )
           END,
           3
@@ -101,97 +89,24 @@ export const getBattingLeaders = async (req, res) => {
 
         ROUND(
           CASE
-            WHEN SUM(bs.ab) = 0 THEN 0
-
+            WHEN COALESCE(SUM(bs.ab), 0) = 0 THEN 0
             ELSE (
               (
-                (
-                  SUM(bs.h)
-                  -
-                  SUM(bs.doubles)
-                  -
-                  SUM(bs.triples)
-                  -
-                  SUM(bs.hr)
+                GREATEST(
+                  SUM(bs.h),
+                  SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)
                 )
-                +
-                (SUM(bs.doubles) * 2)
-                +
-                (SUM(bs.triples) * 3)
-                +
-                (SUM(bs.hr) * 4)
-              )::numeric
-              /
-              SUM(bs.ab)
-            )
+                - SUM(bs.doubles)
+                - SUM(bs.triples)
+                - SUM(bs.hr)
+              )
+              + (SUM(bs.doubles) * 2)
+              + (SUM(bs.triples) * 3)
+              + (SUM(bs.hr) * 4)
+            )::numeric / SUM(bs.ab)
           END,
           3
-        ) AS slg,
-
-        ROUND(
-          (
-            CASE
-              WHEN (
-                SUM(bs.ab)
-                +
-                SUM(bs.bb)
-                +
-                SUM(bs.hbp)
-                +
-                SUM(bs.sf)
-              ) = 0 THEN 0
-
-              ELSE (
-                (
-                  SUM(bs.h)
-                  +
-                  SUM(bs.bb)
-                  +
-                  SUM(bs.hbp)
-                )::numeric
-                /
-                (
-                  SUM(bs.ab)
-                  +
-                  SUM(bs.bb)
-                  +
-                  SUM(bs.hbp)
-                  +
-                  SUM(bs.sf)
-                )
-              )
-            END
-          )
-          +
-          (
-            CASE
-              WHEN SUM(bs.ab) = 0 THEN 0
-
-              ELSE (
-                (
-                  (
-                    SUM(bs.h)
-                    -
-                    SUM(bs.doubles)
-                    -
-                    SUM(bs.triples)
-                    -
-                    SUM(bs.hr)
-                  )
-                  +
-                  (SUM(bs.doubles) * 2)
-                  +
-                  (SUM(bs.triples) * 3)
-                  +
-                  (SUM(bs.hr) * 4)
-                )::numeric
-                /
-                SUM(bs.ab)
-              )
-            END
-          ),
-          3
-        ) AS ops
+        ) AS slg
 
       FROM batting_stats bs
 
@@ -203,16 +118,23 @@ export const getBattingLeaders = async (req, res) => {
         players.full_name,
         players.photo_url
 
-      ORDER BY ops DESC
+      ORDER BY avg DESC, h DESC
     `)
+
+    const leaders = result.rows.map((player) => ({
+      ...player,
+      ops: (
+        Number(player.obp || 0) +
+        Number(player.slg || 0)
+      ).toFixed(3),
+    }))
 
     res.json({
       ok: true,
-      leaders: result.rows,
+      leaders,
     })
 
   } catch (error) {
-
     console.log(error)
 
     res.status(500).json({

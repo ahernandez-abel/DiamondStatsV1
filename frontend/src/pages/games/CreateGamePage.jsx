@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-
 import { createGame } from '../../api/games.api'
 import { getTeams } from '../../api/teams.api'
 
@@ -16,39 +15,32 @@ import './CreateGamePage.css'
 
 function CreateGamePage() {
 
-  const navigate = useNavigate()
-
-  const [teams, setTeams] = useState([])
-
-  const [form, setForm] = useState({
+  const initialForm = {
     home_team_id: '',
     away_team_id: '',
     game_date: '',
     game_time: '',
     venue: '',
     status: 'pending',
-  })
+  }
+
+  const [teams, setTeams] = useState([])
+  const [form, setForm] = useState(initialForm)
 
   useEffect(() => {
     loadTeams()
   }, [])
 
   const loadTeams = async () => {
-
     try {
-
       const res = await getTeams()
-
-      setTeams(res.data.teams)
-
+      setTeams(res.data.teams || [])
     } catch (error) {
-
       console.log(error)
     }
   }
 
   const handleChange = (e) => {
-
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -56,25 +48,21 @@ function CreateGamePage() {
   }
 
   const handleSubmit = async (e) => {
-
     e.preventDefault()
 
-    try {
+    if (form.home_team_id === form.away_team_id) {
+      alert('El equipo Home y Away no pueden ser el mismo')
+      return
+    }
 
+    try {
       await createGame(form)
 
-alert('Juego creado correctamente')
+      alert('Juego creado correctamente')
 
-setForm({
-  home_team_id: '',
-  away_team_id: '',
-  game_date: '',
-  game_time: '',
-  venue: '',
-  status: 'pending',
-})
+      setForm(initialForm)
+
     } catch (error) {
-
       console.log(error)
       alert('Error creando juego')
     }
@@ -226,8 +214,8 @@ setForm({
                 </option>
 
                 <option value="final">
-  Finalizado
-</option>
+                  Finalizado
+                </option>
 
               </select>
 

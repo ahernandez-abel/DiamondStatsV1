@@ -22,6 +22,8 @@ import BattingStatsPage from '../pages/stats/BattingStatsPage'
 import PitchingStatsPage from '../pages/stats/PitchingStatsPage'
 import FieldingStatsPage from '../pages/stats/FieldingStatsPage'
 
+import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
+
 function AppRouter() {
 
   return (
@@ -45,6 +47,11 @@ function AppRouter() {
       <Route
         path="/players/:id"
         element={<PlayerDetailsPage />}
+      />
+
+      <Route
+        path="/comparar"
+        element={<ComparePlayersPage />}
       />
 
       <Route

@@ -16,6 +16,7 @@ import {
   Target,
   Activity,
   LogOut,
+  Swords,
 } from 'lucide-react'
 
 import { useAuth } from '../../contexts/AuthContext'
@@ -48,6 +49,11 @@ function Sidebar() {
       path: '/admin/players',
       label: 'Administrar Jugadores',
       icon: Users,
+    },
+    {
+      path: '/comparar',
+      label: 'Comparar Jugadores',
+      icon: Swords,
     },
     {
       path: '/players/create',
@@ -171,32 +177,32 @@ function Sidebar() {
 
         <div className="sidebar-footer">
 
-  <div className="abeldev-badge">
+          <div className="abeldev-badge">
 
-    <span className="abeldev-title">
-      AbelDev
-    </span>
+            <span className="abeldev-title">
+              AbelDev
+            </span>
 
-    <span className="abeldev-subtitle">
-      DiamondStats System
-    </span>
+            <span className="abeldev-subtitle">
+              DiamondStats System
+            </span>
 
-  </div>
+          </div>
 
-  <button
-    onClick={handleLogout}
-    className="sidebar-logout-btn"
-  >
+          <button
+            onClick={handleLogout}
+            className="sidebar-logout-btn"
+          >
 
-    <LogOut size={18} />
+            <LogOut size={18} />
 
-    <span>
-      Cerrar Sesión
-    </span>
+            <span>
+              Cerrar Sesión
+            </span>
 
-  </button>
+          </button>
 
-</div>
+        </div>
 
       </aside>
 

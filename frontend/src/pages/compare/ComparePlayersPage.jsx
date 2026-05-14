@@ -16,7 +16,7 @@ function ComparePlayersPage() {
   const [playerOneId, setPlayerOneId] = useState('')
   const [playerTwoId, setPlayerTwoId] = useState('')
 
-  const [equalAb, setEqualAb] = useState(true)
+  const [compareMode, setCompareMode] = useState('common_equal_ab')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -26,7 +26,7 @@ function ComparePlayersPage() {
 
   useEffect(() => {
     loadComparison()
-  }, [playerOneId, playerTwoId, equalAb])
+  }, [playerOneId, playerTwoId, compareMode, players])
 
   const loadPlayers = async () => {
     try {
@@ -52,10 +52,39 @@ function ComparePlayersPage() {
 
       setLoading(true)
 
+      if (compareMode === 'general') {
+        const playerOneGeneral = players.find(
+          (player) => String(player.id) === String(playerOneId)
+        )
+
+        const playerTwoGeneral = players.find(
+          (player) => String(player.id) === String(playerTwoId)
+        )
+
+        if (!playerOneGeneral || !playerTwoGeneral) return
+
+        setComparisonPlayers([
+          {
+            ...playerOneGeneral,
+            player_id: playerOneGeneral.id,
+            compared_ab: playerOneGeneral.ab,
+            adjusted_hits: playerOneGeneral.h,
+          },
+          {
+            ...playerTwoGeneral,
+            player_id: playerTwoGeneral.id,
+            compared_ab: playerTwoGeneral.ab,
+            adjusted_hits: playerTwoGeneral.h,
+          },
+        ])
+
+        return
+      }
+
       const res = await comparePlayersCommonGames(
         playerOneId,
         playerTwoId,
-        equalAb
+        compareMode === 'common_equal_ab'
       )
 
       const data = res.data.players || []
@@ -69,7 +98,7 @@ function ComparePlayersPage() {
       setComparisonPlayers(data)
     } catch (error) {
       console.log(error)
-      setMessage('Error comparando jugadores en juegos comunes.')
+      setMessage('Error comparando jugadores.')
     } finally {
       setLoading(false)
     }
@@ -86,6 +115,8 @@ function ComparePlayersPage() {
       (player) => String(player.player_id) === String(playerTwoId)
     )
   }, [comparisonPlayers, playerTwoId])
+
+  const isEqualAbMode = compareMode === 'common_equal_ab'
 
   const formatDecimal = (value) => {
     const number = Number(value || 0)
@@ -158,23 +189,23 @@ function ComparePlayersPage() {
         format: 'decimal',
       },
       {
-        label: 'G',
-        name: 'Juegos comunes',
+        label: compareMode === 'general' ? 'G' : 'GC',
+        name: compareMode === 'general' ? 'Juegos totales' : 'Juegos comunes',
         one: playerOne.games_played,
         two: playerTwo.games_played,
       },
       {
-        label: equalAb ? 'AB usado' : 'AB',
-        name: equalAb ? 'Turnos igualados' : 'Turnos oficiales',
-        one: equalAb ? playerOne.compared_ab : playerOne.ab,
-        two: equalAb ? playerTwo.compared_ab : playerTwo.ab,
+        label: isEqualAbMode ? 'AB usado' : 'AB',
+        name: isEqualAbMode ? 'Turnos igualados' : 'Turnos oficiales',
+        one: isEqualAbMode ? playerOne.compared_ab : playerOne.ab,
+        two: isEqualAbMode ? playerTwo.compared_ab : playerTwo.ab,
       },
       {
-        label: equalAb ? 'H ajustados' : 'H',
-        name: equalAb ? 'Hits normalizados' : 'Hits',
-        one: equalAb ? playerOne.adjusted_hits : playerOne.h,
-        two: equalAb ? playerTwo.adjusted_hits : playerTwo.h,
-        format: equalAb ? 'two' : undefined,
+        label: isEqualAbMode ? 'H ajustados' : 'H',
+        name: isEqualAbMode ? 'Hits normalizados' : 'Hits',
+        one: isEqualAbMode ? playerOne.adjusted_hits : playerOne.h,
+        two: isEqualAbMode ? playerTwo.adjusted_hits : playerTwo.h,
+        format: isEqualAbMode ? 'two' : undefined,
       },
       {
         label: '2B',
@@ -239,7 +270,7 @@ function ComparePlayersPage() {
         two: playerTwo.tb,
       },
     ]
-  }, [playerOne, playerTwo, equalAb])
+  }, [playerOne, playerTwo, compareMode, isEqualAbMode])
 
   const score = useMemo(() => {
     let one = 0
@@ -289,8 +320,8 @@ function ComparePlayersPage() {
           </h1>
 
           <p>
-            Compara dos jugadores usando solo los juegos donde ambos participaron.
-            También puedes igualar los turnos para una comparación más justa.
+            Compara jugadores de forma general, por juegos comunes o con turnos
+            igualados para una medición más justa.
           </p>
         </div>
 
@@ -352,22 +383,43 @@ function ComparePlayersPage() {
 
         <div className="compare-mode-card">
 
-          <label className="compare-checkbox">
-            <input
-              type="checkbox"
-              checked={equalAb}
-              onChange={(e) => setEqualAb(e.target.checked)}
-            />
+          <div className="compare-mode-options">
 
-            <span>
-              Igualar turnos
-            </span>
-          </label>
+            <button
+              type="button"
+              className={compareMode === 'general' ? 'active' : ''}
+              onClick={() => setCompareMode('general')}
+            >
+              General
+            </button>
+
+            <button
+              type="button"
+              className={compareMode === 'common_games' ? 'active' : ''}
+              onClick={() => setCompareMode('common_games')}
+            >
+              Mismos juegos
+            </button>
+
+            <button
+              type="button"
+              className={compareMode === 'common_equal_ab' ? 'active' : ''}
+              onClick={() => setCompareMode('common_equal_ab')}
+            >
+              Mismos juegos + turnos iguales
+            </button>
+
+          </div>
 
           <p>
-            {equalAb
-              ? 'Modo justo activo: se comparan los mismos juegos y se normaliza por la menor cantidad de turnos.'
-              : 'Modo juegos comunes: se comparan solo los partidos donde ambos jugadores participaron.'}
+            {compareMode === 'general' &&
+              'Modo general: compara todas las estadísticas acumuladas de cada jugador.'}
+
+            {compareMode === 'common_games' &&
+              'Modo juegos comunes: compara solo partidos donde ambos participaron.'}
+
+            {compareMode === 'common_equal_ab' &&
+              'Modo justo: compara mismos juegos y normaliza por la menor cantidad de turnos.'}
           </p>
 
         </div>
@@ -437,7 +489,9 @@ function ComparePlayersPage() {
                 </p>
 
                 <small>
-                  {playerOne.games_played || 0} juegos comunes
+                  {compareMode === 'general'
+                    ? 'Comparación general'
+                    : `${playerOne.games_played || 0} juegos comunes`}
                 </small>
               </div>
 
@@ -469,11 +523,11 @@ function ComparePlayersPage() {
 
               <div className="compare-summary-card">
                 <span>
-                  Juegos comparados
+                  {compareMode === 'general' ? 'Juegos totales' : 'Juegos comparados'}
                 </span>
 
                 <strong>
-                  {playerOne.games_played || 0}
+                  {playerOne.games_played || 0} / {playerTwo.games_played || 0}
                 </strong>
               </div>
 
@@ -493,7 +547,7 @@ function ComparePlayersPage() {
                 </span>
 
                 <strong>
-                  {equalAb
+                  {isEqualAbMode
                     ? `${playerOne.compared_ab || 0} / ${playerTwo.compared_ab || 0}`
                     : `${playerOne.ab || 0} / ${playerTwo.ab || 0}`}
                 </strong>

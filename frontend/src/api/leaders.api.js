@@ -15,3 +15,17 @@ export const getFieldingLeaders = () => {
 export const getMonthlyMVP = () => {
   return API.get('/leaders/mvp/monthly')
 }
+
+export const comparePlayersCommonGames = (
+  playerOneId,
+  playerTwoId,
+  equalAb = false
+) => {
+  return API.get('/leaders/compare/common-games', {
+    params: {
+      playerOneId,
+      playerTwoId,
+      equalAb,
+    },
+  })
+}

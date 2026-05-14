@@ -455,3 +455,130 @@ export const getMonthlyMVP = async (req, res) => {
     })
   }
 }
+
+export const comparePlayersCommonGames = async (req, res) => {
+  try {
+    const { playerOneId, playerTwoId, equalAb } = req.query
+
+    if (!playerOneId || !playerTwoId) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Debes enviar los dos jugadores',
+      })
+    }
+
+    const result = await pool.query(
+      `
+      WITH common_games AS (
+        SELECT bs1.game_id
+        FROM batting_stats bs1
+        JOIN batting_stats bs2
+        ON bs2.game_id = bs1.game_id
+        WHERE bs1.player_id = $1
+        AND bs2.player_id = $2
+      ),
+
+      base_stats AS (
+        SELECT
+          bs.player_id,
+          p.full_name,
+          p.photo_url,
+          p.position,
+          t.name AS team_name,
+          COUNT(DISTINCT bs.game_id) AS games_played,
+          SUM(bs.ab) AS ab,
+          GREATEST(SUM(bs.h), SUM(bs.doubles) + SUM(bs.triples) + SUM(bs.hr)) AS h,
+          SUM(bs.doubles) AS doubles,
+          SUM(bs.triples) AS triples,
+          SUM(bs.hr) AS hr,
+          SUM(bs.rbi) AS rbi,
+          SUM(bs.r) AS runs,
+          SUM(bs.bb) AS bb,
+          SUM(bs.so) AS so,
+          SUM(bs.sb) AS sb,
+          SUM(bs.cs) AS cs,
+          SUM(bs.hbp) AS hbp,
+          SUM(bs.sf) AS sf
+        FROM batting_stats bs
+        JOIN common_games cg ON cg.game_id = bs.game_id
+        JOIN players p ON p.id = bs.player_id
+        LEFT JOIN teams t ON t.id = p.team_id
+        WHERE bs.player_id IN ($1, $2)
+        GROUP BY bs.player_id, p.full_name, p.photo_url, p.position, t.name
+      ),
+
+      min_ab AS (
+        SELECT MIN(ab) AS limit_ab FROM base_stats
+      )
+
+      SELECT
+        b.*,
+        (
+          (b.h - b.doubles - b.triples - b.hr)
+          + (b.doubles * 2)
+          + (b.triples * 3)
+          + (b.hr * 4)
+        ) AS tb,
+
+        ROUND(
+          CASE WHEN b.ab = 0 THEN 0
+          ELSE b.h::numeric / b.ab
+          END,
+          3
+        ) AS avg,
+
+        ROUND(
+          CASE WHEN (b.ab + b.bb + b.hbp + b.sf) = 0 THEN 0
+          ELSE (b.h + b.bb + b.hbp)::numeric / NULLIF((b.ab + b.bb + b.hbp + b.sf), 0)
+          END,
+          3
+        ) AS obp,
+
+        ROUND(
+          CASE WHEN b.ab = 0 THEN 0
+          ELSE (
+            (b.h - b.doubles - b.triples - b.hr)
+            + (b.doubles * 2)
+            + (b.triples * 3)
+            + (b.hr * 4)
+          )::numeric / b.ab
+          END,
+          3
+        ) AS slg,
+
+        CASE
+          WHEN $3 = 'true' AND b.ab > 0 THEN
+            ROUND((b.h::numeric / b.ab) * (SELECT limit_ab FROM min_ab), 2)
+          ELSE b.h
+        END AS adjusted_hits,
+
+        CASE
+          WHEN $3 = 'true' THEN (SELECT limit_ab FROM min_ab)
+          ELSE b.ab
+        END AS compared_ab
+
+      FROM base_stats b
+      ORDER BY b.player_id
+      `,
+      [playerOneId, playerTwoId, equalAb || 'false']
+    )
+
+    const players = result.rows.map((p) => ({
+      ...p,
+      ops: (Number(p.obp || 0) + Number(p.slg || 0)).toFixed(3),
+    }))
+
+    res.json({
+      ok: true,
+      mode: equalAb === 'true' ? 'same_games_equal_ab' : 'same_games',
+      players,
+    })
+  } catch (error) {
+    console.log(error)
+
+    res.status(500).json({
+      ok: false,
+      message: 'Error comparando jugadores en juegos comunes',
+    })
+  }
+}

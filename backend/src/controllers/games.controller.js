@@ -1,57 +1,87 @@
-import {pool} from '../config/db.js'
+import { pool } from '../config/db.js';
+
+const DEFAULT_TENANT_ID = 1;
+
+const getTenantId = (req) => {
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
+};
 
 export const getGames = async (req, res) => {
   try {
-    const result = await pool.query(`
+    const tenantId = getTenantId(req);
+
+    const result = await pool.query(
+      `
       SELECT
         g.*,
         ht.name AS home_team_name,
         at.name AS away_team_name
       FROM games g
-      LEFT JOIN teams ht ON g.home_team_id = ht.id
-      LEFT JOIN teams at ON g.away_team_id = at.id
+      LEFT JOIN teams ht
+        ON g.home_team_id = ht.id
+        AND ht.tenant_id = g.tenant_id
+      LEFT JOIN teams at
+        ON g.away_team_id = at.id
+        AND at.tenant_id = g.tenant_id
+      WHERE g.tenant_id = $1
       ORDER BY g.game_date DESC
-    `)
+      `,
+      [tenantId]
+    );
 
-    res.json(result.rows)
+    res.json(result.rows);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: 'Error obteniendo juegos',
-    })
+    });
   }
-}
+};
 
 export const getGameById = async (req, res) => {
   try {
-    const { id } = req.params
+    const tenantId = getTenantId(req);
+    const { id } = req.params;
 
     const result = await pool.query(
       `
-      SELECT *
-      FROM games
-      WHERE id = $1
+      SELECT
+        g.*,
+        ht.name AS home_team_name,
+        at.name AS away_team_name
+      FROM games g
+      LEFT JOIN teams ht
+        ON g.home_team_id = ht.id
+        AND ht.tenant_id = g.tenant_id
+      LEFT JOIN teams at
+        ON g.away_team_id = at.id
+        AND at.tenant_id = g.tenant_id
+      WHERE g.id = $1
+      AND g.tenant_id = $2
+      LIMIT 1
       `,
-      [id]
-    )
+      [id, tenantId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         message: 'Juego no encontrado',
-      })
+      });
     }
 
-    res.json(result.rows[0])
+    res.json(result.rows[0]);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: 'Error obteniendo juego',
-    })
+    });
   }
-}
+};
 
 export const createGame = async (req, res) => {
   try {
+    const tenantId = getTenantId(req);
+
     const {
       home_team_id,
       away_team_id,
@@ -61,11 +91,12 @@ export const createGame = async (req, res) => {
       innings_played,
       status,
       notes,
-    } = req.body
+    } = req.body;
 
     const result = await pool.query(
       `
       INSERT INTO games (
+        tenant_id,
         home_team_id,
         away_team_id,
         game_date,
@@ -73,38 +104,42 @@ export const createGame = async (req, res) => {
         venue,
         innings_played,
         status,
-        notes
+        notes,
+        created_by
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *
       `,
       [
+        tenantId,
         home_team_id,
         away_team_id,
         game_date,
-        game_time,
-        venue,
+        game_time || null,
+        venue || null,
         innings_played || 7,
         status || 'scheduled',
         notes || null,
+        req.user?.id || null,
       ]
-    )
+    );
 
     res.status(201).json({
       message: 'Juego creado correctamente',
       game: result.rows[0],
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: 'Error creando juego',
-    })
+    });
   }
-}
+};
 
 export const updateGame = async (req, res) => {
   try {
-    const { id } = req.params
+    const tenantId = getTenantId(req);
+    const { id } = req.params;
 
     const {
       home_team_id,
@@ -117,7 +152,7 @@ export const updateGame = async (req, res) => {
       innings_played,
       status,
       notes,
-    } = req.body
+    } = req.body;
 
     const result = await pool.query(
       `
@@ -135,81 +170,86 @@ export const updateGame = async (req, res) => {
         notes = $10,
         updated_at = NOW()
       WHERE id = $11
+      AND tenant_id = $12
       RETURNING *
       `,
       [
         home_team_id,
         away_team_id,
         game_date,
-        game_time,
-        venue,
+        game_time || null,
+        venue || null,
         home_score,
         away_score,
-        innings_played,
-        status,
-        notes,
+        innings_played || 7,
+        status || 'scheduled',
+        notes || null,
         id,
+        tenantId,
       ]
-    )
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         message: 'Juego no encontrado',
-      })
+      });
     }
 
     res.json({
       message: 'Juego actualizado correctamente',
       game: result.rows[0],
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: 'Error actualizando juego',
-    })
+    });
   }
-}
+};
 
 export const deleteGame = async (req, res) => {
   try {
-    const { id } = req.params
+    const tenantId = getTenantId(req);
+    const { id } = req.params;
 
     const result = await pool.query(
       `
       DELETE FROM games
       WHERE id = $1
+      AND tenant_id = $2
       RETURNING *
       `,
-      [id]
-    )
+      [id, tenantId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         message: 'Juego no encontrado',
-      })
+      });
     }
 
     res.json({
       message: 'Juego eliminado correctamente',
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: 'Error eliminando juego',
-    })
+    });
   }
-}
+};
 
 export const updateGameResult = async (req, res) => {
   try {
-    const { id } = req.params
+    const tenantId = getTenantId(req);
+    const { id } = req.params;
 
     const {
       home_score,
       away_score,
       status,
       notes,
-    } = req.body
+    } = req.body;
 
     const result = await pool.query(
       `
@@ -221,6 +261,7 @@ export const updateGameResult = async (req, res) => {
         notes = $4,
         updated_at = NOW()
       WHERE id = $5
+      AND tenant_id = $6
       RETURNING *
       `,
       [
@@ -229,20 +270,28 @@ export const updateGameResult = async (req, res) => {
         status || 'final',
         notes || null,
         id,
+        tenantId,
       ]
-    )
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Juego no encontrado',
+      });
+    }
 
     res.json({
       ok: true,
       message: 'Resultado publicado correctamente',
       game: result.rows[0],
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
 
     res.status(500).json({
       ok: false,
       message: 'Error publicando resultado',
-    })
+    });
   }
-}
+};

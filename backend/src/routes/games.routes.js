@@ -9,18 +9,21 @@ import {
   updateGameResult,
 } from '../controllers/games.controller.js';
 
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../middlewares/tenant.middleware.js';
+
 const router = Router();
 
 router.get('/', getGames);
 
 router.get('/:id', getGameById);
 
-router.post('/', createGame);
+router.post('/', authMiddleware, tenantMiddleware, createGame);
 
-router.put('/:id', updateGame);
+router.put('/:id', authMiddleware, tenantMiddleware, updateGame);
 
-router.delete('/:id', deleteGame);
+router.delete('/:id', authMiddleware, tenantMiddleware, deleteGame);
 
-router.patch('/:id/result', updateGameResult);
+router.patch('/:id/result', authMiddleware, tenantMiddleware, updateGameResult);
 
 export default router;

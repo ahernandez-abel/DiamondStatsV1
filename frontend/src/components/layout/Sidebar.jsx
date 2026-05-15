@@ -17,6 +17,7 @@ import {
   Activity,
   LogOut,
   Swords,
+  LayoutDashboard,
 } from 'lucide-react'
 
 import { useAuth } from '../../contexts/AuthContext'
@@ -90,6 +91,11 @@ function Sidebar() {
     label: 'Ver Defensa',
     icon: Shield,
   },
+  {
+  path: '/admin/dashboard',
+  label: 'Dashboard',
+  icon: LayoutDashboard,
+},
 ]
 
   return (

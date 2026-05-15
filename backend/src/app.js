@@ -11,6 +11,7 @@ import statsRoutes from './routes/stats.routes.js';
 import leadersRoutes from './routes/leaders.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import tenantsRoutes from './routes/tenants.routes.js';
+import adminDashboardRoutes from './routes/adminDashboard.routes.js'
 
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
@@ -36,6 +37,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/leaders', leadersRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/tenants', tenantsRoutes);
+app.use('/api/admin', adminDashboardRoutes)
 
 app.use(errorMiddleware);
 

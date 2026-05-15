@@ -22,6 +22,8 @@ import BattingStatsPage from '../pages/stats/BattingStatsPage'
 import PitchingStatsPage from '../pages/stats/PitchingStatsPage'
 import FieldingStatsPage from '../pages/stats/FieldingStatsPage'
 
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage' 
+
 import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 
 function AppRouter() {
@@ -148,6 +150,15 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <FieldingStatsPage admin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboardPage />
           </ProtectedRoute>
         }
       />

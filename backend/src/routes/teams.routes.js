@@ -9,17 +9,18 @@ import {
 } from '../controllers/teams.controller.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../middlewares/tenant.middleware.js';
 
 const router = Router();
 
-router.get('/', getTeams);
+router.get('/', authMiddleware, tenantMiddleware, getTeams);
 
-router.get('/:id', getTeamById);
+router.get('/:id', authMiddleware, tenantMiddleware, getTeamById);
 
-router.post('/', authMiddleware, createTeam);
+router.post('/', authMiddleware, tenantMiddleware, createTeam);
 
-router.put('/:id', authMiddleware, updateTeam);
+router.put('/:id', authMiddleware, tenantMiddleware, updateTeam);
 
-router.delete('/:id', authMiddleware, deleteTeam);
+router.delete('/:id', authMiddleware, tenantMiddleware, deleteTeam);
 
 export default router;

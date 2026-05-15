@@ -84,6 +84,44 @@ function TeamsPage() {
     return 'Empate'
   }
 
+  const getTeamRecord = (team) => {
+    const teamGames = finishedGames.filter(
+      (game) =>
+        Number(game.home_team_id) === Number(team.id) ||
+        Number(game.away_team_id) === Number(team.id)
+    )
+
+    return teamGames.reduce(
+      (record, game) => {
+        const isHome = Number(game.home_team_id) === Number(team.id)
+
+        const teamScore = Number(isHome ? game.home_score : game.away_score)
+        const rivalScore = Number(isHome ? game.away_score : game.home_score)
+
+        if (teamScore > rivalScore) {
+          record.wins += 1
+        }
+
+        if (teamScore < rivalScore) {
+          record.losses += 1
+        }
+
+        return record
+      },
+      {
+        wins: 0,
+        losses: 0,
+      }
+    )
+  }
+
+  const mainTeamRecord = mainTeam
+    ? getTeamRecord(mainTeam)
+    : {
+        wins: 0,
+        losses: 0,
+      }
+
   return (
     <PublicLayout tenantSlug={tenantSlug}>
       <section className="teams-page">
@@ -128,12 +166,12 @@ function TeamsPage() {
             <div className="main-record">
               <div className="main-record-box win">
                 <span>Victorias</span>
-                <strong>{mainTeam.wins || 0}</strong>
+                <strong>{mainTeamRecord.wins}</strong>
               </div>
 
               <div className="main-record-box loss">
                 <span>Derrotas</span>
-                <strong>{mainTeam.losses || 0}</strong>
+                <strong>{mainTeamRecord.losses}</strong>
               </div>
             </div>
           </div>
@@ -191,46 +229,50 @@ function TeamsPage() {
           </h2>
 
           <div className="teams-grid">
-            {teams.map((team) => (
-              <div
-                key={team.id}
-                className={
-                  team.is_main
-                    ? 'team-card main-team-card'
-                    : 'team-card'
-                }
-              >
-                <img
-                  src={team.logo_url || 'https://placehold.co/100x100'}
-                  alt={team.name}
-                  className="team-logo"
-                />
+            {teams.map((team) => {
+              const teamRecord = getTeamRecord(team)
 
-                <h3>
-                  {team.name}
-                </h3>
+              return (
+                <div
+                  key={team.id}
+                  className={
+                    team.is_main === true || team.is_main === 'true'
+                      ? 'team-card main-team-card'
+                      : 'team-card'
+                  }
+                >
+                  <img
+                    src={team.logo_url || 'https://placehold.co/100x100'}
+                    alt={team.name}
+                    className="team-logo"
+                  />
 
-                <p>
-                  {team.city || 'Sin ciudad'}
-                </p>
+                  <h3>
+                    {team.name}
+                  </h3>
 
-                <div className="team-record">
-                  <span>
-                    W: {team.wins || 0}
-                  </span>
+                  <p>
+                    {team.city || 'Sin ciudad'}
+                  </p>
 
-                  <span>
-                    L: {team.losses || 0}
-                  </span>
+                  <div className="team-record">
+                    <span>
+                      W: {teamRecord.wins}
+                    </span>
+
+                    <span>
+                      L: {teamRecord.losses}
+                    </span>
+                  </div>
+
+                  {(team.is_main === true || team.is_main === 'true') && (
+                    <span className="team-main-badge">
+                      Principal
+                    </span>
+                  )}
                 </div>
-
-                {team.is_main && (
-                  <span className="team-main-badge">
-                    Principal
-                  </span>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

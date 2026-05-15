@@ -36,10 +36,10 @@ function Sidebar() {
 
   const handleLogout = () => {
 
-    logout()
+  logout()
 
-    navigate('/')
-  }
+  navigate('/login', { replace: true })
+}
 
   const closeSidebar = () => {
     setMobileOpen(false)

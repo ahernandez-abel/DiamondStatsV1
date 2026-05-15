@@ -12,7 +12,6 @@ import logo from '../../assets/logo.png'
 import './LoginPage.css'
 
 function LoginPage() {
-
   const navigate = useNavigate()
 
   const { login } = useAuth()
@@ -45,12 +44,11 @@ function LoginPage() {
       return
     }
 
-    navigate('/players/create')
+    navigate('/admin/dashboard', { replace: true })
   }
 
   return (
     <div className="login-container">
-
       <div className="login-bg-ball"></div>
       <div className="login-bg-glow"></div>
 
@@ -58,9 +56,7 @@ function LoginPage() {
         onSubmit={handleSubmit}
         className="login-card"
       >
-
         <div className="login-header">
-
           <img
             src={logo}
             alt="DiamondStats Logo"
@@ -78,7 +74,6 @@ function LoginPage() {
           <p className="login-subtitle">
             Acceso privado para gestionar jugadores, juegos y estadísticas.
           </p>
-
         </div>
 
         {error && (
@@ -88,7 +83,6 @@ function LoginPage() {
         )}
 
         <div className="login-form-group">
-
           <label>
             Email
           </label>
@@ -101,17 +95,14 @@ function LoginPage() {
             placeholder="correo@ejemplo.com"
             required
           />
-
         </div>
 
         <div className="login-form-group">
-
           <label>
             Contraseña
           </label>
 
           <div className="password-wrapper">
-
             <input
               type={showPassword ? 'text' : 'password'}
               name="password"
@@ -129,9 +120,7 @@ function LoginPage() {
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-
           </div>
-
         </div>
 
         <button
@@ -142,14 +131,12 @@ function LoginPage() {
         </button>
 
         <Link
-  to="/"
-  className="login-back-home"
->
-  ← Volver al Inicio
-</Link>
-
+          to="/team/team-mahanaim"
+          className="login-back-home"
+        >
+          ← Volver al Inicio
+        </Link>
       </form>
-
     </div>
   )
 }

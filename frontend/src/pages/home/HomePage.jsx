@@ -1,56 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import PublicLayout from '../../layouts/PublicLayout'
+import PublicLayout from '../../layouts/PublicLayout';
+import { getPublicHome } from '../../api/public.api';
 
-import {
-  getBattingLeaders,
-  getPitchingLeaders,
-  getFieldingLeaders,
-  getMonthlyMVP,
-} from '../../api/leaders.api'
+import './HomePage.css';
 
-import './HomePage.css'
+function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
+  const { tenantSlug } = useParams();
 
-function HomePage() {
+  const activeTenantSlug = tenantSlug || defaultTenantSlug;
 
-  const [batting, setBatting] = useState([])
-  const [pitching, setPitching] = useState([])
-  const [fielding, setFielding] = useState([])
-  const [mvp, setMvp] = useState(null)
+  const [tenant, setTenant] = useState(null);
+  const [batting, setBatting] = useState([]);
+  const [pitching, setPitching] = useState([]);
+  const [fielding, setFielding] = useState([]);
+  const [mvp, setMvp] = useState(null);
 
   useEffect(() => {
-    loadHomeStats()
-  }, [])
+    loadHomeStats();
+  }, [activeTenantSlug]);
 
   const loadHomeStats = async () => {
     try {
-      const battingRes = await getBattingLeaders()
-      const pitchingRes = await getPitchingLeaders()
-      const fieldingRes = await getFieldingLeaders()
-      const mvpRes = await getMonthlyMVP()
+      const res = await getPublicHome(activeTenantSlug);
 
-      setBatting(battingRes.data.leaders || [])
-      setPitching(pitchingRes.data.leaders || [])
-      setFielding(fieldingRes.data.leaders || [])
-      setMvp(mvpRes.data.mvp || null)
-
+      setTenant(res.data.tenant || null);
+      setBatting(res.data.batting || []);
+      setPitching(res.data.pitching || []);
+      setFielding(res.data.fielding || []);
+      setMvp(res.data.mvp || null);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const getTop = (list, field) => {
     return [...list]
       .sort((a, b) => Number(b[field] || 0) - Number(a[field] || 0))
-      .slice(0, 5)
-  }
+      .slice(0, 5);
+  };
 
   const LeaderRow = ({ rank, player, stat }) => (
     <div className="leader-row">
-
-      <span className="leader-rank">
-        {rank}
-      </span>
+      <span className="leader-rank">{rank}</span>
 
       <img
         src={player?.photo_url || 'https://placehold.co/60x60'}
@@ -65,13 +58,11 @@ function HomePage() {
       <span className="leader-stat">
         {stat ?? '-'}
       </span>
-
     </div>
-  )
+  );
 
   const LeaderCard = ({ title, label, players, field, link }) => (
     <div className="leader-card">
-
       <div className="leader-card-header">
         <h2>{title}</h2>
         <span>{label}</span>
@@ -92,27 +83,19 @@ function HomePage() {
         ))
       )}
 
-      <a
-        href={link}
-        className="leader-link"
-      >
+      <a href={link} className="leader-link">
         Lista Completa
       </a>
-
     </div>
-  )
+  );
 
   return (
     <PublicLayout>
-
       <section className="home-page">
-
         <div className="home-top-grid">
-
           <div className="home-hero-info">
-
             <span className="home-badge">
-              🥎 Sistema Oficial del Equipo Mahanain
+              🥎 Sistema Oficial de {tenant?.name || 'DiamondStats'}
             </span>
 
             <h1 className="home-title">
@@ -125,27 +108,17 @@ function HomePage() {
             </p>
 
             <div className="home-buttons">
-
-              <a
-                href="/players"
-                className="home-btn-primary"
-              >
+              <a href="/players" className="home-btn-primary">
                 Ver Jugadores
               </a>
 
-              <a
-                href="/games"
-                className="home-btn-secondary"
-              >
+              <a href="/games" className="home-btn-secondary">
                 Ver Juegos
               </a>
-
             </div>
-
           </div>
 
           <div className="mvp-card">
-
             <span className="mvp-label">
               MVP DEL MES
             </span>
@@ -165,35 +138,30 @@ function HomePage() {
             </p>
 
             <div className="mvp-stats mvp-stats-four">
+              <div>
+                <span>PTS</span>
+                <strong>{mvp?.mvp_points || 0}</strong>
+              </div>
 
-  <div>
-    <span>PTS</span>
-    <strong>{mvp?.mvp_points || 0}</strong>
-  </div>
+              <div>
+                <span>AVG</span>
+                <strong>{mvp?.avg || '.000'}</strong>
+              </div>
 
-  <div>
-    <span>AVG</span>
-    <strong>{mvp?.avg || '.000'}</strong>
-  </div>
+              <div>
+                <span>HR</span>
+                <strong>{mvp?.hr || 0}</strong>
+              </div>
 
-  <div>
-    <span>HR</span>
-    <strong>{mvp?.hr || 0}</strong>
-  </div>
-
-  <div>
-    <span>RBI</span>
-    <strong>{mvp?.rbi || 0}</strong>
-  </div>
-
-</div>
-
+              <div>
+                <span>RBI</span>
+                <strong>{mvp?.rbi || 0}</strong>
+              </div>
+            </div>
           </div>
-
         </div>
 
         <div className="quick-leaders-grid">
-
           <div className="quick-stat-card">
             <span>AVG</span>
             <h3>{batting[0]?.avg || '.000'}</h3>
@@ -229,11 +197,9 @@ function HomePage() {
             <h3>{getTop(pitching, 'strikeouts')[0]?.strikeouts || 0}</h3>
             <p>{getTop(pitching, 'strikeouts')[0]?.full_name || '-'}</p>
           </div>
-
         </div>
 
         <div className="leaders-grid">
-
           <LeaderCard
             title="Promedio de Bateo"
             label="AVG"
@@ -331,13 +297,10 @@ function HomePage() {
             field="fielding_pct"
             link="/stats/fielding"
           />
-
         </div>
-
       </section>
-
     </PublicLayout>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;

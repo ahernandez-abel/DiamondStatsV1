@@ -30,14 +30,19 @@ function AppRouter() {
     <Routes>
 
       <Route
-        path="/"
-        element={<HomePage />}
-      />
+    path="/"
+    element={<HomePage defaultTenantSlug="team-mahanaim" />}
+  />
 
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
+  <Route
+    path="/team/:tenantSlug"
+    element={<HomePage />}
+  />
+
+  <Route
+    path="/login"
+    element={<LoginPage />}
+  />
 
       <Route
         path="/players"

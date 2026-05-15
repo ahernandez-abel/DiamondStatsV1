@@ -1,45 +1,46 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
-import PublicLayout from '../../layouts/PublicLayout';
-import { getPublicHome } from '../../api/public.api';
+import PublicLayout from '../../layouts/PublicLayout'
+import { getPublicHome } from '../../api/public.api'
 
-import './HomePage.css';
+import './HomePage.css'
 
 function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
-  const { tenantSlug } = useParams();
+  const { tenantSlug } = useParams()
 
-  const activeTenantSlug = tenantSlug || defaultTenantSlug;
+  const activeTenantSlug = tenantSlug || defaultTenantSlug
+  const tenantBasePath = `/team/${activeTenantSlug}`
 
-  const [tenant, setTenant] = useState(null);
-  const [batting, setBatting] = useState([]);
-  const [pitching, setPitching] = useState([]);
-  const [fielding, setFielding] = useState([]);
-  const [mvp, setMvp] = useState(null);
+  const [tenant, setTenant] = useState(null)
+  const [batting, setBatting] = useState([])
+  const [pitching, setPitching] = useState([])
+  const [fielding, setFielding] = useState([])
+  const [mvp, setMvp] = useState(null)
 
   useEffect(() => {
-    loadHomeStats();
-  }, [activeTenantSlug]);
+    loadHomeStats()
+  }, [activeTenantSlug])
 
   const loadHomeStats = async () => {
     try {
-      const res = await getPublicHome(activeTenantSlug);
+      const res = await getPublicHome(activeTenantSlug)
 
-      setTenant(res.data.tenant || null);
-      setBatting(res.data.batting || []);
-      setPitching(res.data.pitching || []);
-      setFielding(res.data.fielding || []);
-      setMvp(res.data.mvp || null);
+      setTenant(res.data.tenant || null)
+      setBatting(res.data.batting || [])
+      setPitching(res.data.pitching || [])
+      setFielding(res.data.fielding || [])
+      setMvp(res.data.mvp || null)
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
 
   const getTop = (list, field) => {
     return [...list]
       .sort((a, b) => Number(b[field] || 0) - Number(a[field] || 0))
-      .slice(0, 5);
-  };
+      .slice(0, 5)
+  }
 
   const LeaderRow = ({ rank, player, stat }) => (
     <div className="leader-row">
@@ -59,7 +60,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
         {stat ?? '-'}
       </span>
     </div>
-  );
+  )
 
   const LeaderCard = ({ title, label, players, field, link }) => (
     <div className="leader-card">
@@ -87,7 +88,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
         Lista Completa
       </a>
     </div>
-  );
+  )
 
   return (
     <PublicLayout tenantSlug={activeTenantSlug}>
@@ -108,11 +109,11 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             </p>
 
             <div className="home-buttons">
-              <a href="/players" className="home-btn-primary">
+              <a href={`${tenantBasePath}/players`} className="home-btn-primary">
                 Ver Jugadores
               </a>
 
-              <a href="/games" className="home-btn-secondary">
+              <a href={`${tenantBasePath}/games`} className="home-btn-secondary">
                 Ver Juegos
               </a>
             </div>
@@ -205,7 +206,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="AVG"
             players={batting.slice(0, 5)}
             field="avg"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -213,7 +214,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="H"
             players={getTop(batting, 'h')}
             field="h"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -221,7 +222,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="2B"
             players={getTop(batting, 'doubles')}
             field="doubles"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -229,7 +230,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="3B"
             players={getTop(batting, 'triples')}
             field="triples"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -237,7 +238,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="HR"
             players={getTop(batting, 'hr')}
             field="hr"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -245,7 +246,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="RBI"
             players={getTop(batting, 'rbi')}
             field="rbi"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -253,7 +254,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="R"
             players={getTop(batting, 'runs')}
             field="runs"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -261,7 +262,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="SB"
             players={getTop(batting, 'sb')}
             field="sb"
-            link="/stats/batting"
+            link={`${tenantBasePath}/stats/batting`}
           />
 
           <LeaderCard
@@ -269,7 +270,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="ERA"
             players={pitching.slice(0, 5)}
             field="era"
-            link="/stats/pitching"
+            link={`${tenantBasePath}/stats/pitching`}
           />
 
           <LeaderCard
@@ -277,7 +278,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="SO"
             players={getTop(pitching, 'strikeouts')}
             field="strikeouts"
-            link="/stats/pitching"
+            link={`${tenantBasePath}/stats/pitching`}
           />
 
           <LeaderCard
@@ -287,7 +288,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
               .sort((a, b) => Number(a.whip || 0) - Number(b.whip || 0))
               .slice(0, 5)}
             field="whip"
-            link="/stats/pitching"
+            link={`${tenantBasePath}/stats/pitching`}
           />
 
           <LeaderCard
@@ -295,12 +296,12 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             label="FLD%"
             players={fielding.slice(0, 5)}
             field="fielding_pct"
-            link="/stats/fielding"
+            link={`${tenantBasePath}/stats/fielding`}
           />
         </div>
       </section>
     </PublicLayout>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage

@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import ProtectedRoute from './ProtectedRoute'
 
@@ -25,105 +25,66 @@ import FieldingStatsPage from '../pages/stats/FieldingStatsPage'
 import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 
 function AppRouter() {
-
   return (
     <Routes>
+      {/* PUBLIC TENANT ROUTES */}
+      <Route
+        path="/"
+        element={<Navigate to="/team/team-mahanaim" replace />}
+      />
 
       <Route
-    path="/"
-    element={<HomePage defaultTenantSlug="team-mahanaim" />}
-  />
-
-  <Route
-    path="/team/:tenantSlug"
-    element={<HomePage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/players"
-    element={<PlayersPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/players/:id"
-    element={<PlayerDetailsPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/comparar"
-    element={<ComparePlayersPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/teams"
-    element={<TeamsPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/games"
-    element={<GamesPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/stats/batting"
-    element={<BattingStatsPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/stats/pitching"
-    element={<PitchingStatsPage />}
-  />
-
-  <Route
-    path="/team/:tenantSlug/stats/fielding"
-    element={<FieldingStatsPage />}
-  />
-
-  <Route
-    path="/login"
-    element={<LoginPage />}
-  />
+        path="/team/:tenantSlug"
+        element={<HomePage />}
+      />
 
       <Route
-        path="/players"
+        path="/team/:tenantSlug/players"
         element={<PlayersPage />}
       />
 
       <Route
-        path="/players/:id"
+        path="/team/:tenantSlug/players/:id"
         element={<PlayerDetailsPage />}
       />
 
       <Route
-        path="/comparar"
+        path="/team/:tenantSlug/comparar"
         element={<ComparePlayersPage />}
       />
 
       <Route
-        path="/teams"
+        path="/team/:tenantSlug/teams"
         element={<TeamsPage />}
       />
 
       <Route
-        path="/games"
+        path="/team/:tenantSlug/games"
         element={<GamesPage />}
       />
 
       <Route
-        path="/stats/batting"
+        path="/team/:tenantSlug/stats/batting"
         element={<BattingStatsPage />}
       />
 
       <Route
-        path="/stats/pitching"
+        path="/team/:tenantSlug/stats/pitching"
         element={<PitchingStatsPage />}
       />
 
       <Route
-        path="/stats/fielding"
+        path="/team/:tenantSlug/stats/fielding"
         element={<FieldingStatsPage />}
       />
 
+      {/* AUTH */}
+      <Route
+        path="/login"
+        element={<LoginPage />}
+      />
+
+      {/* ADMIN PRIVATE ROUTES */}
       <Route
         path="/players/create"
         element={
@@ -223,6 +184,11 @@ function AppRouter() {
         }
       />
 
+      {/* FALLBACK */}
+      <Route
+        path="*"
+        element={<Navigate to="/team/team-mahanaim" replace />}
+      />
     </Routes>
   )
 }

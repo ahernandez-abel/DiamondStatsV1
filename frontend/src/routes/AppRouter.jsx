@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import ProtectedRoute from './ProtectedRoute'
 
+import LandingPage from '../pages/landing/LandingPage'
+
 import HomePage from '../pages/home/HomePage'
 import LoginPage from '../pages/auth/LoginPage'
 
@@ -30,29 +32,23 @@ function AppRouter() {
   return (
     <Routes>
 
-      {/* PUBLIC DEFAULT */}
-      <Route
-        path="/"
-        element={<Navigate to="/login" replace />}
-      />
+      {/* LANDING PUBLICA */}
+      <Route path="/" element={<LandingPage />} />
 
       {/* PUBLIC TENANT ROUTES */}
       <Route path="/team/:tenantSlug" element={<HomePage />} />
+      <Route path="/team/:tenantSlug/home" element={<HomePage />} />
 
       <Route path="/team/:tenantSlug/players" element={<PlayersPage />} />
-
       <Route path="/team/:tenantSlug/players/:id" element={<PlayerDetailsPage />} />
 
       <Route path="/team/:tenantSlug/comparar" element={<ComparePlayersPage />} />
 
       <Route path="/team/:tenantSlug/teams" element={<TeamsPage />} />
-
       <Route path="/team/:tenantSlug/games" element={<GamesPage />} />
 
       <Route path="/team/:tenantSlug/stats/batting" element={<BattingStatsPage />} />
-
       <Route path="/team/:tenantSlug/stats/pitching" element={<PitchingStatsPage />} />
-
       <Route path="/team/:tenantSlug/stats/fielding" element={<FieldingStatsPage />} />
 
       {/* AUTH */}
@@ -191,10 +187,7 @@ function AppRouter() {
       />
 
       {/* FALLBACK */}
-      <Route
-        path="*"
-        element={<Navigate to="/login" replace />}
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   )

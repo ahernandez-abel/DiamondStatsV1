@@ -1,62 +1,103 @@
-import {pool} from '../config/db.js'
+import { pool } from '../config/db.js';
+
+const DEFAULT_TENANT_ID = 1;
+
+const getTenantId = (req) => {
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
+};
 
 export const getGameStats = async (req, res) => {
   try {
-    const { gameId } = req.params
+    const tenantId = getTenantId(req);
+    const { gameId } = req.params;
 
     const batting = await pool.query(
       `
-      SELECT bs.*, p.full_name, p.jersey_number, p.position
+      SELECT
+        bs.*,
+        p.full_name,
+        p.jersey_number,
+        p.position
+
       FROM batting_stats bs
-      JOIN players p ON p.id = bs.player_id
+
+      JOIN players p
+        ON p.id = bs.player_id
+        AND p.tenant_id = bs.tenant_id
+
       WHERE bs.game_id = $1
+      AND bs.tenant_id = $2
+
       ORDER BY p.full_name ASC
       `,
-      [gameId]
-    )
+      [gameId, tenantId]
+    );
 
     const fielding = await pool.query(
       `
-      SELECT fs.*, p.full_name, p.jersey_number
+      SELECT
+        fs.*,
+        p.full_name,
+        p.jersey_number
+
       FROM fielding_stats fs
-      JOIN players p ON p.id = fs.player_id
+
+      JOIN players p
+        ON p.id = fs.player_id
+        AND p.tenant_id = fs.tenant_id
+
       WHERE fs.game_id = $1
+      AND fs.tenant_id = $2
+
       ORDER BY p.full_name ASC
       `,
-      [gameId]
-    )
+      [gameId, tenantId]
+    );
 
     const pitching = await pool.query(
       `
-      SELECT ps.*, p.full_name, p.jersey_number
+      SELECT
+        ps.*,
+        p.full_name,
+        p.jersey_number
+
       FROM pitching_stats ps
-      JOIN players p ON p.id = ps.player_id
+
+      JOIN players p
+        ON p.id = ps.player_id
+        AND p.tenant_id = ps.tenant_id
+
       WHERE ps.game_id = $1
+      AND ps.tenant_id = $2
+
       ORDER BY p.full_name ASC
       `,
-      [gameId]
-    )
+      [gameId, tenantId]
+    );
 
     res.json({
       ok: true,
       batting: batting.rows,
       fielding: fielding.rows,
       pitching: pitching.rows,
-    })
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+
     res.status(500).json({
       ok: false,
       message: 'Error obteniendo estadísticas del juego',
-    })
+    });
   }
-}
+};
 
 export const savePlayerGameStats = async (req, res) => {
-  const client = await pool.connect()
+  const client = await pool.connect();
 
   try {
-    const { gameId } = req.params
+    const tenantId = getTenantId(req);
+
+    const { gameId } = req.params;
 
     const {
       player_id,
@@ -64,21 +105,36 @@ export const savePlayerGameStats = async (req, res) => {
       batting,
       fielding,
       pitching,
-    } = req.body
+    } = req.body;
 
-    await client.query('BEGIN')
+    await client.query('BEGIN');
 
     if (batting) {
       await client.query(
         `
         INSERT INTO batting_stats (
-          player_id, game_id, team_id,
-          ab, h, doubles, triples, hr, rbi, r,
-          sb, cs, so, bb, hbp, sf, sac
+          tenant_id,
+          player_id,
+          game_id,
+          team_id,
+          ab,
+          h,
+          doubles,
+          triples,
+          hr,
+          rbi,
+          r,
+          sb,
+          cs,
+          so,
+          bb,
+          hbp,
+          sf,
+          sac
         )
         VALUES (
           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-          $11,$12,$13,$14,$15,$16,$17
+          $11,$12,$13,$14,$15,$16,$17,$18
         )
         ON CONFLICT (player_id, game_id)
         DO UPDATE SET
@@ -99,6 +155,7 @@ export const savePlayerGameStats = async (req, res) => {
           updated_at = NOW()
         `,
         [
+          tenantId,
           player_id,
           gameId,
           team_id,
@@ -117,17 +174,24 @@ export const savePlayerGameStats = async (req, res) => {
           batting.sf || 0,
           batting.sac || 0,
         ]
-      )
+      );
     }
 
     if (fielding) {
       await client.query(
         `
         INSERT INTO fielding_stats (
-          player_id, game_id, team_id,
-          position, putouts, assists, errors, passed_balls
+          tenant_id,
+          player_id,
+          game_id,
+          team_id,
+          position,
+          putouts,
+          assists,
+          errors,
+          passed_balls
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
         ON CONFLICT (player_id, game_id)
         DO UPDATE SET
           position = EXCLUDED.position,
@@ -138,6 +202,7 @@ export const savePlayerGameStats = async (req, res) => {
           updated_at = NOW()
         `,
         [
+          tenantId,
           player_id,
           gameId,
           team_id,
@@ -147,18 +212,28 @@ export const savePlayerGameStats = async (req, res) => {
           fielding.errors || 0,
           fielding.passed_balls || 0,
         ]
-      )
+      );
     }
 
     if (pitching?.pitched) {
       await client.query(
         `
         INSERT INTO pitching_stats (
-          player_id, game_id, team_id,
-          outs_recorded, hits_allowed, er, r_allowed,
-          bb, so, hr_allowed, hbp, result
+          tenant_id,
+          player_id,
+          game_id,
+          team_id,
+          outs_recorded,
+          hits_allowed,
+          er,
+          r_allowed,
+          bb,
+          so,
+          hr_allowed,
+          hbp,
+          result
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         ON CONFLICT (player_id, game_id)
         DO UPDATE SET
           outs_recorded = EXCLUDED.outs_recorded,
@@ -173,6 +248,7 @@ export const savePlayerGameStats = async (req, res) => {
           updated_at = NOW()
         `,
         [
+          tenantId,
           player_id,
           gameId,
           team_id,
@@ -186,31 +262,34 @@ export const savePlayerGameStats = async (req, res) => {
           pitching.hbp || 0,
           pitching.result || null,
         ]
-      )
+      );
     }
 
-    await client.query('COMMIT')
+    await client.query('COMMIT');
 
     res.json({
       ok: true,
       message: 'Estadísticas guardadas correctamente',
-    })
+    });
   } catch (error) {
-    await client.query('ROLLBACK')
-    console.log(error)
+    await client.query('ROLLBACK');
+
+    console.log(error);
 
     res.status(500).json({
       ok: false,
       message: 'Error guardando estadísticas',
-    })
+    });
   } finally {
-    client.release()
+    client.release();
   }
-}
+};
 
 export const getPlayerGameStats = async (req, res) => {
   try {
-    const { gameId, playerId } = req.params
+    const tenantId = getTenantId(req);
+
+    const { gameId, playerId } = req.params;
 
     const batting = await pool.query(
       `
@@ -218,9 +297,10 @@ export const getPlayerGameStats = async (req, res) => {
       FROM batting_stats
       WHERE game_id = $1
       AND player_id = $2
+      AND tenant_id = $3
       `,
-      [gameId, playerId]
-    )
+      [gameId, playerId, tenantId]
+    );
 
     const fielding = await pool.query(
       `
@@ -228,9 +308,10 @@ export const getPlayerGameStats = async (req, res) => {
       FROM fielding_stats
       WHERE game_id = $1
       AND player_id = $2
+      AND tenant_id = $3
       `,
-      [gameId, playerId]
-    )
+      [gameId, playerId, tenantId]
+    );
 
     const pitching = await pool.query(
       `
@@ -238,14 +319,15 @@ export const getPlayerGameStats = async (req, res) => {
       FROM pitching_stats
       WHERE game_id = $1
       AND player_id = $2
+      AND tenant_id = $3
       `,
-      [gameId, playerId]
-    )
+      [gameId, playerId, tenantId]
+    );
 
     const hasStats =
       batting.rows.length > 0 ||
       fielding.rows.length > 0 ||
-      pitching.rows.length > 0
+      pitching.rows.length > 0;
 
     res.json({
       ok: true,
@@ -256,14 +338,13 @@ export const getPlayerGameStats = async (req, res) => {
             pitching: pitching.rows[0] || null,
           }
         : null,
-    })
-
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
 
     res.status(500).json({
       ok: false,
       message: 'Error obteniendo estadísticas del jugador en el juego',
-    })
+    });
   }
-}
+};

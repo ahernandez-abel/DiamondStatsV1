@@ -1,19 +1,28 @@
-import { Router } from 'express'
+import { Router } from 'express';
 
 import {
   getGameStats,
   savePlayerGameStats,
   getPlayerGameStats,
-} from '../controllers/stats.controller.js'
+} from '../controllers/stats.controller.js';
 
-const router = Router()
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../middlewares/tenant.middleware.js';
 
-router.get('/game/:gameId', getGameStats)
+const router = Router();
 
-router.post('/game/:gameId/player', savePlayerGameStats)
+router.get('/game/:gameId', getGameStats);
+
+router.post(
+  '/game/:gameId/player',
+  authMiddleware,
+  tenantMiddleware,
+  savePlayerGameStats
+);
+
 router.get(
   '/games/:gameId/player/:playerId',
   getPlayerGameStats
-)
+);
 
-export default router
+export default router;

@@ -9,6 +9,7 @@ import teamsRoutes from './routes/teams.routes.js';
 import gamesRoutes from './routes/games.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import leadersRoutes from './routes/leaders.routes.js';
+import publicRoutes from './routes/public.routes.js';
 
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
@@ -32,6 +33,7 @@ app.use('/api/teams', teamsRoutes);
 app.use('/api/games', gamesRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/leaders', leadersRoutes);
+app.use('/api/public', publicRoutes);
 
 app.use(errorMiddleware);
 

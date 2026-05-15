@@ -1,32 +1,36 @@
-import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 
-import logo from '../../assets/logo.png'
+import logo from '../../assets/logo.png';
 
-import './Navbar.css'
+import './Navbar.css';
 
-function Navbar() {
-
-  const [menuOpen, setMenuOpen] = useState(false)
+function Navbar({ tenantSlug }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => {
-    setMenuOpen(false)
-  }
+    setMenuOpen(false);
+  };
+
+  const basePath = tenantSlug
+    ? `/team/${tenantSlug}`
+    : '';
+
+  const homePath = tenantSlug
+    ? `/team/${tenantSlug}`
+    : '/';
 
   const navClass = ({ isActive }) =>
-    isActive ? 'navbar-link active' : 'navbar-link'
+    isActive ? 'navbar-link active' : 'navbar-link';
 
   return (
     <header className="navbar">
-
       <div className="navbar-left">
-
         <Link
-          to="/"
+          to={homePath}
           className="navbar-brand"
           onClick={closeMenu}
         >
-
           <img
             src={logo}
             alt="DiamondStats Logo"
@@ -34,7 +38,6 @@ function Navbar() {
           />
 
           <div className="navbar-brand-text">
-
             <span className="navbar-logo">
               DiamondStats
             </span>
@@ -42,11 +45,8 @@ function Navbar() {
             <span className="navbar-badge">
               Softball Analytics
             </span>
-
           </div>
-
         </Link>
-
       </div>
 
       <button
@@ -61,68 +61,35 @@ function Navbar() {
       </button>
 
       <nav className={menuOpen ? 'navbar-links open' : 'navbar-links'}>
-
-        <NavLink
-          to="/"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={homePath} onClick={closeMenu} className={navClass}>
           Inicio
         </NavLink>
 
-        <NavLink
-          to="/players"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/players`} onClick={closeMenu} className={navClass}>
           Jugadores
         </NavLink>
 
-        <NavLink
-          to="/comparar"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/comparar`} onClick={closeMenu} className={navClass}>
           Comparar
         </NavLink>
 
-        <NavLink
-          to="/teams"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/teams`} onClick={closeMenu} className={navClass}>
           Equipos
         </NavLink>
 
-        <NavLink
-          to="/games"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/games`} onClick={closeMenu} className={navClass}>
           Juegos
         </NavLink>
 
-        <NavLink
-          to="/stats/batting"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/stats/batting`} onClick={closeMenu} className={navClass}>
           Bateo
         </NavLink>
 
-        <NavLink
-          to="/stats/pitching"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/stats/pitching`} onClick={closeMenu} className={navClass}>
           Pitcher
         </NavLink>
 
-        <NavLink
-          to="/stats/fielding"
-          onClick={closeMenu}
-          className={navClass}
-        >
+        <NavLink to={`${basePath}/stats/fielding`} onClick={closeMenu} className={navClass}>
           Defensa
         </NavLink>
 
@@ -133,22 +100,18 @@ function Navbar() {
         >
           Iniciar Sesión
         </Link>
-
       </nav>
 
       <div className="navbar-login-desktop">
-
         <Link
           to="/login"
           className="navbar-login-btn"
         >
           Iniciar Sesión
         </Link>
-
       </div>
-
     </header>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;

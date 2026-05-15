@@ -90,7 +90,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
   );
 
   return (
-    <PublicLayout>
+    <PublicLayout tenantSlug={activeTenantSlug}>
       <section className="home-page">
         <div className="home-top-grid">
           <div className="home-hero-info">

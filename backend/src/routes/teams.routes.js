@@ -13,9 +13,9 @@ import { tenantMiddleware } from '../middlewares/tenant.middleware.js';
 
 const router = Router();
 
-router.get('/', getTeams);
+router.get('/', authMiddleware, tenantMiddleware, getTeams);
 
-router.get('/:id', getTeamById);
+router.get('/:id', authMiddleware, tenantMiddleware, getTeamById);
 
 router.post('/', authMiddleware, tenantMiddleware, createTeam);
 

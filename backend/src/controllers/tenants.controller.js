@@ -1,15 +1,66 @@
-import { pool } from '../config/db.js';
+import { pool } from '../config/db.js'
 
-const normalizeSlug = (value) => {
+const normalizeSlug = (value = '') => {
   return value
     .toLowerCase()
     .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-};
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+const generateAccessCode = (name = '') => {
+  const base = normalizeSlug(name)
+    .replace(/-/g, '')
+    .slice(0, 8)
+    .toUpperCase() || 'TEAM'
+
+  const random = Math.floor(1000 + Math.random() * 9000)
+
+  return `${base}${random}`
+}
+
+const generateUniqueSlug = async (client, baseSlug) => {
+  let slug = baseSlug
+  let counter = 1
+
+  while (true) {
+    const result = await client.query(
+      'SELECT id FROM tenants WHERE slug = $1 LIMIT 1',
+      [slug]
+    )
+
+    if (result.rows.length === 0) {
+      return slug
+    }
+
+    counter += 1
+    slug = `${baseSlug}-${counter}`
+  }
+}
+
+const generateUniqueAccessCode = async (client, tenantName) => {
+  let accessCode = generateAccessCode(tenantName)
+
+  while (true) {
+    const result = await client.query(
+      'SELECT id FROM tenants WHERE access_code = $1 LIMIT 1',
+      [accessCode]
+    )
+
+    if (result.rows.length === 0) {
+      return accessCode
+    }
+
+    accessCode = generateAccessCode(tenantName)
+  }
+}
 
 export const createTenantOnboarding = async (req, res) => {
-  const client = await pool.connect();
+  const client = await pool.connect()
 
   try {
     const {
@@ -17,6 +68,9 @@ export const createTenantOnboarding = async (req, res) => {
       tenant_slug,
       contact_email,
       whatsapp,
+      plan,
+      logo_url,
+      is_public,
 
       team_name,
       short_name,
@@ -28,24 +82,54 @@ export const createTenantOnboarding = async (req, res) => {
       admin_username,
       admin_email,
       admin_password,
-    } = req.body;
+    } = req.body
 
-    if (
-      !tenant_name ||
-      !team_name ||
-      !admin_username ||
-      !admin_email ||
-      !admin_password
-    ) {
+    if (!tenant_name || !admin_username || !admin_email || !admin_password) {
       return res.status(400).json({
         ok: false,
-        message: 'Faltan datos obligatorios',
-      });
+        message: 'Faltan datos obligatorios para registrar el equipo.',
+      })
     }
 
-    const slug = normalizeSlug(tenant_slug || tenant_name);
+    const cleanTenantName = tenant_name.trim()
+    const cleanTeamName = team_name?.trim() || cleanTenantName
+    const cleanAdminUsername = admin_username.trim()
+    const cleanAdminEmail = admin_email.trim().toLowerCase()
+    const cleanContactEmail = contact_email?.trim().toLowerCase() || cleanAdminEmail
 
-    await client.query('BEGIN');
+    const baseSlug = normalizeSlug(tenant_slug || cleanTenantName)
+
+    if (!baseSlug) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El nombre del equipo no permite generar un slug válido.',
+      })
+    }
+
+    await client.query('BEGIN')
+
+    const existingUser = await client.query(
+      `
+      SELECT id
+      FROM users
+      WHERE LOWER(email) = LOWER($1)
+         OR LOWER(username) = LOWER($2)
+      LIMIT 1
+      `,
+      [cleanAdminEmail, cleanAdminUsername]
+    )
+
+    if (existingUser.rows.length > 0) {
+      await client.query('ROLLBACK')
+
+      return res.status(409).json({
+        ok: false,
+        message: 'Ya existe un usuario con ese email o nombre de usuario.',
+      })
+    }
+
+    const slug = await generateUniqueSlug(client, baseSlug)
+    const accessCode = await generateUniqueAccessCode(client, cleanTenantName)
 
     const tenantResult = await client.query(
       `
@@ -54,20 +138,28 @@ export const createTenantOnboarding = async (req, res) => {
         slug,
         contact_email,
         whatsapp,
-        status
+        status,
+        access_code,
+        is_public,
+        plan,
+        logo_url
       )
-      VALUES ($1,$2,$3,$4,'active')
+      VALUES ($1, $2, $3, $4, 'active', $5, $6, $7, $8)
       RETURNING *
       `,
       [
-        tenant_name,
+        cleanTenantName,
         slug,
-        contact_email || admin_email,
-        whatsapp || null,
+        cleanContactEmail,
+        whatsapp?.trim() || null,
+        accessCode,
+        is_public ?? false,
+        plan || 'basic',
+        logo_url || null,
       ]
-    );
+    )
 
-    const tenant = tenantResult.rows[0];
+    const tenant = tenantResult.rows[0]
 
     const teamResult = await client.query(
       `
@@ -75,26 +167,29 @@ export const createTenantOnboarding = async (req, res) => {
         tenant_id,
         name,
         short_name,
+        logo_url,
         primary_color,
         secondary_color,
         manager_name,
-        city
+        city,
+        is_main
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
       RETURNING *
       `,
       [
         tenant.id,
-        team_name,
-        short_name || null,
+        cleanTeamName,
+        short_name?.trim() || null,
+        logo_url || null,
         primary_color || '#22c55e',
         secondary_color || '#0f172a',
-        manager_name || null,
-        city || null,
+        manager_name?.trim() || cleanAdminUsername,
+        city?.trim() || null,
       ]
-    );
+    )
 
-    const team = teamResult.rows[0];
+    const team = teamResult.rows[0]
 
     const userResult = await client.query(
       `
@@ -106,46 +201,41 @@ export const createTenantOnboarding = async (req, res) => {
         role,
         is_active
       )
-      VALUES ($1,$2,$3,$4,'admin',true)
+      VALUES ($1, $2, $3, $4, 'admin', true)
       RETURNING id, tenant_id, username, email, role, is_active, created_at
       `,
       [
         tenant.id,
-        admin_username,
-        admin_email,
+        cleanAdminUsername,
+        cleanAdminEmail,
         admin_password,
       ]
-    );
+    )
 
-    const user = userResult.rows[0];
+    const user = userResult.rows[0]
 
-    await client.query('COMMIT');
+    await client.query('COMMIT')
 
-    res.status(201).json({
+    return res.status(201).json({
       ok: true,
-      message: 'Organización creada correctamente',
+      message: 'Equipo registrado correctamente.',
       tenant,
       team,
       user,
+      access_code: tenant.access_code,
       public_url: `/team/${tenant.slug}`,
-    });
+      admin_url: '/login',
+    })
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query('ROLLBACK')
 
-    console.log(error);
+    console.error('Error en createTenantOnboarding:', error)
 
-    if (error.code === '23505') {
-      return res.status(409).json({
-        ok: false,
-        message: 'El slug, usuario o email ya existe',
-      });
-    }
-
-    res.status(500).json({
+    return res.status(500).json({
       ok: false,
-      message: 'Error creando organización',
-    });
+      message: 'Error registrando el equipo.',
+    })
   } finally {
-    client.release();
+    client.release()
   }
-};
+}

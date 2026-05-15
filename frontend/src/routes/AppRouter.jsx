@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 
 import LandingPage from '../pages/landing/LandingPage'
-
+import RegisterTeamPage from '../pages/register/RegisterTeamPage'
 import HomePage from '../pages/home/HomePage'
 import LoginPage from '../pages/auth/LoginPage'
 
@@ -34,7 +34,7 @@ function AppRouter() {
 
       {/* LANDING PUBLICA */}
       <Route path="/" element={<LandingPage />} />
-
+<Route path="/register-team" element={<RegisterTeamPage />} />
       {/* PUBLIC TENANT ROUTES */}
       <Route path="/team/:tenantSlug" element={<HomePage />} />
       <Route path="/team/:tenantSlug/home" element={<HomePage />} />

@@ -9,6 +9,7 @@ import {
 } from '../controllers/players.controller.js';
 
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../middlewares/tenant.middleware.js';
 
 const router = Router();
 
@@ -16,10 +17,10 @@ router.get('/', getPlayers);
 
 router.get('/:id', getPlayerById);
 
-router.post('/', authMiddleware, createPlayer);
+router.post('/', authMiddleware, tenantMiddleware, createPlayer);
 
-router.put('/:id', authMiddleware, updatePlayer);
+router.put('/:id', authMiddleware, tenantMiddleware, updatePlayer);
 
-router.delete('/:id', authMiddleware, deletePlayer);
+router.delete('/:id', authMiddleware, tenantMiddleware, deletePlayer);
 
 export default router;

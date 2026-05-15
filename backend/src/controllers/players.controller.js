@@ -1,17 +1,33 @@
 import { pool } from '../config/db.js';
 
+const DEFAULT_TENANT_ID = 1;
+
+const getTenantId = (req) => {
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
+};
+
 export const getPlayers = async (req, res, next) => {
   try {
-    const result = await pool.query(`
+    const tenantId = getTenantId(req);
+
+    const result = await pool.query(
+      `
       SELECT
         players.*,
         teams.name AS team_name,
         teams.primary_color
+
       FROM players
+
       LEFT JOIN teams
       ON players.team_id = teams.id
+
+      WHERE players.tenant_id = $1
+
       ORDER BY players.full_name ASC
-    `);
+      `,
+      [tenantId]
+    );
 
     res.json({
       ok: true,
@@ -24,8 +40,8 @@ export const getPlayers = async (req, res, next) => {
 
 export const getPlayerById = async (req, res, next) => {
   try {
-
-    const { id } = req.params
+    const tenantId = getTenantId(req);
+    const { id } = req.params;
 
     const playerResult = await pool.query(
       `
@@ -33,119 +49,64 @@ export const getPlayerById = async (req, res, next) => {
         players.*,
         teams.name AS team_name,
         teams.primary_color
+
       FROM players
+
       LEFT JOIN teams
       ON players.team_id = teams.id
+
       WHERE players.id = $1
+      AND players.tenant_id = $2
+
+      LIMIT 1
       `,
-      [id]
-    )
+      [id, tenantId]
+    );
 
     if (playerResult.rows.length === 0) {
       return res.status(404).json({
         ok: false,
         message: 'Jugador no encontrado',
-      })
+      });
     }
 
     const battingResult = await pool.query(
-  `
-  SELECT
-    COALESCE(SUM(ab), 0) AS ab,
+      `
+      SELECT
+        COALESCE(SUM(ab), 0) AS ab,
 
-    COALESCE(
-      GREATEST(
-        SUM(h),
-        SUM(doubles) + SUM(triples) + SUM(hr)
-      ),
-      0
-    ) AS hits,
-
-    COALESCE(SUM(doubles), 0) AS doubles,
-    COALESCE(SUM(triples), 0) AS triples,
-    COALESCE(SUM(hr), 0) AS hr,
-    COALESCE(SUM(r), 0) AS runs,
-    COALESCE(SUM(rbi), 0) AS rbi,
-    COALESCE(SUM(bb), 0) AS bb,
-    COALESCE(SUM(so), 0) AS so,
-    COALESCE(SUM(sb), 0) AS sb,
-    COALESCE(SUM(cs), 0) AS cs,
-    COALESCE(SUM(hbp), 0) AS hbp,
-    COALESCE(SUM(sf), 0) AS sf,
-
-    COALESCE(
-      GREATEST(
-        SUM(h),
-        SUM(doubles) + SUM(triples) + SUM(hr)
-      )
-      - COALESCE(SUM(doubles), 0)
-      - COALESCE(SUM(triples), 0)
-      - COALESCE(SUM(hr), 0),
-      0
-    ) AS singles,
-
-    COALESCE(
-      (
-        GREATEST(
-          SUM(h),
-          SUM(doubles) + SUM(triples) + SUM(hr)
-        )
-        - COALESCE(SUM(doubles), 0)
-        - COALESCE(SUM(triples), 0)
-        - COALESCE(SUM(hr), 0)
-      )
-      + (COALESCE(SUM(doubles), 0) * 2)
-      + (COALESCE(SUM(triples), 0) * 3)
-      + (COALESCE(SUM(hr), 0) * 4),
-      0
-    ) AS tb,
-
-    ROUND(
-      CASE
-        WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
-        ELSE
+        COALESCE(
           GREATEST(
             SUM(h),
             SUM(doubles) + SUM(triples) + SUM(hr)
-          )::numeric / NULLIF(SUM(ab), 0)
-      END,
-      3
-    ) AS avg,
+          ),
+          0
+        ) AS hits,
 
-    ROUND(
-      CASE
-        WHEN (
-          COALESCE(SUM(ab), 0)
-          + COALESCE(SUM(bb), 0)
-          + COALESCE(SUM(hbp), 0)
-          + COALESCE(SUM(sf), 0)
-        ) = 0 THEN 0
-        ELSE (
+        COALESCE(SUM(doubles), 0) AS doubles,
+        COALESCE(SUM(triples), 0) AS triples,
+        COALESCE(SUM(hr), 0) AS hr,
+        COALESCE(SUM(r), 0) AS runs,
+        COALESCE(SUM(rbi), 0) AS rbi,
+        COALESCE(SUM(bb), 0) AS bb,
+        COALESCE(SUM(so), 0) AS so,
+        COALESCE(SUM(sb), 0) AS sb,
+        COALESCE(SUM(cs), 0) AS cs,
+        COALESCE(SUM(hbp), 0) AS hbp,
+        COALESCE(SUM(sf), 0) AS sf,
+
+        COALESCE(
           GREATEST(
             SUM(h),
             SUM(doubles) + SUM(triples) + SUM(hr)
           )
-          + COALESCE(SUM(bb), 0)
-          + COALESCE(SUM(hbp), 0)
-        )::numeric
-        /
-        NULLIF(
-          (
-            COALESCE(SUM(ab), 0)
-            + COALESCE(SUM(bb), 0)
-            + COALESCE(SUM(hbp), 0)
-            + COALESCE(SUM(sf), 0)
-          ),
+          - COALESCE(SUM(doubles), 0)
+          - COALESCE(SUM(triples), 0)
+          - COALESCE(SUM(hr), 0),
           0
-        )
-      END,
-      3
-    ) AS obp,
+        ) AS singles,
 
-    ROUND(
-      CASE
-        WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
-        ELSE (
+        COALESCE(
           (
             GREATEST(
               SUM(h),
@@ -157,23 +118,87 @@ export const getPlayerById = async (req, res, next) => {
           )
           + (COALESCE(SUM(doubles), 0) * 2)
           + (COALESCE(SUM(triples), 0) * 3)
-          + (COALESCE(SUM(hr), 0) * 4)
-        )::numeric / NULLIF(SUM(ab), 0)
-      END,
-      3
-    ) AS slg
+          + (COALESCE(SUM(hr), 0) * 4),
+          0
+        ) AS tb,
 
-  FROM batting_stats
-  WHERE player_id = $1
-  `,
-  [id]
-)
-    const batting = battingResult.rows[0]
+        ROUND(
+          CASE
+            WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
+            ELSE
+              GREATEST(
+                SUM(h),
+                SUM(doubles) + SUM(triples) + SUM(hr)
+              )::numeric / NULLIF(SUM(ab), 0)
+          END,
+          3
+        ) AS avg,
+
+        ROUND(
+          CASE
+            WHEN (
+              COALESCE(SUM(ab), 0)
+              + COALESCE(SUM(bb), 0)
+              + COALESCE(SUM(hbp), 0)
+              + COALESCE(SUM(sf), 0)
+            ) = 0 THEN 0
+            ELSE (
+              GREATEST(
+                SUM(h),
+                SUM(doubles) + SUM(triples) + SUM(hr)
+              )
+              + COALESCE(SUM(bb), 0)
+              + COALESCE(SUM(hbp), 0)
+            )::numeric
+            /
+            NULLIF(
+              (
+                COALESCE(SUM(ab), 0)
+                + COALESCE(SUM(bb), 0)
+                + COALESCE(SUM(hbp), 0)
+                + COALESCE(SUM(sf), 0)
+              ),
+              0
+            )
+          END,
+          3
+        ) AS obp,
+
+        ROUND(
+          CASE
+            WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
+            ELSE (
+              (
+                GREATEST(
+                  SUM(h),
+                  SUM(doubles) + SUM(triples) + SUM(hr)
+                )
+                - COALESCE(SUM(doubles), 0)
+                - COALESCE(SUM(triples), 0)
+                - COALESCE(SUM(hr), 0)
+              )
+              + (COALESCE(SUM(doubles), 0) * 2)
+              + (COALESCE(SUM(triples), 0) * 3)
+              + (COALESCE(SUM(hr), 0) * 4)
+            )::numeric / NULLIF(SUM(ab), 0)
+          END,
+          3
+        ) AS slg
+
+      FROM batting_stats
+
+      WHERE player_id = $1
+      AND tenant_id = $2
+      `,
+      [id, tenantId]
+    );
+
+    const batting = battingResult.rows[0];
 
     batting.ops = (
       Number(batting.obp || 0) +
       Number(batting.slg || 0)
-    ).toFixed(3)
+    ).toFixed(3);
 
     const pitchingResult = await pool.query(
       `
@@ -217,10 +242,12 @@ export const getPlayerById = async (req, res, next) => {
         ) AS whip
 
       FROM pitching_stats
+
       WHERE player_id = $1
+      AND tenant_id = $2
       `,
-      [id]
-    )
+      [id, tenantId]
+    );
 
     const fieldingResult = await pool.query(
       `
@@ -260,10 +287,12 @@ export const getPlayerById = async (req, res, next) => {
         ) AS fielding_pct
 
       FROM fielding_stats
+
       WHERE player_id = $1
+      AND tenant_id = $2
       `,
-      [id]
-    )
+      [id, tenantId]
+    );
 
     res.json({
       ok: true,
@@ -273,15 +302,16 @@ export const getPlayerById = async (req, res, next) => {
         pitching: pitchingResult.rows[0],
         fielding: fieldingResult.rows[0],
       },
-    })
-
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 export const createPlayer = async (req, res, next) => {
   try {
+    const tenantId = getTenantId(req);
+
     const {
       full_name,
       nickname,
@@ -296,6 +326,7 @@ export const createPlayer = async (req, res, next) => {
     const result = await pool.query(
       `
       INSERT INTO players (
+        tenant_id,
         full_name,
         nickname,
         photo_url,
@@ -305,10 +336,11 @@ export const createPlayer = async (req, res, next) => {
         throwing_hand,
         team_id
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
       `,
       [
+        tenantId,
         full_name,
         nickname,
         photo_url,
@@ -331,6 +363,7 @@ export const createPlayer = async (req, res, next) => {
 
 export const updatePlayer = async (req, res, next) => {
   try {
+    const tenantId = getTenantId(req);
     const { id } = req.params;
 
     const {
@@ -360,6 +393,7 @@ export const updatePlayer = async (req, res, next) => {
         is_active = $9,
         updated_at = NOW()
       WHERE id = $10
+      AND tenant_id = $11
       RETURNING *
       `,
       [
@@ -373,8 +407,16 @@ export const updatePlayer = async (req, res, next) => {
         team_id,
         is_active,
         id,
+        tenantId,
       ]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Jugador no encontrado',
+      });
+    }
 
     res.json({
       ok: true,
@@ -387,15 +429,25 @@ export const updatePlayer = async (req, res, next) => {
 
 export const deletePlayer = async (req, res, next) => {
   try {
+    const tenantId = getTenantId(req);
     const { id } = req.params;
 
-    await pool.query(
+    const result = await pool.query(
       `
       DELETE FROM players
       WHERE id = $1
+      AND tenant_id = $2
+      RETURNING id
       `,
-      [id]
+      [id, tenantId]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Jugador no encontrado',
+      });
+    }
 
     res.json({
       ok: true,

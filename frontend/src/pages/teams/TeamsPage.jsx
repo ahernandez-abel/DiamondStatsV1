@@ -1,59 +1,66 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
-import PublicLayout from '../../layouts/PublicLayout';
+import PublicLayout from '../../layouts/PublicLayout'
 
-import { getTeams } from '../../api/teams.api';
-import { getGames } from '../../api/games.api';
-import { getPublicHome } from '../../api/public.api';
+import { getTeams } from '../../api/teams.api'
+import { getGames } from '../../api/games.api'
+import { getPublicHome } from '../../api/public.api'
 
-import './TeamsPage.css';
+import './TeamsPage.css'
 
 function TeamsPage() {
-  const { tenantSlug } = useParams();
+  const { tenantSlug } = useParams()
 
-  const [teams, setTeams] = useState([]);
-  const [games, setGames] = useState([]);
-  const [tenant, setTenant] = useState(null);
+  const [teams, setTeams] = useState([])
+  const [games, setGames] = useState([])
+  const [tenant, setTenant] = useState(null)
 
   useEffect(() => {
-    loadData();
-  }, [tenantSlug]);
+    loadData()
+  }, [tenantSlug])
 
   const loadData = async () => {
     try {
       if (tenantSlug) {
-        const res = await getPublicHome(tenantSlug);
+        const res = await getPublicHome(tenantSlug)
 
-        setTenant(res.data.tenant || null);
-        setTeams(res.data.teams || []);
-        setGames(res.data.games || []);
+        setTenant(res.data.tenant || null)
+        setTeams(res.data.teams || [])
+        setGames(res.data.games || [])
 
-        return;
+        return
       }
 
-      const teamsRes = await getTeams();
-      const gamesRes = await getGames();
+      const teamsRes = await getTeams()
+      const gamesRes = await getGames()
 
-      setTeams(teamsRes.data.teams || []);
+      setTeams(teamsRes.data.teams || [])
 
       const gamesData =
         gamesRes.data.games ||
         gamesRes.data.data ||
         gamesRes.data ||
-        [];
+        []
 
-      setGames(Array.isArray(gamesData) ? gamesData : []);
+      setGames(Array.isArray(gamesData) ? gamesData : [])
     } catch (error) {
-      console.log(error);
+      console.log(error)
+      setTeams([])
+      setGames([])
     }
-  };
+  }
 
-  const mainTeam = teams[0] || null;
+  const mainTeam =
+    teams.find((team) => team.is_main === true) ||
+    teams.find((team) => team.is_main === 'true') ||
+    null
 
   const finishedGames = games.filter(
-    (game) => game.status === 'final'
-  );
+    (game) =>
+      game.status === 'final' ||
+      game.status === 'completed'
+  )
 
   const mainTeamGames = mainTeam
     ? finishedGames.filter(
@@ -61,21 +68,21 @@ function TeamsPage() {
           Number(game.home_team_id) === Number(mainTeam.id) ||
           Number(game.away_team_id) === Number(mainTeam.id)
       )
-    : [];
+    : []
 
   const getMainTeamResult = (game) => {
-    if (!mainTeam) return 'N/A';
+    if (!mainTeam) return 'N/A'
 
-    const isHome = Number(game.home_team_id) === Number(mainTeam.id);
+    const isHome = Number(game.home_team_id) === Number(mainTeam.id)
 
-    const myScore = isHome ? game.home_score : game.away_score;
-    const rivalScore = isHome ? game.away_score : game.home_score;
+    const myScore = Number(isHome ? game.home_score : game.away_score)
+    const rivalScore = Number(isHome ? game.away_score : game.home_score)
 
-    if (myScore > rivalScore) return 'Victoria';
-    if (myScore < rivalScore) return 'Derrota';
+    if (myScore > rivalScore) return 'Victoria'
+    if (myScore < rivalScore) return 'Derrota'
 
-    return 'Empate';
-  };
+    return 'Empate'
+  }
 
   return (
     <PublicLayout tenantSlug={tenantSlug}>
@@ -132,7 +139,7 @@ function TeamsPage() {
           </div>
         ) : (
           <div className="empty-results">
-            No hay equipos registrados todavía.
+            No hay equipo principal configurado.
           </div>
         )}
 
@@ -185,7 +192,14 @@ function TeamsPage() {
 
           <div className="teams-grid">
             {teams.map((team) => (
-              <div key={team.id} className="team-card">
+              <div
+                key={team.id}
+                className={
+                  team.is_main
+                    ? 'team-card main-team-card'
+                    : 'team-card'
+                }
+              >
                 <img
                   src={team.logo_url || 'https://placehold.co/100x100'}
                   alt={team.name}
@@ -209,13 +223,19 @@ function TeamsPage() {
                     L: {team.losses || 0}
                   </span>
                 </div>
+
+                {team.is_main && (
+                  <span className="team-main-badge">
+                    Principal
+                  </span>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
     </PublicLayout>
-  );
+  )
 }
 
-export default TeamsPage;
+export default TeamsPage

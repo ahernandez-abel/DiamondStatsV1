@@ -1,31 +1,35 @@
-import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { useState } from 'react'
+import { Link, NavLink, useParams } from 'react-router-dom'
 
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo.png'
 
-import './Navbar.css';
+import './Navbar.css'
 
-function Navbar({ tenantSlug }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+function Navbar({ tenantSlug: tenantSlugProp }) {
+  const { tenantSlug: tenantSlugParam } = useParams()
+
+  const tenantSlug = tenantSlugProp || tenantSlugParam
+
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const closeMenu = () => {
-    setMenuOpen(false);
-  };
+    setMenuOpen(false)
+  }
 
   const basePath = tenantSlug
     ? `/team/${tenantSlug}`
-    : '';
+    : '/login'
 
-  const homePath = tenantSlug
-    ? `/team/${tenantSlug}`
-    : '/';
+  const homePath = basePath
 
   const navClass = ({ isActive }) =>
-    isActive ? 'navbar-link active' : 'navbar-link';
+    isActive ? 'navbar-link active' : 'navbar-link'
 
   return (
     <header className="navbar">
+
       <div className="navbar-left">
+
         <Link
           to={homePath}
           className="navbar-brand"
@@ -47,6 +51,7 @@ function Navbar({ tenantSlug }) {
             </span>
           </div>
         </Link>
+
       </div>
 
       <button
@@ -61,35 +66,68 @@ function Navbar({ tenantSlug }) {
       </button>
 
       <nav className={menuOpen ? 'navbar-links open' : 'navbar-links'}>
-        <NavLink to={homePath} onClick={closeMenu} className={navClass}>
+
+        <NavLink
+          to={homePath}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Inicio
         </NavLink>
 
-        <NavLink to={`${basePath}/players`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/players`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Jugadores
         </NavLink>
 
-        <NavLink to={`${basePath}/comparar`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/comparar`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Comparar
         </NavLink>
 
-        <NavLink to={`${basePath}/teams`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/teams`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Equipos
         </NavLink>
 
-        <NavLink to={`${basePath}/games`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/games`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Juegos
         </NavLink>
 
-        <NavLink to={`${basePath}/stats/batting`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/stats/batting`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Bateo
         </NavLink>
 
-        <NavLink to={`${basePath}/stats/pitching`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/stats/pitching`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Pitcher
         </NavLink>
 
-        <NavLink to={`${basePath}/stats/fielding`} onClick={closeMenu} className={navClass}>
+        <NavLink
+          to={`${basePath}/stats/fielding`}
+          onClick={closeMenu}
+          className={navClass}
+        >
           Defensa
         </NavLink>
 
@@ -100,6 +138,7 @@ function Navbar({ tenantSlug }) {
         >
           Iniciar Sesión
         </Link>
+
       </nav>
 
       <div className="navbar-login-desktop">
@@ -110,8 +149,9 @@ function Navbar({ tenantSlug }) {
           Iniciar Sesión
         </Link>
       </div>
+
     </header>
-  );
+  )
 }
 
-export default Navbar;
+export default Navbar

@@ -30,73 +30,35 @@ function AppRouter() {
   return (
     <Routes>
 
-      {/* ================================= */}
-      {/* PUBLIC ROUTES */}
-      {/* ================================= */}
-
+      {/* PUBLIC DEFAULT */}
       <Route
         path="/"
-        element={<Navigate to="/team/team-mahanaim" replace />}
+        element={<Navigate to="/login" replace />}
       />
 
-      <Route
-        path="/team/:tenantSlug"
-        element={<HomePage />}
-      />
+      {/* PUBLIC TENANT ROUTES */}
+      <Route path="/team/:tenantSlug" element={<HomePage />} />
 
-      <Route
-        path="/team/:tenantSlug/players"
-        element={<PlayersPage />}
-      />
+      <Route path="/team/:tenantSlug/players" element={<PlayersPage />} />
 
-      <Route
-        path="/team/:tenantSlug/players/:id"
-        element={<PlayerDetailsPage />}
-      />
+      <Route path="/team/:tenantSlug/players/:id" element={<PlayerDetailsPage />} />
 
-      <Route
-        path="/team/:tenantSlug/comparar"
-        element={<ComparePlayersPage />}
-      />
+      <Route path="/team/:tenantSlug/comparar" element={<ComparePlayersPage />} />
 
-      <Route
-        path="/team/:tenantSlug/teams"
-        element={<TeamsPage />}
-      />
+      <Route path="/team/:tenantSlug/teams" element={<TeamsPage />} />
 
-      <Route
-        path="/team/:tenantSlug/games"
-        element={<GamesPage />}
-      />
+      <Route path="/team/:tenantSlug/games" element={<GamesPage />} />
 
-      <Route
-        path="/team/:tenantSlug/stats/batting"
-        element={<BattingStatsPage />}
-      />
+      <Route path="/team/:tenantSlug/stats/batting" element={<BattingStatsPage />} />
 
-      <Route
-        path="/team/:tenantSlug/stats/pitching"
-        element={<PitchingStatsPage />}
-      />
+      <Route path="/team/:tenantSlug/stats/pitching" element={<PitchingStatsPage />} />
 
-      <Route
-        path="/team/:tenantSlug/stats/fielding"
-        element={<FieldingStatsPage />}
-      />
+      <Route path="/team/:tenantSlug/stats/fielding" element={<FieldingStatsPage />} />
 
-      {/* ================================= */}
       {/* AUTH */}
-      {/* ================================= */}
+      <Route path="/login" element={<LoginPage />} />
 
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
-
-      {/* ================================= */}
       {/* ADMIN DASHBOARD */}
-      {/* ================================= */}
-
       <Route
         path="/admin"
         element={
@@ -115,10 +77,7 @@ function AppRouter() {
         }
       />
 
-      {/* ================================= */}
       {/* ADMIN PLAYERS */}
-      {/* ================================= */}
-
       <Route
         path="/admin/players"
         element={
@@ -146,10 +105,7 @@ function AppRouter() {
         }
       />
 
-      {/* ================================= */}
       {/* ADMIN TEAMS */}
-      {/* ================================= */}
-
       <Route
         path="/admin/teams/create"
         element={
@@ -159,10 +115,7 @@ function AppRouter() {
         }
       />
 
-      {/* ================================= */}
       {/* ADMIN GAMES */}
-      {/* ================================= */}
-
       <Route
         path="/admin/games"
         element={
@@ -199,23 +152,17 @@ function AppRouter() {
         }
       />
 
-      {/* ================================= */}
       {/* ADMIN COMPARE */}
-      {/* ================================= */}
-
       <Route
         path="/admin/comparar"
         element={
           <ProtectedRoute>
-            <ComparePlayersPage />
+            <ComparePlayersPage admin />
           </ProtectedRoute>
         }
       />
 
-      {/* ================================= */}
       {/* ADMIN STATS */}
-      {/* ================================= */}
-
       <Route
         path="/admin/stats/batting"
         element={
@@ -243,13 +190,10 @@ function AppRouter() {
         }
       />
 
-      {/* ================================= */}
       {/* FALLBACK */}
-      {/* ================================= */}
-
       <Route
         path="*"
-        element={<Navigate to="/team/team-mahanaim" replace />}
+        element={<Navigate to="/login" replace />}
       />
 
     </Routes>

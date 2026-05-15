@@ -27,78 +27,37 @@ import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 function AppRouter() {
   return (
     <Routes>
-      {/* PUBLIC TENANT ROUTES */}
       <Route
         path="/"
         element={<Navigate to="/team/team-mahanaim" replace />}
       />
 
-      <Route
-        path="/team/:tenantSlug"
-        element={<HomePage />}
-      />
+      <Route path="/team/:tenantSlug" element={<HomePage />} />
+      <Route path="/team/:tenantSlug/players" element={<PlayersPage />} />
+      <Route path="/team/:tenantSlug/players/:id" element={<PlayerDetailsPage />} />
+      <Route path="/team/:tenantSlug/comparar" element={<ComparePlayersPage />} />
+      <Route path="/team/:tenantSlug/teams" element={<TeamsPage />} />
+      <Route path="/team/:tenantSlug/games" element={<GamesPage />} />
+      <Route path="/team/:tenantSlug/stats/batting" element={<BattingStatsPage />} />
+      <Route path="/team/:tenantSlug/stats/pitching" element={<PitchingStatsPage />} />
+      <Route path="/team/:tenantSlug/stats/fielding" element={<FieldingStatsPage />} />
 
-      <Route
-        path="/team/:tenantSlug/players"
-        element={<PlayersPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/players/:id"
-        element={<PlayerDetailsPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/comparar"
-        element={<ComparePlayersPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/teams"
-        element={<TeamsPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/games"
-        element={<GamesPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/stats/batting"
-        element={<BattingStatsPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/stats/pitching"
-        element={<PitchingStatsPage />}
-      />
-
-      <Route
-        path="/team/:tenantSlug/stats/fielding"
-        element={<FieldingStatsPage />}
-      />
-
-      {/* AUTH */}
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
-
-      {/* ADMIN PRIVATE ROUTES */}
-      <Route
-        path="/players/create"
-        element={
-          <ProtectedRoute>
-            <CreatePlayerPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/login" element={<LoginPage />} />
 
       <Route
         path="/admin/players"
         element={
           <ProtectedRoute>
             <AdminPlayersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/players/create"
+        element={
+          <ProtectedRoute>
+            <CreatePlayerPage />
           </ProtectedRoute>
         }
       />
@@ -113,19 +72,10 @@ function AppRouter() {
       />
 
       <Route
-        path="/teams/create"
+        path="/admin/teams/create"
         element={
           <ProtectedRoute>
             <CreateTeamPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/games/create"
-        element={
-          <ProtectedRoute>
-            <CreateGamePage />
           </ProtectedRoute>
         }
       />
@@ -135,6 +85,15 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <GamesPage admin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/games/create"
+        element={
+          <ProtectedRoute>
+            <CreateGamePage />
           </ProtectedRoute>
         }
       />
@@ -153,6 +112,15 @@ function AppRouter() {
         element={
           <ProtectedRoute>
             <UpdateGameResultPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/comparar"
+        element={
+          <ProtectedRoute>
+            <ComparePlayersPage />
           </ProtectedRoute>
         }
       />
@@ -184,7 +152,6 @@ function AppRouter() {
         }
       />
 
-      {/* FALLBACK */}
       <Route
         path="*"
         element={<Navigate to="/team/team-mahanaim" replace />}

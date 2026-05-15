@@ -45,52 +45,52 @@ function Sidebar() {
   }
 
   const links = [
-    {
-      path: '/admin/players',
-      label: 'Administrar Jugadores',
-      icon: Users,
-    },
-    {
-      path: '/comparar',
-      label: 'Comparar Jugadores',
-      icon: Swords,
-    },
-    {
-      path: '/players/create',
-      label: 'Crear Jugador',
-      icon: UserPlus,
-    },
-    {
-      path: '/teams/create',
-      label: 'Crear Equipo',
-      icon: Shield,
-    },
-    {
-      path: '/games/create',
-      label: 'Crear Juego',
-      icon: CalendarDays,
-    },
-    {
-      path: '/admin/games',
-      label: 'Partidos / Stats',
-      icon: Trophy,
-    },
-    {
-      path: '/admin/stats/batting',
-      label: 'Ver Bateo',
-      icon: Target,
-    },
-    {
-      path: '/admin/stats/pitching',
-      label: 'Ver Pitcher',
-      icon: Activity,
-    },
-    {
-      path: '/admin/stats/fielding',
-      label: 'Ver Defensa',
-      icon: Shield,
-    },
-  ]
+  {
+    path: '/admin/players',
+    label: 'Administrar Jugadores',
+    icon: Users,
+  },
+  {
+    path: '/admin/comparar',
+    label: 'Comparar Jugadores',
+    icon: Swords,
+  },
+  {
+    path: '/admin/players/create',
+    label: 'Crear Jugador',
+    icon: UserPlus,
+  },
+  {
+    path: '/admin/teams/create',
+    label: 'Crear Equipo',
+    icon: Shield,
+  },
+  {
+    path: '/admin/games/create',
+    label: 'Crear Juego',
+    icon: CalendarDays,
+  },
+  {
+    path: '/admin/games',
+    label: 'Partidos / Stats',
+    icon: Trophy,
+  },
+  {
+    path: '/admin/stats/batting',
+    label: 'Ver Bateo',
+    icon: Target,
+  },
+  {
+    path: '/admin/stats/pitching',
+    label: 'Ver Pitcher',
+    icon: Activity,
+  },
+  {
+    path: '/admin/stats/fielding',
+    label: 'Ver Defensa',
+    icon: Shield,
+  },
+]
 
   return (
     <>

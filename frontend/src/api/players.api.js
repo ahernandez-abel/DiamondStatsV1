@@ -1,10 +1,20 @@
 import axios from './axios'
 
-export const getPlayers = () =>
-  axios.get('/players')
+export const getPlayers = (tenantSlug) => {
+  if (tenantSlug) {
+    return axios.get(`/public/${tenantSlug}/players`)
+  }
 
-export const getPlayerById = (id) =>
-  axios.get(`/players/${id}`)
+  return axios.get('/players')
+}
+
+export const getPlayerById = (id, tenantSlug) => {
+  if (tenantSlug) {
+    return axios.get(`/public/${tenantSlug}/players/${id}`)
+  }
+
+  return axios.get(`/players/${id}`)
+}
 
 export const createPlayer = (player) =>
   axios.post('/players', player)

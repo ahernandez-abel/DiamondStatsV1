@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
@@ -7,6 +8,7 @@ import { getFieldingLeaders } from '../../api/leaders.api'
 import './FieldingStatsPage.css'
 
 function FieldingStatsPage() {
+  const { tenantSlug } = useParams()
 
   const [leaders, setLeaders] = useState([])
 
@@ -17,14 +19,20 @@ function FieldingStatsPage() {
 
   useEffect(() => {
     loadLeaders()
-  }, [])
+  }, [tenantSlug])
 
   const loadLeaders = async () => {
     try {
-      const res = await getFieldingLeaders()
-      setLeaders(res.data.leaders || [])
+      const res = await getFieldingLeaders(tenantSlug)
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.leaders || []
+
+      setLeaders(data)
     } catch (error) {
       console.log(error)
+      setLeaders([])
     }
   }
 
@@ -78,12 +86,9 @@ function FieldingStatsPage() {
   ]
 
   return (
-    <PublicLayout>
-
+    <PublicLayout tenantSlug={tenantSlug}>
       <section className="fielding-page">
-
         <div className="fielding-header">
-
           <h1 className="fielding-title">
             Líderes Defensivos
           </h1>
@@ -91,17 +96,12 @@ function FieldingStatsPage() {
           <p className="fielding-subtitle">
             Estadísticas acumuladas defensivas
           </p>
-
         </div>
 
         <div className="fielding-table-wrapper">
-
           <table className="fielding-table">
-
             <thead>
-
               <tr>
-
                 <th className="rank-column">
                   POS
                 </th>
@@ -115,7 +115,6 @@ function FieldingStatsPage() {
                 </th>
 
                 {columns.map((column) => (
-
                   <th
                     key={column.key}
                     className={column.highlight ? 'highlight-column' : ''}
@@ -129,41 +128,28 @@ function FieldingStatsPage() {
                           {sortConfig.direction === 'desc' ? ' ↓' : ' ↑'}
                         </small>
                       )}
-
                     </span>
                   </th>
-
                 ))}
-
               </tr>
-
             </thead>
 
             <tbody>
-
               {sortedLeaders.map((player, index) => (
-
                 <tr key={player.id}>
-
                   <td className="rank-column">
                     {index + 1}
                   </td>
 
                   <td className="player-column">
-
                     <div className="player-info">
-
                       <img
-                        src={
-                          player.photo_url ||
-                          'https://placehold.co/80x80'
-                        }
+                        src={player.photo_url || 'https://placehold.co/80x80'}
                         alt={player.full_name}
                         className="player-photo"
                       />
 
                       <div className="player-name-box">
-
                         <span className="player-name">
                           {player.full_name}
                         </span>
@@ -171,11 +157,8 @@ function FieldingStatsPage() {
                         <span className="player-team">
                           {player.team_name || ''}
                         </span>
-
                       </div>
-
                     </div>
-
                   </td>
 
                   <td className="position-column">
@@ -183,28 +166,27 @@ function FieldingStatsPage() {
                   </td>
 
                   {columns.map((column) => (
-
                     <td
                       key={column.key}
                       className={column.highlight ? 'highlight-column' : ''}
                     >
                       {formatStat(column.key, player[column.key])}
                     </td>
-
                   ))}
-
                 </tr>
-
               ))}
 
+              {sortedLeaders.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length + 3} className="empty-row">
+                    No hay estadísticas defensivas registradas.
+                  </td>
+                </tr>
+              )}
             </tbody>
-
           </table>
-
         </div>
-
       </section>
-
     </PublicLayout>
   )
 }

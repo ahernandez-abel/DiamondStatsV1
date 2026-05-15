@@ -1,47 +1,60 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import PublicLayout from '../../layouts/PublicLayout'
+import PublicLayout from '../../layouts/PublicLayout';
 
-import { getBattingLeaders } from '../../api/leaders.api'
+import { getBattingLeaders } from '../../api/leaders.api';
+import { getPublicHome } from '../../api/public.api';
 
-import './BattingStatsPage.css'
+import './BattingStatsPage.css';
 
 function BattingStatsPage() {
+  const { tenantSlug } = useParams();
 
-  const [leaders, setLeaders] = useState([])
+  const [leaders, setLeaders] = useState([]);
+  const [tenant, setTenant] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: 'avg',
     direction: 'desc',
-  })
+  });
 
   useEffect(() => {
-    loadLeaders()
-  }, [])
+    loadLeaders();
+  }, [tenantSlug]);
 
   const loadLeaders = async () => {
     try {
-      const res = await getBattingLeaders()
-      setLeaders(res.data.leaders || [])
+      if (tenantSlug) {
+        const res = await getPublicHome(tenantSlug);
+
+        setTenant(res.data.tenant || null);
+        setLeaders(res.data.batting || []);
+
+        return;
+      }
+
+      const res = await getBattingLeaders();
+      setLeaders(res.data.leaders || []);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const formatDecimal = (value) => {
-    const number = Number(value || 0)
+    const number = Number(value || 0);
 
     return number
       .toFixed(3)
-      .replace(/^0/, '')
-  }
+      .replace(/^0/, '');
+  };
 
   const formatStat = (key, value) => {
     if (['avg', 'obp', 'slg', 'ops'].includes(key)) {
-      return formatDecimal(value)
+      return formatDecimal(value);
     }
 
-    return value || 0
-  }
+    return value || 0;
+  };
 
   const handleSort = (key) => {
     setSortConfig((current) => ({
@@ -50,21 +63,21 @@ function BattingStatsPage() {
         current.key === key && current.direction === 'desc'
           ? 'asc'
           : 'desc',
-    }))
-  }
+    }));
+  };
 
   const sortedLeaders = useMemo(() => {
     return [...leaders].sort((a, b) => {
-      const aValue = Number(a[sortConfig.key] || 0)
-      const bValue = Number(b[sortConfig.key] || 0)
+      const aValue = Number(a[sortConfig.key] || 0);
+      const bValue = Number(b[sortConfig.key] || 0);
 
       if (sortConfig.direction === 'asc') {
-        return aValue - bValue
+        return aValue - bValue;
       }
 
-      return bValue - aValue
-    })
-  }, [leaders, sortConfig])
+      return bValue - aValue;
+    });
+  }, [leaders, sortConfig]);
 
   const columns = [
     { key: 'games_played', label: 'GP' },
@@ -76,21 +89,21 @@ function BattingStatsPage() {
     { key: 'triples', label: '3B' },
     { key: 'hr', label: 'HR' },
     { key: 'rbi', label: 'RBI' },
-    { key: 'tb', label: 'TB' },
     { key: 'bb', label: 'BB' },
     { key: 'so', label: 'K' },
     { key: 'sb', label: 'SB' },
     { key: 'obp', label: 'OBP' },
     { key: 'slg', label: 'SLG' },
     { key: 'ops', label: 'OPS' },
-  ]
+  ];
 
   return (
-    <PublicLayout>
-
+    <PublicLayout tenantSlug={tenantSlug}>
       <section className="batting-page">
-
         <div className="batting-header">
+          <span className="players-badge">
+            {tenant?.name || 'DiamondStats'}
+          </span>
 
           <h1 className="batting-title">
             Líderes Ofensivos
@@ -99,30 +112,17 @@ function BattingStatsPage() {
           <p className="batting-subtitle">
             Estadísticas acumuladas de bateo
           </p>
-
         </div>
 
         <div className="batting-table-wrapper">
-
           <table className="batting-table">
-
             <thead>
               <tr>
-
-                <th className="rank-column">
-                  POS
-                </th>
-
-                <th className="player-column">
-                  NOMBRE
-                </th>
-
-                <th className="position-column">
-                  POS
-                </th>
+                <th className="rank-column">POS</th>
+                <th className="player-column">NOMBRE</th>
+                <th className="position-column">POS</th>
 
                 {columns.map((column) => (
-
                   <th
                     key={column.key}
                     className={column.highlight ? 'highlight-column' : ''}
@@ -138,49 +138,35 @@ function BattingStatsPage() {
                       )}
                     </span>
                   </th>
-
                 ))}
-
               </tr>
             </thead>
 
             <tbody>
-
               {sortedLeaders.map((player, index) => (
-
                 <tr key={player.id}>
-
                   <td className="rank-column">
                     {index + 1}
                   </td>
 
                   <td className="player-column">
-
                     <div className="player-table-info">
-
                       <img
-                        src={
-                          player.photo_url ||
-                          'https://placehold.co/80x80'
-                        }
+                        src={player.photo_url || 'https://placehold.co/80x80'}
                         alt={player.full_name}
-                        className="player-photo"
+                        className="table-player-photo"
                       />
 
-                      <div className="player-name-box">
-
-                        <span className="player-name">
+                      <div>
+                        <strong>
                           {player.full_name}
-                        </span>
+                        </strong>
 
-                        <span className="player-team">
-                          {player.team_name || ''}
+                        <span>
+                          {player.team_name || 'Sin equipo'}
                         </span>
-
                       </div>
-
                     </div>
-
                   </td>
 
                   <td className="position-column">
@@ -188,30 +174,29 @@ function BattingStatsPage() {
                   </td>
 
                   {columns.map((column) => (
-
                     <td
                       key={column.key}
                       className={column.highlight ? 'highlight-column' : ''}
                     >
                       {formatStat(column.key, player[column.key])}
                     </td>
-
                   ))}
-
                 </tr>
-
               ))}
 
+              {sortedLeaders.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length + 3}>
+                    No hay estadísticas ofensivas registradas.
+                  </td>
+                </tr>
+              )}
             </tbody>
-
           </table>
-
         </div>
-
       </section>
-
     </PublicLayout>
-  )
+  );
 }
 
-export default BattingStatsPage
+export default BattingStatsPage;

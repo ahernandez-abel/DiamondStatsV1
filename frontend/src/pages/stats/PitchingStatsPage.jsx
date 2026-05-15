@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
@@ -7,6 +8,7 @@ import { getPitchingLeaders } from '../../api/leaders.api'
 import './PitchingStatsPage.css'
 
 function PitchingStatsPage() {
+  const { tenantSlug } = useParams()
 
   const [leaders, setLeaders] = useState([])
 
@@ -17,24 +19,24 @@ function PitchingStatsPage() {
 
   useEffect(() => {
     loadLeaders()
-  }, [])
+  }, [tenantSlug])
 
   const loadLeaders = async () => {
-
     try {
+      const res = await getPitchingLeaders(tenantSlug)
 
-      const res = await getPitchingLeaders()
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.leaders || []
 
-      setLeaders(res.data.leaders || [])
-
+      setLeaders(data)
     } catch (error) {
-
       console.log(error)
+      setLeaders([])
     }
   }
 
   const handleSort = (key) => {
-
     setSortConfig((current) => ({
       key,
       direction:
@@ -45,9 +47,7 @@ function PitchingStatsPage() {
   }
 
   const sortedLeaders = useMemo(() => {
-
     return [...leaders].sort((a, b) => {
-
       const aValue = Number(a[sortConfig.key] || 0)
       const bValue = Number(b[sortConfig.key] || 0)
 
@@ -57,7 +57,6 @@ function PitchingStatsPage() {
 
       return bValue - aValue
     })
-
   }, [leaders, sortConfig])
 
   const columns = [
@@ -77,12 +76,9 @@ function PitchingStatsPage() {
   ]
 
   return (
-    <PublicLayout>
-
+    <PublicLayout tenantSlug={tenantSlug}>
       <section className="pitching-page">
-
         <div className="pitching-header">
-
           <h1 className="pitching-title">
             Líderes de Pitcheo
           </h1>
@@ -90,17 +86,12 @@ function PitchingStatsPage() {
           <p className="pitching-subtitle">
             Estadísticas acumuladas de pitcheo
           </p>
-
         </div>
 
         <div className="pitching-table-wrapper">
-
           <table className="pitching-table">
-
             <thead>
-
               <tr>
-
                 <th className="rank-column">
                   POS
                 </th>
@@ -114,13 +105,11 @@ function PitchingStatsPage() {
                 </th>
 
                 {columns.map((column) => (
-
                   <th
                     key={column.key}
                     className={column.highlight ? 'highlight-column' : ''}
                     onClick={() => handleSort(column.key)}
                   >
-
                     <span>
                       {column.label}
 
@@ -129,42 +118,28 @@ function PitchingStatsPage() {
                           {sortConfig.direction === 'desc' ? ' ↓' : ' ↑'}
                         </small>
                       )}
-
                     </span>
-
                   </th>
-
                 ))}
-
               </tr>
-
             </thead>
 
             <tbody>
-
               {sortedLeaders.map((player, index) => (
-
                 <tr key={player.id}>
-
                   <td className="rank-column">
                     {index + 1}
                   </td>
 
                   <td className="pitcher-column">
-
                     <div className="pitcher-info">
-
                       <img
-                        src={
-                          player.photo_url ||
-                          'https://placehold.co/80x80'
-                        }
+                        src={player.photo_url || 'https://placehold.co/80x80'}
                         alt={player.full_name}
                         className="pitcher-photo"
                       />
 
                       <div className="pitcher-name-box">
-
                         <span className="pitcher-name">
                           {player.full_name}
                         </span>
@@ -172,11 +147,8 @@ function PitchingStatsPage() {
                         <span className="pitcher-team">
                           {player.team_name || ''}
                         </span>
-
                       </div>
-
                     </div>
-
                   </td>
 
                   <td className="position-column">
@@ -184,28 +156,27 @@ function PitchingStatsPage() {
                   </td>
 
                   {columns.map((column) => (
-
                     <td
                       key={column.key}
                       className={column.highlight ? 'highlight-column' : ''}
                     >
                       {player[column.key] || 0}
                     </td>
-
                   ))}
-
                 </tr>
-
               ))}
 
+              {sortedLeaders.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length + 3} className="empty-row">
+                    No hay estadísticas de pitcheo registradas.
+                  </td>
+                </tr>
+              )}
             </tbody>
-
           </table>
-
         </div>
-
       </section>
-
     </PublicLayout>
   )
 }

@@ -11,41 +11,36 @@ import PageHeader from '../../components/layout/PageHeader'
 import './PlayerDetailsPage.css'
 
 function PlayerDetailsPage() {
-
-  const { id } = useParams()
+  const { tenantSlug, id } = useParams()
 
   const [player, setPlayer] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadPlayer()
-  }, [id])
+  }, [tenantSlug, id])
 
   const loadPlayer = async () => {
-
     try {
+      setLoading(true)
 
-      const res = await getPlayerById(id)
+      const res = await getPlayerById(id, tenantSlug)
 
-      setPlayer(res.data.player)
-
+      setPlayer(res.data.player || null)
     } catch (error) {
-
       console.log(error)
-
+      setPlayer(null)
     } finally {
-
       setLoading(false)
     }
   }
 
   const formatAverage = (value) => {
-
     const number = Number(value || 0)
 
-    return Math.round(number * 1000)
-      .toString()
-      .padStart(4, '0')
+    return number
+      .toFixed(3)
+      .replace(/^0/, '')
   }
 
   if (loading) {
@@ -54,36 +49,25 @@ function PlayerDetailsPage() {
 
   if (!player) {
     return (
-      <PublicLayout>
-
+      <PublicLayout tenantSlug={tenantSlug}>
         <div className="player-not-found">
           Jugador no encontrado
         </div>
-
       </PublicLayout>
     )
   }
 
   return (
-    <PublicLayout>
-
+    <PublicLayout tenantSlug={tenantSlug}>
       <div className="player-details-page">
-
         <PageHeader
           title={player.full_name}
           subtitle={`${player.team_name || 'Agente Libre'} • ${player.position || '-'}`}
         />
 
         <div className="player-details-card">
-
-          {/* ================================= */}
-          {/* PLAYER IMAGE */}
-          {/* ================================= */}
-
           <div className="player-image-section">
-
             <div className="player-image-wrapper">
-
               <img
                 src={
                   player.photo_url ||
@@ -96,124 +80,71 @@ function PlayerDetailsPage() {
               <div className="player-jersey-number">
                 #{player.jersey_number || '00'}
               </div>
-
             </div>
-
           </div>
 
-          {/* ================================= */}
-          {/* PLAYER INFO */}
-          {/* ================================= */}
-
           <div className="player-info-section">
-
             <div className="player-basic-header">
-
-              <h1>
-                {player.full_name}
-              </h1>
-
-              <p>
-                {player.nickname || 'Sin apodo'}
-              </p>
-
+              <h1>{player.full_name}</h1>
+              <p>{player.nickname || 'Sin apodo'}</p>
             </div>
 
             <div className="player-info-grid">
-
               <div className="info-card">
-
-                <span className="info-label">
-                  Equipo
-                </span>
-
-                <h3 className="info-value">
-                  {player.team_name || '-'}
-                </h3>
-
+                <span className="info-label">Equipo</span>
+                <h3 className="info-value">{player.team_name || '-'}</h3>
               </div>
 
               <div className="info-card">
-
-                <span className="info-label">
-                  Posición
-                </span>
-
+                <span className="info-label">Posición</span>
                 <h3 className="info-value highlight">
                   {player.position || '-'}
                 </h3>
-
               </div>
 
               <div className="info-card">
-
-                <span className="info-label">
-                  Batea
-                </span>
-
+                <span className="info-label">Batea</span>
                 <h3 className="info-value">
                   {player.batting_hand || '-'}
                 </h3>
-
               </div>
 
               <div className="info-card">
-
-                <span className="info-label">
-                  Lanza
-                </span>
-
+                <span className="info-label">Lanza</span>
                 <h3 className="info-value">
                   {player.throwing_hand || '-'}
                 </h3>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
-        {/* ================================= */}
-        {/* BATTING */}
-        {/* ================================= */}
-
         <div className="stats-section">
-
           <div className="section-header">
-
             <h2 className="stats-title">
               Estadísticas Ofensivas
             </h2>
-
           </div>
 
           <div className="stats-grid">
-
             <div className="stat-card featured">
-
               <span>AVG</span>
-
-              <h3>
-                {formatAverage(player.batting?.avg)}
-              </h3>
-
+              <h3>{formatAverage(player.batting?.avg)}</h3>
             </div>
 
             <div className="stat-card">
               <span>OPS</span>
-              <h3>{player.batting?.ops || '0.000'}</h3>
+              <h3>{formatAverage(player.batting?.ops)}</h3>
             </div>
 
             <div className="stat-card">
               <span>OBP</span>
-              <h3>{player.batting?.obp || '0.000'}</h3>
+              <h3>{formatAverage(player.batting?.obp)}</h3>
             </div>
 
             <div className="stat-card">
               <span>SLG</span>
-              <h3>{player.batting?.slg || '0.000'}</h3>
+              <h3>{formatAverage(player.batting?.slg)}</h3>
             </div>
 
             <div className="stat-card">
@@ -255,23 +186,15 @@ function PlayerDetailsPage() {
               <span>SB</span>
               <h3>{player.batting?.sb || 0}</h3>
             </div>
-
           </div>
-
         </div>
 
-        {/* ================================= */}
-        {/* PITCHING */}
-        {/* ================================= */}
-
         <div className="stats-section">
-
           <h2 className="stats-title">
             Estadísticas de Pitcheo
           </h2>
 
           <div className="stats-grid">
-
             <div className="stat-card featured">
               <span>ERA</span>
               <h3>{player.pitching?.era || '0.00'}</h3>
@@ -301,31 +224,18 @@ function PlayerDetailsPage() {
               <span>ER</span>
               <h3>{player.pitching?.earned_runs || 0}</h3>
             </div>
-
           </div>
-
         </div>
 
-        {/* ================================= */}
-        {/* FIELDING */}
-        {/* ================================= */}
-
         <div className="stats-section">
-
           <h2 className="stats-title">
             Estadísticas Defensivas
           </h2>
 
           <div className="stats-grid">
-
             <div className="stat-card featured">
-
               <span>FLD%</span>
-
-              <h3>
-                {formatAverage(player.fielding?.fielding_pct)}
-              </h3>
-
+              <h3>{formatAverage(player.fielding?.fielding_pct)}</h3>
             </div>
 
             <div className="stat-card">
@@ -342,13 +252,9 @@ function PlayerDetailsPage() {
               <span>ERR</span>
               <h3>{player.fielding?.errors || 0}</h3>
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </PublicLayout>
   )
 }

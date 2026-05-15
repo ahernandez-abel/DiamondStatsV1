@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
 
@@ -10,6 +11,8 @@ import {
 import './ComparePlayersPage.css'
 
 function ComparePlayersPage() {
+  const { tenantSlug } = useParams()
+
   const [players, setPlayers] = useState([])
   const [comparisonPlayers, setComparisonPlayers] = useState([])
 
@@ -22,18 +25,26 @@ function ComparePlayersPage() {
 
   useEffect(() => {
     loadPlayers()
-  }, [])
+  }, [tenantSlug])
 
   useEffect(() => {
     loadComparison()
-  }, [playerOneId, playerTwoId, compareMode, players])
+  }, [playerOneId, playerTwoId, compareMode, players, tenantSlug])
 
   const loadPlayers = async () => {
     try {
-      const res = await getBattingLeaders()
-      setPlayers(res.data.leaders || [])
+      setMessage('')
+
+      const res = await getBattingLeaders(tenantSlug)
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.leaders || []
+
+      setPlayers(data)
     } catch (error) {
       console.log(error)
+      setPlayers([])
       setMessage('No se pudieron cargar los jugadores.')
     }
   }
@@ -84,7 +95,8 @@ function ComparePlayersPage() {
       const res = await comparePlayersCommonGames(
         playerOneId,
         playerTwoId,
-        compareMode === 'common_equal_ab'
+        compareMode === 'common_equal_ab',
+        tenantSlug
       )
 
       const data = res.data.players || []
@@ -307,9 +319,8 @@ function ComparePlayersPage() {
   }, [score, playerOne, playerTwo])
 
   return (
-    <PublicLayout>
+    <PublicLayout tenantSlug={tenantSlug}>
       <section className="compare-page">
-
         <div className="compare-header">
           <span className="compare-kicker">
             DiamondStats Matchup
@@ -326,7 +337,6 @@ function ComparePlayersPage() {
         </div>
 
         <div className="compare-select-card">
-
           <div className="compare-select-box">
             <label>
               Jugador 1
@@ -378,13 +388,10 @@ function ComparePlayersPage() {
               ))}
             </select>
           </div>
-
         </div>
 
         <div className="compare-mode-card">
-
           <div className="compare-mode-options">
-
             <button
               type="button"
               className={compareMode === 'general' ? 'active' : ''}
@@ -408,7 +415,6 @@ function ComparePlayersPage() {
             >
               Mismos juegos + turnos iguales
             </button>
-
           </div>
 
           <p>
@@ -421,7 +427,6 @@ function ComparePlayersPage() {
             {compareMode === 'common_equal_ab' &&
               'Modo justo: compara mismos juegos y normaliza por la menor cantidad de turnos.'}
           </p>
-
         </div>
 
         {loading && (
@@ -450,9 +455,7 @@ function ComparePlayersPage() {
 
         {playerOne && playerTwo && !loading && (
           <>
-
             <div className="compare-player-cards">
-
               <div className="compare-player-card">
                 <img
                   src={
@@ -516,11 +519,9 @@ function ComparePlayersPage() {
                   {score.two} ventajas
                 </strong>
               </div>
-
             </div>
 
             <div className="compare-summary-grid">
-
               <div className="compare-summary-card">
                 <span>
                   {compareMode === 'general' ? 'Juegos totales' : 'Juegos comparados'}
@@ -552,12 +553,10 @@ function ComparePlayersPage() {
                     : `${playerOne.ab || 0} / ${playerTwo.ab || 0}`}
                 </strong>
               </div>
-
             </div>
 
             <div className="compare-table-wrapper">
               <table className="compare-table">
-
                 <thead>
                   <tr>
                     <th>{playerOne.full_name}</th>
@@ -569,7 +568,6 @@ function ComparePlayersPage() {
                 <tbody>
                   {stats.map((stat) => (
                     <tr key={stat.label}>
-
                       <td
                         className={getWinnerClass(
                           stat.one,
@@ -599,17 +597,13 @@ function ComparePlayersPage() {
                       >
                         {formatValue(stat.two, stat.format)}
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
-
               </table>
             </div>
-
           </>
         )}
-
       </section>
     </PublicLayout>
   )

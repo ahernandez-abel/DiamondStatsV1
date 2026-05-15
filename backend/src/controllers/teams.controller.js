@@ -1,8 +1,14 @@
 import { pool } from '../config/db.js';
 
+const DEFAULT_TENANT_ID = 1;
+
+const getTenantId = (req) => {
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
+};
+
 export const getTeams = async (req, res, next) => {
   try {
-    const tenantId = req.tenantId;
+    const tenantId = getTenantId(req);
 
     const result = await pool.query(
       `
@@ -66,7 +72,7 @@ export const getTeams = async (req, res, next) => {
 
 export const getTeamById = async (req, res, next) => {
   try {
-    const tenantId = req.tenantId;
+    const tenantId = getTenantId(req);
     const { id } = req.params;
 
     const result = await pool.query(
@@ -98,7 +104,7 @@ export const getTeamById = async (req, res, next) => {
 
 export const createTeam = async (req, res, next) => {
   try {
-    const tenantId = req.tenantId;
+    const tenantId = getTenantId(req);
 
     const {
       name,
@@ -148,7 +154,7 @@ export const createTeam = async (req, res, next) => {
 
 export const updateTeam = async (req, res, next) => {
   try {
-    const tenantId = req.tenantId;
+    const tenantId = getTenantId(req);
     const { id } = req.params;
 
     const {
@@ -208,7 +214,7 @@ export const updateTeam = async (req, res, next) => {
 
 export const deleteTeam = async (req, res, next) => {
   try {
-    const tenantId = req.tenantId;
+    const tenantId = getTenantId(req);
     const { id } = req.params;
 
     const result = await pool.query(

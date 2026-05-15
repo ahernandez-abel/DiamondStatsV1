@@ -1,60 +1,66 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
-import PublicLayout from '../../layouts/PublicLayout';
+import PublicLayout from '../../layouts/PublicLayout'
+import DashboardLayout from '../../layouts/DashboardLayout'
 
-import { getBattingLeaders } from '../../api/leaders.api';
-import { getPublicHome } from '../../api/public.api';
+import { getBattingLeaders } from '../../api/leaders.api'
+import { getPublicHome } from '../../api/public.api'
 
-import './BattingStatsPage.css';
+import './BattingStatsPage.css'
 
-function BattingStatsPage() {
-  const { tenantSlug } = useParams();
+function BattingStatsPage({ admin = false }) {
+  const { tenantSlug } = useParams()
 
-  const [leaders, setLeaders] = useState([]);
-  const [tenant, setTenant] = useState(null);
+  const Layout = admin ? DashboardLayout : PublicLayout
+
+  const [leaders, setLeaders] = useState([])
+  const [tenant, setTenant] = useState(null)
+
   const [sortConfig, setSortConfig] = useState({
     key: 'avg',
     direction: 'desc',
-  });
+  })
 
   useEffect(() => {
-    loadLeaders();
-  }, [tenantSlug]);
+    loadLeaders()
+  }, [tenantSlug, admin])
 
   const loadLeaders = async () => {
     try {
-      if (tenantSlug) {
-        const res = await getPublicHome(tenantSlug);
+      if (!admin && tenantSlug) {
+        const res = await getPublicHome(tenantSlug)
 
-        setTenant(res.data.tenant || null);
-        setLeaders(res.data.batting || []);
+        setTenant(res.data.tenant || null)
+        setLeaders(res.data.batting || [])
 
-        return;
+        return
       }
 
-      const res = await getBattingLeaders();
-      setLeaders(res.data.leaders || []);
+      const res = await getBattingLeaders()
+
+      setTenant(null)
+      setLeaders(res.data.leaders || [])
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
 
   const formatDecimal = (value) => {
-    const number = Number(value || 0);
+    const number = Number(value || 0)
 
     return number
       .toFixed(3)
-      .replace(/^0/, '');
-  };
+      .replace(/^0/, '')
+  }
 
   const formatStat = (key, value) => {
     if (['avg', 'obp', 'slg', 'ops'].includes(key)) {
-      return formatDecimal(value);
+      return formatDecimal(value)
     }
 
-    return value || 0;
-  };
+    return value || 0
+  }
 
   const handleSort = (key) => {
     setSortConfig((current) => ({
@@ -63,21 +69,21 @@ function BattingStatsPage() {
         current.key === key && current.direction === 'desc'
           ? 'asc'
           : 'desc',
-    }));
-  };
+    }))
+  }
 
   const sortedLeaders = useMemo(() => {
     return [...leaders].sort((a, b) => {
-      const aValue = Number(a[sortConfig.key] || 0);
-      const bValue = Number(b[sortConfig.key] || 0);
+      const aValue = Number(a[sortConfig.key] || 0)
+      const bValue = Number(b[sortConfig.key] || 0)
 
       if (sortConfig.direction === 'asc') {
-        return aValue - bValue;
+        return aValue - bValue
       }
 
-      return bValue - aValue;
-    });
-  }, [leaders, sortConfig]);
+      return bValue - aValue
+    })
+  }, [leaders, sortConfig])
 
   const columns = [
     { key: 'games_played', label: 'GP' },
@@ -95,14 +101,17 @@ function BattingStatsPage() {
     { key: 'obp', label: 'OBP' },
     { key: 'slg', label: 'SLG' },
     { key: 'ops', label: 'OPS' },
-  ];
+  ]
 
   return (
-    <PublicLayout tenantSlug={tenantSlug}>
+    <Layout tenantSlug={tenantSlug}>
+
       <section className="batting-page">
+
         <div className="batting-header">
+
           <span className="players-badge">
-            {tenant?.name || 'DiamondStats'}
+            {admin ? 'Panel Administrativo' : tenant?.name || 'DiamondStats'}
           </span>
 
           <h1 className="batting-title">
@@ -112,10 +121,13 @@ function BattingStatsPage() {
           <p className="batting-subtitle">
             Estadísticas acumuladas de bateo
           </p>
+
         </div>
 
         <div className="batting-table-wrapper">
+
           <table className="batting-table">
+
             <thead>
               <tr>
                 <th className="rank-column">POS</th>
@@ -143,14 +155,17 @@ function BattingStatsPage() {
             </thead>
 
             <tbody>
+
               {sortedLeaders.map((player, index) => (
                 <tr key={player.id}>
+
                   <td className="rank-column">
                     {index + 1}
                   </td>
 
                   <td className="player-column">
                     <div className="player-table-info">
+
                       <img
                         src={player.photo_url || 'https://placehold.co/80x80'}
                         alt={player.full_name}
@@ -166,6 +181,7 @@ function BattingStatsPage() {
                           {player.team_name || 'Sin equipo'}
                         </span>
                       </div>
+
                     </div>
                   </td>
 
@@ -181,6 +197,7 @@ function BattingStatsPage() {
                       {formatStat(column.key, player[column.key])}
                     </td>
                   ))}
+
                 </tr>
               ))}
 
@@ -191,12 +208,17 @@ function BattingStatsPage() {
                   </td>
                 </tr>
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </section>
-    </PublicLayout>
-  );
+
+    </Layout>
+  )
 }
 
-export default BattingStatsPage;
+export default BattingStatsPage

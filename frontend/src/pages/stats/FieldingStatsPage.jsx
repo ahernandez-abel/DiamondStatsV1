@@ -2,15 +2,24 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
+import DashboardLayout from '../../layouts/DashboardLayout'
 
 import { getFieldingLeaders } from '../../api/leaders.api'
+import { getPublicHome } from '../../api/public.api'
 
 import './FieldingStatsPage.css'
 
-function FieldingStatsPage() {
+function FieldingStatsPage({ admin = false }) {
+
   const { tenantSlug } = useParams()
 
+  const Layout = admin
+    ? DashboardLayout
+    : PublicLayout
+
   const [leaders, setLeaders] = useState([])
+
+  const [tenant, setTenant] = useState(null)
 
   const [sortConfig, setSortConfig] = useState({
     key: 'fielding_pct',
@@ -19,24 +28,49 @@ function FieldingStatsPage() {
 
   useEffect(() => {
     loadLeaders()
-  }, [tenantSlug])
+  }, [tenantSlug, admin])
 
   const loadLeaders = async () => {
+
     try {
-      const res = await getFieldingLeaders(tenantSlug)
+
+      if (!admin && tenantSlug) {
+
+        const publicRes = await getPublicHome(tenantSlug)
+
+        setTenant(publicRes.data.tenant || null)
+
+        const res = await getFieldingLeaders(tenantSlug)
+
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data.leaders || []
+
+        setLeaders(data)
+
+        return
+      }
+
+      const res = await getFieldingLeaders()
 
       const data = Array.isArray(res.data)
         ? res.data
         : res.data.leaders || []
 
+      setTenant(null)
+
       setLeaders(data)
+
     } catch (error) {
+
       console.log(error)
+
       setLeaders([])
     }
   }
 
   const handleSort = (key) => {
+
     setSortConfig((current) => ({
       key,
       direction:
@@ -47,6 +81,7 @@ function FieldingStatsPage() {
   }
 
   const formatDecimal = (value) => {
+
     const number = Number(value || 0)
 
     return number
@@ -55,7 +90,11 @@ function FieldingStatsPage() {
   }
 
   const formatStat = (key, value) => {
-    if (key === 'fielding_pct' || key === 'range_factor') {
+
+    if (
+      key === 'fielding_pct' ||
+      key === 'range_factor'
+    ) {
       return formatDecimal(value)
     }
 
@@ -63,7 +102,9 @@ function FieldingStatsPage() {
   }
 
   const sortedLeaders = useMemo(() => {
+
     return [...leaders].sort((a, b) => {
+
       const aValue = Number(a[sortConfig.key] || 0)
       const bValue = Number(b[sortConfig.key] || 0)
 
@@ -73,6 +114,7 @@ function FieldingStatsPage() {
 
       return bValue - aValue
     })
+
   }, [leaders, sortConfig])
 
   const columns = [
@@ -86,9 +128,16 @@ function FieldingStatsPage() {
   ]
 
   return (
-    <PublicLayout tenantSlug={tenantSlug}>
+    <Layout tenantSlug={tenantSlug}>
+
       <section className="fielding-page">
+
         <div className="fielding-header">
+
+          <span className="players-badge">
+            {admin ? 'Panel Administrativo' : tenant?.name || 'DiamondStats'}
+          </span>
+
           <h1 className="fielding-title">
             Líderes Defensivos
           </h1>
@@ -96,12 +145,17 @@ function FieldingStatsPage() {
           <p className="fielding-subtitle">
             Estadísticas acumuladas defensivas
           </p>
+
         </div>
 
         <div className="fielding-table-wrapper">
+
           <table className="fielding-table">
+
             <thead>
+
               <tr>
+
                 <th className="rank-column">
                   POS
                 </th>
@@ -120,7 +174,9 @@ function FieldingStatsPage() {
                     className={column.highlight ? 'highlight-column' : ''}
                     onClick={() => handleSort(column.key)}
                   >
+
                     <span>
+
                       {column.label}
 
                       {sortConfig.key === column.key && (
@@ -128,21 +184,30 @@ function FieldingStatsPage() {
                           {sortConfig.direction === 'desc' ? ' ↓' : ' ↑'}
                         </small>
                       )}
+
                     </span>
+
                   </th>
                 ))}
+
               </tr>
+
             </thead>
 
             <tbody>
+
               {sortedLeaders.map((player, index) => (
+
                 <tr key={player.id}>
+
                   <td className="rank-column">
                     {index + 1}
                   </td>
 
                   <td className="player-column">
+
                     <div className="player-info">
+
                       <img
                         src={player.photo_url || 'https://placehold.co/80x80'}
                         alt={player.full_name}
@@ -150,15 +215,19 @@ function FieldingStatsPage() {
                       />
 
                       <div className="player-name-box">
+
                         <span className="player-name">
                           {player.full_name}
                         </span>
 
                         <span className="player-team">
-                          {player.team_name || ''}
+                          {player.team_name || 'Sin equipo'}
                         </span>
+
                       </div>
+
                     </div>
+
                   </td>
 
                   <td className="position-column">
@@ -173,21 +242,28 @@ function FieldingStatsPage() {
                       {formatStat(column.key, player[column.key])}
                     </td>
                   ))}
+
                 </tr>
+
               ))}
 
               {sortedLeaders.length === 0 && (
                 <tr>
-                  <td colSpan={columns.length + 3} className="empty-row">
+                  <td colSpan={columns.length + 3}>
                     No hay estadísticas defensivas registradas.
                   </td>
                 </tr>
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </section>
-    </PublicLayout>
+
+    </Layout>
   )
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
+import DashboardLayout from '../../layouts/DashboardLayout'
 
 import {
   getBattingLeaders,
@@ -10,8 +11,11 @@ import {
 
 import './ComparePlayersPage.css'
 
-function ComparePlayersPage() {
+function ComparePlayersPage({ admin = false }) {
   const { tenantSlug } = useParams()
+  const Layout = admin
+  ? DashboardLayout
+  : PublicLayout
 
   const [players, setPlayers] = useState([])
   const [comparisonPlayers, setComparisonPlayers] = useState([])
@@ -319,7 +323,7 @@ function ComparePlayersPage() {
   }, [score, playerOne, playerTwo])
 
   return (
-    <PublicLayout tenantSlug={tenantSlug}>
+  <Layout tenantSlug={tenantSlug}>
       <section className="compare-page">
         <div className="compare-header">
           <span className="compare-kicker">
@@ -605,7 +609,7 @@ function ComparePlayersPage() {
           </>
         )}
       </section>
-    </PublicLayout>
+    </Layout>
   )
 }
 

@@ -63,21 +63,26 @@ function PlansPage() {
         description: plan.description,
         price_monthly: Number(plan.price_monthly || 0),
         currency: plan.currency || 'DOP',
+
         max_players:
           plan.max_players === '' || plan.max_players === null
             ? null
             : Number(plan.max_players),
+
         max_games:
           plan.max_games === '' || plan.max_games === null
             ? null
             : Number(plan.max_games),
+
         max_rival_teams:
           plan.max_rival_teams === '' || plan.max_rival_teams === null
             ? null
             : Number(plan.max_rival_teams),
-        allow_custom_logo: Boolean(plan.allow_custom_logo),
-        allow_advanced_stats: Boolean(plan.allow_advanced_stats),
-        allow_player_compare: Boolean(plan.allow_player_compare),
+
+        allow_custom_logo: true,
+        allow_advanced_stats: true,
+        allow_player_compare: true,
+
         is_public: Boolean(plan.is_public),
         is_active: Boolean(plan.is_active),
       }
@@ -100,7 +105,6 @@ function PlansPage() {
   return (
     <SuperAdminLayout>
       <section className="plans-page">
-
         <div className="plans-header">
           <span className="plans-badge">
             Planes comerciales
@@ -111,7 +115,7 @@ function PlansPage() {
           </h1>
 
           <p>
-            Edita precios, límites y funciones visibles de los planes de DiamondStats.
+            Edita precios y límites de uso. Todos los planes tienen acceso completo al sistema.
           </p>
         </div>
 
@@ -284,51 +288,6 @@ function PlansPage() {
                   <label>
                     <input
                       type="checkbox"
-                      checked={Boolean(plan.allow_custom_logo)}
-                      onChange={(e) =>
-                        handleChange(
-                          plan.id,
-                          'allow_custom_logo',
-                          e.target.checked
-                        )
-                      }
-                    />
-                    Logo personalizado
-                  </label>
-
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(plan.allow_advanced_stats)}
-                      onChange={(e) =>
-                        handleChange(
-                          plan.id,
-                          'allow_advanced_stats',
-                          e.target.checked
-                        )
-                      }
-                    />
-                    Estadísticas avanzadas
-                  </label>
-
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(plan.allow_player_compare)}
-                      onChange={(e) =>
-                        handleChange(
-                          plan.id,
-                          'allow_player_compare',
-                          e.target.checked
-                        )
-                      }
-                    />
-                    Comparar jugadores
-                  </label>
-
-                  <label>
-                    <input
-                      type="checkbox"
                       checked={Boolean(plan.is_public)}
                       onChange={(e) =>
                         handleChange(
@@ -357,6 +316,11 @@ function PlansPage() {
                   </label>
                 </div>
 
+                <div className="plan-note">
+                  <CheckCircle2 size={18} />
+                  Este plan tiene acceso completo al sistema. Solo cambian los límites de uso.
+                </div>
+
                 <button
                   type="button"
                   className="plan-save-button"
@@ -379,7 +343,6 @@ function PlansPage() {
             ))}
           </div>
         )}
-
       </section>
     </SuperAdminLayout>
   )

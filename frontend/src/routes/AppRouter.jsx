@@ -31,6 +31,10 @@ import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 
+import SuperAdminDashboard from '../pages/superadmin/SuperAdminDashboard'
+import SuperAdminTenantsPage from '../pages/superadmin/SuperAdminTenantsPage'
+import CreateTenantPage from '../pages/superadmin/CreateTenantPage'
+
 function AppRouter() {
   return (
     <Routes>
@@ -134,11 +138,39 @@ function AppRouter() {
       {/* AUTH */}
       <Route path="/login" element={<LoginPage />} />
 
+      {/* SUPERADMIN */}
+      <Route
+        path="/superadmin"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin']}>
+            <SuperAdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/tenants"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin']}>
+            <SuperAdminTenantsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/create-tenant"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin']}>
+            <CreateTenantPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* ADMIN DASHBOARD */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboardPage />
           </ProtectedRoute>
         }
@@ -147,7 +179,7 @@ function AppRouter() {
       <Route
         path="/admin/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboardPage />
           </ProtectedRoute>
         }
@@ -157,7 +189,7 @@ function AppRouter() {
       <Route
         path="/admin/players"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <AdminPlayersPage />
           </ProtectedRoute>
         }
@@ -166,7 +198,7 @@ function AppRouter() {
       <Route
         path="/admin/players/create"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <CreatePlayerPage />
           </ProtectedRoute>
         }
@@ -175,7 +207,7 @@ function AppRouter() {
       <Route
         path="/admin/players/:id/edit"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <CreatePlayerPage />
           </ProtectedRoute>
         }
@@ -185,7 +217,7 @@ function AppRouter() {
       <Route
         path="/admin/teams/create"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <CreateTeamPage />
           </ProtectedRoute>
         }
@@ -195,7 +227,7 @@ function AppRouter() {
       <Route
         path="/admin/games"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <GamesPage admin />
           </ProtectedRoute>
         }
@@ -204,7 +236,7 @@ function AppRouter() {
       <Route
         path="/admin/games/create"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <CreateGamePage />
           </ProtectedRoute>
         }
@@ -213,7 +245,7 @@ function AppRouter() {
       <Route
         path="/admin/games/:id/stats"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <GameStatsPage />
           </ProtectedRoute>
         }
@@ -222,7 +254,7 @@ function AppRouter() {
       <Route
         path="/admin/games/:id/result"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <UpdateGameResultPage />
           </ProtectedRoute>
         }
@@ -232,7 +264,7 @@ function AppRouter() {
       <Route
         path="/admin/comparar"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <ComparePlayersPage admin />
           </ProtectedRoute>
         }
@@ -242,7 +274,7 @@ function AppRouter() {
       <Route
         path="/admin/stats/batting"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <BattingStatsPage admin />
           </ProtectedRoute>
         }
@@ -251,7 +283,7 @@ function AppRouter() {
       <Route
         path="/admin/stats/pitching"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <PitchingStatsPage admin />
           </ProtectedRoute>
         }
@@ -260,7 +292,7 @@ function AppRouter() {
       <Route
         path="/admin/stats/fielding"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['admin']}>
             <FieldingStatsPage admin />
           </ProtectedRoute>
         }

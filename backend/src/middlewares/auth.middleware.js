@@ -13,16 +13,28 @@ export const authMiddleware = (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
+
     const decoded = jwt.verify(token, env.JWT_SECRET);
 
-    if (!decoded.id || !decoded.role || !decoded.tenant_id) {
+    if (!decoded.id || !decoded.role) {
       return res.status(401).json({
         ok: false,
         message: 'Token incompleto',
       });
     }
 
-    req.user = decoded;
+    if (decoded.role !== 'superadmin' && !decoded.tenant_id) {
+      return res.status(401).json({
+        ok: false,
+        message: 'Token sin tenant asignado',
+      });
+    }
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      tenant_id: decoded.tenant_id || null,
+    };
 
     next();
   } catch (error) {

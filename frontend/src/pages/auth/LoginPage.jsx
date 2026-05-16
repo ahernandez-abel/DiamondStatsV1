@@ -48,7 +48,17 @@ function LoginPage() {
       return
     }
 
-    navigate('/admin/dashboard', { replace: true })
+    if (result.user?.role === 'superadmin') {
+      navigate('/superadmin', { replace: true })
+      return
+    }
+
+    if (result.user?.role === 'admin') {
+      navigate('/admin/dashboard', { replace: true })
+      return
+    }
+
+    setError('Rol de usuario no autorizado')
   }
 
   return (

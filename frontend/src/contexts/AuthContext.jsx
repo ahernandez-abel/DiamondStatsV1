@@ -3,56 +3,65 @@ import {
   useContext,
   useEffect,
   useState,
-} from 'react';
+} from 'react'
 
-import { loginRequest } from '../api/auth.api';
+import { loginRequest } from '../api/auth.api'
 
-const AuthContext = createContext();
+const AuthContext = createContext()
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [user, setUser] = useState(null)
+  const [loadingAuth, setLoadingAuth] = useState(true)
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user')
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser))
+      } catch (error) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setUser(null)
+      }
     }
 
-    setLoadingAuth(false);
-  }, []);
+    setLoadingAuth(false)
+  }, [])
 
   const login = async (credentials) => {
     try {
-      const res = await loginRequest(credentials);
+      const res = await loginRequest(credentials)
 
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      const loggedUser = res.data.user
 
-      setUser(res.data.user);
+      localStorage.setItem('token', res.data.token)
+      localStorage.setItem('user', JSON.stringify(loggedUser))
+
+      setUser(loggedUser)
 
       return {
         success: true,
-      };
+        user: loggedUser,
+      }
     } catch (error) {
       return {
         success: false,
         message:
           error.response?.data?.message ||
           'Error login',
-      };
+      }
     }
-  };
+  }
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
 
-    setUser(null);
-  };
+    setUser(null)
+  }
 
   return (
     <AuthContext.Provider
@@ -66,5 +75,5 @@ export function AuthProvider({ children }) {
     >
       {children}
     </AuthContext.Provider>
-  );
+  )
 }

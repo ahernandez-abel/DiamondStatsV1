@@ -1,0 +1,141 @@
+.superadmin-layout {
+  min-height: 100vh;
+  display: flex;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.16), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.13), transparent 36%),
+    #020617;
+  color: #e5e7eb;
+}
+
+.superadmin-sidebar {
+  width: 280px;
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.superadmin-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 38px;
+}
+
+.superadmin-brand-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.13);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.superadmin-brand h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.superadmin-brand span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.superadmin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.superadmin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 15px;
+  border-radius: 16px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 700;
+  transition: 0.25s ease;
+}
+
+.superadmin-nav-link:hover {
+  background: rgba(30, 41, 59, 0.9);
+  color: #ffffff;
+}
+
+.superadmin-nav-link.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #0ea5e9);
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.18);
+}
+
+.superadmin-user-box {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(2, 6, 23, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.superadmin-user-box p {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.superadmin-user-box span {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #94a3b8;
+  word-break: break-all;
+}
+
+.superadmin-user-box button {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  padding: 11px 12px;
+  border-radius: 14px;
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 800;
+}
+
+.superadmin-user-box button:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.superadmin-main {
+  flex: 1;
+  padding: 34px;
+  overflow-x: hidden;
+}
+
+@media (max-width: 850px) {
+  .superadmin-layout {
+    flex-direction: column;
+  }
+
+  .superadmin-sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .superadmin-main {
+    padding: 22px;
+  }
+}

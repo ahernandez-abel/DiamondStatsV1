@@ -19,7 +19,7 @@ export const login = async (req, res, next) => {
         tenants.slug AS tenant_slug,
         tenants.status AS tenant_status
       FROM users
-      INNER JOIN tenants ON tenants.id = users.tenant_id
+      LEFT JOIN tenants ON tenants.id = users.tenant_id
       WHERE users.email = $1
       AND users.password = $2
       LIMIT 1
@@ -43,11 +43,20 @@ export const login = async (req, res, next) => {
       });
     }
 
-    if (user.tenant_status !== 'active') {
-      return res.status(403).json({
-        ok: false,
-        message: 'El equipo no tiene acceso activo',
-      });
+    if (user.role !== 'superadmin') {
+      if (!user.tenant_id) {
+        return res.status(403).json({
+          ok: false,
+          message: 'Este usuario no tiene equipo asignado',
+        });
+      }
+
+      if (user.tenant_status !== 'active') {
+        return res.status(403).json({
+          ok: false,
+          message: 'El equipo no tiene acceso activo',
+        });
+      }
     }
 
     const token = generateToken(user);
@@ -85,12 +94,11 @@ export const profile = async (req, res, next) => {
         tenants.slug AS tenant_slug,
         tenants.status AS tenant_status
       FROM users
-      INNER JOIN tenants ON tenants.id = users.tenant_id
+      LEFT JOIN tenants ON tenants.id = users.tenant_id
       WHERE users.id = $1
-      AND users.tenant_id = $2
       LIMIT 1
       `,
-      [req.user.id, req.user.tenant_id]
+      [req.user.id]
     );
 
     const user = result.rows[0];
@@ -102,9 +110,42 @@ export const profile = async (req, res, next) => {
       });
     }
 
+    if (!user.is_active) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Usuario inactivo',
+      });
+    }
+
+    if (user.role !== 'superadmin') {
+      if (user.tenant_id !== req.user.tenant_id) {
+        return res.status(403).json({
+          ok: false,
+          message: 'No autorizado para este tenant',
+        });
+      }
+
+      if (user.tenant_status !== 'active') {
+        return res.status(403).json({
+          ok: false,
+          message: 'El equipo no tiene acceso activo',
+        });
+      }
+    }
+
     res.json({
       ok: true,
-      user,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        is_active: user.is_active,
+        tenant_id: user.tenant_id,
+        tenant_name: user.tenant_name,
+        tenant_slug: user.tenant_slug,
+        tenant_status: user.tenant_status,
+      },
     });
   } catch (error) {
     next(error);

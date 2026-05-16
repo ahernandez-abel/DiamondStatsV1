@@ -30,6 +30,7 @@ import FieldingStatsPage from '../pages/stats/FieldingStatsPage'
 import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
+import AdminBillingPage from '../pages/adminBilling/AdminBillingPage'
 
 import SuperAdminDashboard from '../pages/superadmin/SuperAdminDashboard'
 import SuperAdminTenantsPage from '../pages/superadmin/SuperAdminTenantsPage'
@@ -41,7 +42,6 @@ import PlansPage from '../pages/billing/PlansPage'
 function AppRouter() {
   return (
     <Routes>
-
       {/* LANDING PUBLICA */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/register-team" element={<RegisterTeamPage />} />
@@ -170,22 +170,22 @@ function AppRouter() {
       />
 
       <Route
-  path="/superadmin/billing"
-  element={
-    <ProtectedRoute allowedRoles={['superadmin']}>
-      <BillingPage />
-    </ProtectedRoute>
-  }
-/>
+        path="/superadmin/billing"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin']}>
+            <BillingPage />
+          </ProtectedRoute>
+        }
+      />
 
-<Route
-  path="/superadmin/plans"
-  element={
-    <ProtectedRoute allowedRoles={['superadmin']}>
-      <PlansPage />
-    </ProtectedRoute>
-  }
-/>
+      <Route
+        path="/superadmin/plans"
+        element={
+          <ProtectedRoute allowedRoles={['superadmin']}>
+            <PlansPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ADMIN DASHBOARD */}
       <Route
@@ -202,6 +202,16 @@ function AppRouter() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ADMIN BILLING */}
+      <Route
+        path="/admin/billing"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminBillingPage />
           </ProtectedRoute>
         }
       />
@@ -321,7 +331,6 @@ function AppRouter() {
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   )
 }

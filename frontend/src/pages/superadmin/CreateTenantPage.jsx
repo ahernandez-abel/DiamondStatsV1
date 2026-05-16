@@ -191,15 +191,18 @@ function CreateTenantPage() {
               <label>Plan</label>
 
               <select
-                name="plan"
-                value={form.plan}
-                onChange={handleChange}
-              >
-                <option value="free">Free</option>
-                <option value="basic">Basic</option>
-                <option value="pro">Pro</option>
-                <option value="premium">Premium</option>
-              </select>
+  name="plan"
+  value={form.plan}
+  onChange={handleChange}
+>
+  <option value="free">
+    Free
+  </option>
+
+  <option value="pro">
+    Pro
+  </option>
+</select>
             </div>
 
             <div className="create-tenant-group">

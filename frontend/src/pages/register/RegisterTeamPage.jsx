@@ -30,7 +30,7 @@ function RegisterTeamPage() {
     admin_username: '',
     admin_email: '',
     admin_password: '',
-    plan: 'basic',
+    plan: 'free',
     is_public: false,
   })
 
@@ -123,18 +123,27 @@ function RegisterTeamPage() {
             <div>
               <strong>{publicUrl}</strong>
 
-              <button type="button" onClick={() => copyText(publicUrl)}>
+              <button
+                type="button"
+                onClick={() => copyText(publicUrl)}
+              >
                 <Copy size={18} />
               </button>
             </div>
           </div>
 
           <div className="register-success-actions">
-            <Link to="/login" className="register-primary-btn">
+            <Link
+              to="/login"
+              className="register-primary-btn"
+            >
               Ir al login
             </Link>
 
-            <Link to="/" className="register-secondary-btn">
+            <Link
+              to="/"
+              className="register-secondary-btn"
+            >
               Volver al inicio
             </Link>
           </div>
@@ -150,12 +159,16 @@ function RegisterTeamPage() {
 
         <div className="register-info">
 
-          <Link to="/" className="register-back-link">
+          <Link
+            to="/"
+            className="register-back-link"
+          >
             <ArrowLeft size={18} />
             Volver al inicio
           </Link>
 
           <div className="register-brand">
+
             <div className="register-logo">
               <img src={logo} alt="DiamondStats" />
             </div>
@@ -164,9 +177,12 @@ function RegisterTeamPage() {
               <h2>DiamondStats</h2>
               <span>Registro de equipo</span>
             </div>
+
           </div>
 
-          <h1>Registra tu equipo y empieza a controlar tus estadísticas.</h1>
+          <h1>
+            Registra tu equipo y empieza a controlar tus estadísticas.
+          </h1>
 
           <p>
             Crea el espacio privado de tu equipo, registra tu administrador y
@@ -174,10 +190,14 @@ function RegisterTeamPage() {
           </p>
 
           <div className="register-info-card">
+
             <ShieldCheck size={28} />
 
             <div>
-              <h3>¿Qué se crea automáticamente?</h3>
+
+              <h3>
+                ¿Qué se crea automáticamente?
+              </h3>
 
               <ul>
                 <li>Cuenta del equipo</li>
@@ -185,23 +205,34 @@ function RegisterTeamPage() {
                 <li>Usuario administrador</li>
                 <li>Código privado de acceso</li>
               </ul>
+
             </div>
+
           </div>
 
         </div>
 
-        <form className="register-form-card" onSubmit={handleSubmit}>
+        <form
+          className="register-form-card"
+          onSubmit={handleSubmit}
+        >
 
           <div className="register-form-header">
             <span>Paso 1</span>
             <h2>Datos del equipo</h2>
           </div>
 
-          {error && <div className="register-error">{error}</div>}
+          {error && (
+            <div className="register-error">
+              {error}
+            </div>
+          )}
 
           <div className="register-grid">
+
             <div className="register-field">
               <label>Nombre del equipo *</label>
+
               <input
                 name="tenant_name"
                 value={form.tenant_name}
@@ -213,6 +244,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Nombre visible del equipo</label>
+
               <input
                 name="team_name"
                 value={form.team_name}
@@ -223,6 +255,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Ciudad</label>
+
               <input
                 name="city"
                 value={form.city}
@@ -233,6 +266,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Manager / encargado</label>
+
               <input
                 name="manager_name"
                 value={form.manager_name}
@@ -243,6 +277,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>WhatsApp</label>
+
               <input
                 name="whatsapp"
                 value={form.whatsapp}
@@ -253,6 +288,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Email de contacto</label>
+
               <input
                 type="email"
                 name="contact_email"
@@ -264,22 +300,37 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Plan</label>
-              <select name="plan" value={form.plan} onChange={handleChange}>
-                <option value="basic">Básico</option>
-                <option value="pro">Pro</option>
-                <option value="premium">Premium</option>
+
+              <select
+                name="plan"
+                value={form.plan}
+                onChange={handleChange}
+              >
+                <option value="free">
+                  Free
+                </option>
+
+                <option value="pro">
+                  Pro
+                </option>
               </select>
             </div>
 
             <label className="register-check">
+
               <input
                 type="checkbox"
                 name="is_public"
                 checked={form.is_public}
                 onChange={handleChange}
               />
-              <span>Hacer estadísticas públicas sin código</span>
+
+              <span>
+                Hacer estadísticas públicas sin código
+              </span>
+
             </label>
+
           </div>
 
           <div className="register-form-header second">
@@ -288,8 +339,10 @@ function RegisterTeamPage() {
           </div>
 
           <div className="register-grid">
+
             <div className="register-field">
               <label>Usuario *</label>
+
               <input
                 name="admin_username"
                 value={form.admin_username}
@@ -301,6 +354,7 @@ function RegisterTeamPage() {
 
             <div className="register-field">
               <label>Email *</label>
+
               <input
                 type="email"
                 name="admin_email"
@@ -312,9 +366,11 @@ function RegisterTeamPage() {
             </div>
 
             <div className="register-field full">
+
               <label>Contraseña *</label>
 
               <div className="register-password-box">
+
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="admin_password"
@@ -328,14 +384,25 @@ function RegisterTeamPage() {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword
+                    ? <EyeOff size={18} />
+                    : <Eye size={18} />}
                 </button>
+
               </div>
+
             </div>
+
           </div>
 
-          <button className="register-submit-btn" type="submit" disabled={loading}>
-            {loading ? 'Registrando equipo...' : 'Registrar equipo'}
+          <button
+            className="register-submit-btn"
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? 'Registrando equipo...'
+              : 'Registrar equipo'}
           </button>
 
         </form>

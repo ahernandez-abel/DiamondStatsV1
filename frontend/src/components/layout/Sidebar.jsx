@@ -18,6 +18,7 @@ import {
   LogOut,
   Swords,
   LayoutDashboard,
+  CreditCard,
 } from 'lucide-react'
 
 import { useAuth } from '../../contexts/AuthContext'
@@ -95,6 +96,11 @@ function Sidebar() {
   path: '/admin/dashboard',
   label: 'Dashboard',
   icon: LayoutDashboard,
+},
+{
+  path: '/admin/billing',
+  label: 'Mi Plan',
+  icon: CreditCard,
 },
 ]
 

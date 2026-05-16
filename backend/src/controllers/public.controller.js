@@ -3,7 +3,19 @@ import { pool } from '../config/db.js';
 const getTenantBySlug = async (tenantSlug) => {
   const result = await pool.query(
     `
-    SELECT id, name, slug, status
+    SELECT
+      id,
+      name,
+      slug,
+      contact_email,
+      whatsapp,
+      status,
+      access_code,
+      is_public,
+      plan,
+      logo_url,
+      created_at,
+      updated_at
     FROM tenants
     WHERE slug = $1
     AND status = 'active'
@@ -401,3 +413,57 @@ export const getPublicHome = async (req, res) => {
     });
   }
 };
+
+export const getTeamAccess = async (req, res) => {
+  try {
+    const { code } = req.params
+
+    if (!code) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Código requerido',
+      })
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        name,
+        slug,
+        access_code,
+        is_public,
+        plan,
+        logo_url,
+        status
+      FROM tenants
+      WHERE UPPER(access_code) = UPPER($1)
+        AND status = 'active'
+      LIMIT 1
+      `,
+      [code.trim()]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Código inválido o equipo inactivo',
+      })
+    }
+
+    const tenant = result.rows[0]
+
+    return res.json({
+      ok: true,
+      tenant,
+      redirect_url: `/team/${tenant.slug}/home`,
+    })
+  } catch (error) {
+    console.log(error)
+
+    return res.status(500).json({
+      ok: false,
+      message: 'Error validando acceso',
+    })
+  }
+}

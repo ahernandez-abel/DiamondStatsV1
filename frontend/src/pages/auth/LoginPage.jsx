@@ -24,6 +24,7 @@ function LoginPage() {
   })
 
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setForm({
@@ -36,8 +37,11 @@ function LoginPage() {
     e.preventDefault()
 
     setError('')
+    setLoading(true)
 
     const result = await login(form)
+
+    setLoading(false)
 
     if (!result.success) {
       setError(result.message)
@@ -126,12 +130,13 @@ function LoginPage() {
         <button
           type="submit"
           className="login-button"
+          disabled={loading}
         >
-          Entrar al Sistema
+          {loading ? 'Entrando...' : 'Entrar al Sistema'}
         </button>
 
         <Link
-          to="/team/team-mahanaim"
+          to="/"
           className="login-back-home"
         >
           ← Volver al Inicio

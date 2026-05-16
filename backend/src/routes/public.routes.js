@@ -2,6 +2,7 @@ import { Router } from 'express'
 
 import {
   getPublicHome,
+  getTeamAccess,
 } from '../controllers/public.controller.js'
 
 import {
@@ -63,6 +64,7 @@ const publicTenantMiddleware = async (req, res, next) => {
 }
 
 router.get('/:tenantSlug/home', getPublicHome)
+router.get('/team-access/:code', getTeamAccess)
 
 router.get('/:tenantSlug/players', publicTenantMiddleware, getPlayers)
 router.get('/:tenantSlug/players/:id', publicTenantMiddleware, getPlayerById)

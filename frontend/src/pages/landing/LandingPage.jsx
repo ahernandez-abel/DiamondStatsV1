@@ -67,33 +67,28 @@ function LandingPage() {
           </div>
 
           <div className="landing-access-card">
-            <div className="landing-access-icon">
-              <LockKeyhole size={28} />
-            </div>
+  <div className="landing-access-icon">
+    <LockKeyhole size={28} />
+  </div>
 
-            <h3>Entrar con código de equipo</h3>
+  <h3>Entrar con código de equipo</h3>
 
-            <p>
-              Si tu equipo ya está registrado, escribe el código privado para ver
-              sus estadísticas.
-            </p>
+  <p>
+    Si tu equipo ya está registrado, usa el código privado compartido
+    por el administrador para acceder a las estadísticas.
+  </p>
 
-            <form className="landing-code-form">
-              <input
-                type="text"
-                placeholder="Ejemplo: MAHANAIM2026"
-                disabled
-              />
+  <Link
+    to="/team-access"
+    className="landing-code-link"
+  >
+    Entrar con código
+  </Link>
 
-              <button type="button" disabled>
-                Entrar
-              </button>
-            </form>
-
-            <small>
-              Esta función será activada en la etapa de acceso privado.
-            </small>
-          </div>
+  <small>
+    Acceso privado para jugadores y seguidores del equipo.
+  </small>
+</div>
 
         </div>
 

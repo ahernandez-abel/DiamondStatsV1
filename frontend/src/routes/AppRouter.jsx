@@ -1,9 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import ProtectedRoute from './ProtectedRoute'
+import PublicTenantRoute from './PublicTenantRoute'
 
 import LandingPage from '../pages/landing/LandingPage'
 import RegisterTeamPage from '../pages/register/RegisterTeamPage'
+import TeamAccessPage from '../pages/access/TeamAccessPage'
+
 import HomePage from '../pages/home/HomePage'
 import LoginPage from '../pages/auth/LoginPage'
 
@@ -34,22 +37,99 @@ function AppRouter() {
 
       {/* LANDING PUBLICA */}
       <Route path="/" element={<LandingPage />} />
-<Route path="/register-team" element={<RegisterTeamPage />} />
+      <Route path="/register-team" element={<RegisterTeamPage />} />
+      <Route path="/team-access" element={<TeamAccessPage />} />
+
       {/* PUBLIC TENANT ROUTES */}
-      <Route path="/team/:tenantSlug" element={<HomePage />} />
-      <Route path="/team/:tenantSlug/home" element={<HomePage />} />
+      <Route
+        path="/team/:tenantSlug"
+        element={
+          <PublicTenantRoute>
+            <HomePage />
+          </PublicTenantRoute>
+        }
+      />
 
-      <Route path="/team/:tenantSlug/players" element={<PlayersPage />} />
-      <Route path="/team/:tenantSlug/players/:id" element={<PlayerDetailsPage />} />
+      <Route
+        path="/team/:tenantSlug/home"
+        element={
+          <PublicTenantRoute>
+            <HomePage />
+          </PublicTenantRoute>
+        }
+      />
 
-      <Route path="/team/:tenantSlug/comparar" element={<ComparePlayersPage />} />
+      <Route
+        path="/team/:tenantSlug/players"
+        element={
+          <PublicTenantRoute>
+            <PlayersPage />
+          </PublicTenantRoute>
+        }
+      />
 
-      <Route path="/team/:tenantSlug/teams" element={<TeamsPage />} />
-      <Route path="/team/:tenantSlug/games" element={<GamesPage />} />
+      <Route
+        path="/team/:tenantSlug/players/:id"
+        element={
+          <PublicTenantRoute>
+            <PlayerDetailsPage />
+          </PublicTenantRoute>
+        }
+      />
 
-      <Route path="/team/:tenantSlug/stats/batting" element={<BattingStatsPage />} />
-      <Route path="/team/:tenantSlug/stats/pitching" element={<PitchingStatsPage />} />
-      <Route path="/team/:tenantSlug/stats/fielding" element={<FieldingStatsPage />} />
+      <Route
+        path="/team/:tenantSlug/comparar"
+        element={
+          <PublicTenantRoute>
+            <ComparePlayersPage />
+          </PublicTenantRoute>
+        }
+      />
+
+      <Route
+        path="/team/:tenantSlug/teams"
+        element={
+          <PublicTenantRoute>
+            <TeamsPage />
+          </PublicTenantRoute>
+        }
+      />
+
+      <Route
+        path="/team/:tenantSlug/games"
+        element={
+          <PublicTenantRoute>
+            <GamesPage />
+          </PublicTenantRoute>
+        }
+      />
+
+      <Route
+        path="/team/:tenantSlug/stats/batting"
+        element={
+          <PublicTenantRoute>
+            <BattingStatsPage />
+          </PublicTenantRoute>
+        }
+      />
+
+      <Route
+        path="/team/:tenantSlug/stats/pitching"
+        element={
+          <PublicTenantRoute>
+            <PitchingStatsPage />
+          </PublicTenantRoute>
+        }
+      />
+
+      <Route
+        path="/team/:tenantSlug/stats/fielding"
+        element={
+          <PublicTenantRoute>
+            <FieldingStatsPage />
+          </PublicTenantRoute>
+        }
+      />
 
       {/* AUTH */}
       <Route path="/login" element={<LoginPage />} />

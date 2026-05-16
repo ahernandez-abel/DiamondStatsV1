@@ -35,6 +35,9 @@ import SuperAdminDashboard from '../pages/superadmin/SuperAdminDashboard'
 import SuperAdminTenantsPage from '../pages/superadmin/SuperAdminTenantsPage'
 import CreateTenantPage from '../pages/superadmin/CreateTenantPage'
 
+import BillingPage from '../pages/billing/BillingPage'
+import PlansPage from '../pages/billing/PlansPage'
+
 function AppRouter() {
   return (
     <Routes>
@@ -165,6 +168,24 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+  path="/superadmin/billing"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <BillingPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/superadmin/plans"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <PlansPage />
+    </ProtectedRoute>
+  }
+/>
 
       {/* ADMIN DASHBOARD */}
       <Route

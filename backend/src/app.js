@@ -13,6 +13,7 @@ import publicRoutes from './routes/public.routes.js';
 import tenantsRoutes from './routes/tenants.routes.js';
 import adminDashboardRoutes from './routes/adminDashboard.routes.js'
 import superadminRoutes from './routes/superadmin.routes.js';
+import billingRoutes from './routes/billing.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/tenants', tenantsRoutes);
 app.use('/api/admin', adminDashboardRoutes);
 app.use('/api/superadmin', superadminRoutes);
+app.use('/api/billing', billingRoutes);
 
 app.use(errorMiddleware);
 

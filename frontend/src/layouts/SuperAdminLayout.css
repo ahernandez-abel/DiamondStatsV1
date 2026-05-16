@@ -139,3 +139,26 @@
     padding: 22px;
   }
 }
+.superadmin-nav-divider {
+  height: 1px;
+
+  margin: 16px 0;
+
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.superadmin-nav-section {
+  margin-bottom: 10px;
+
+  padding-left: 6px;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.12em;
+}

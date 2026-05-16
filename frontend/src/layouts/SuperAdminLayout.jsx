@@ -1,7 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+
 import {
   BarChart3,
   Building2,
+  CreditCard,
+  DollarSign,
   LogOut,
   PlusCircle,
   ShieldCheck,
@@ -13,11 +16,15 @@ import './SuperAdminLayout.css'
 
 function SuperAdminLayout({ children }) {
   const navigate = useNavigate()
+
   const { user, logout } = useAuth()
 
   const handleLogout = () => {
     logout()
-    navigate('/login', { replace: true })
+
+    navigate('/login', {
+      replace: true,
+    })
   }
 
   const navClass = ({ isActive }) =>
@@ -28,6 +35,7 @@ function SuperAdminLayout({ children }) {
   return (
     <div className="superadmin-layout">
       <aside className="superadmin-sidebar">
+
         <div className="superadmin-brand">
           <div className="superadmin-brand-icon">
             <ShieldCheck size={28} />
@@ -35,17 +43,22 @@ function SuperAdminLayout({ children }) {
 
           <div>
             <h2>DiamondStats</h2>
-            <span>Superadmin</span>
+
+            <span>
+              Superadmin
+            </span>
           </div>
         </div>
 
         <nav className="superadmin-nav">
+
           <NavLink
             to="/superadmin"
             end
             className={navClass}
           >
             <BarChart3 size={20} />
+
             Dashboard
           </NavLink>
 
@@ -54,6 +67,7 @@ function SuperAdminLayout({ children }) {
             className={navClass}
           >
             <Building2 size={20} />
+
             Tenants
           </NavLink>
 
@@ -62,21 +76,55 @@ function SuperAdminLayout({ children }) {
             className={navClass}
           >
             <PlusCircle size={20} />
+
             Crear tenant
           </NavLink>
+
+          <div className="superadmin-nav-divider"></div>
+
+          <div className="superadmin-nav-section">
+            Billing
+          </div>
+
+          <NavLink
+            to="/superadmin/billing"
+            className={navClass}
+          >
+            <DollarSign size={20} />
+
+            Pagos
+          </NavLink>
+
+          <NavLink
+            to="/superadmin/plans"
+            className={navClass}
+          >
+            <CreditCard size={20} />
+
+            Planes
+          </NavLink>
+
         </nav>
 
         <div className="superadmin-user-box">
-          <p>{user?.username || 'Super Admin'}</p>
-          <span>{user?.email}</span>
+
+          <p>
+            {user?.username || 'Super Admin'}
+          </p>
+
+          <span>
+            {user?.email}
+          </span>
 
           <button
             type="button"
             onClick={handleLogout}
           >
             <LogOut size={18} />
+
             Cerrar sesión
           </button>
+
         </div>
       </aside>
 

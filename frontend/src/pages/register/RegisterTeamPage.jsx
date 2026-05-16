@@ -7,10 +7,11 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Trophy,
 } from 'lucide-react'
 
 import api from '../../api/axios'
+import logo from '../../assets/logo.png'
+
 import './RegisterTeamPage.css'
 
 function RegisterTeamPage() {
@@ -85,6 +86,11 @@ function RegisterTeamPage() {
     return (
       <main className="register-page">
         <section className="register-success-card">
+
+          <div className="register-success-logo">
+            <img src={logo} alt="DiamondStats" />
+          </div>
+
           <div className="register-success-icon">
             <CheckCircle2 size={42} />
           </div>
@@ -93,11 +99,11 @@ function RegisterTeamPage() {
 
           <p>
             Tu equipo fue creado en DiamondStats. Guarda este código y comparte
-            el link con los jugadores o seguidores.
+            el enlace con jugadores o seguidores.
           </p>
 
           <div className="register-result-box">
-            <span>Código de acceso</span>
+            <span>Código privado de acceso</span>
 
             <div>
               <strong>{createdData.access_code}</strong>
@@ -112,7 +118,7 @@ function RegisterTeamPage() {
           </div>
 
           <div className="register-result-box">
-            <span>Link público</span>
+            <span>Enlace del equipo</span>
 
             <div>
               <strong>{publicUrl}</strong>
@@ -132,6 +138,7 @@ function RegisterTeamPage() {
               Volver al inicio
             </Link>
           </div>
+
         </section>
       </main>
     )
@@ -140,7 +147,9 @@ function RegisterTeamPage() {
   return (
     <main className="register-page">
       <section className="register-wrapper">
+
         <div className="register-info">
+
           <Link to="/" className="register-back-link">
             <ArrowLeft size={18} />
             Volver al inicio
@@ -148,7 +157,7 @@ function RegisterTeamPage() {
 
           <div className="register-brand">
             <div className="register-logo">
-              <Trophy size={28} />
+              <img src={logo} alt="DiamondStats" />
             </div>
 
             <div>
@@ -160,8 +169,8 @@ function RegisterTeamPage() {
           <h1>Registra tu equipo y empieza a controlar tus estadísticas.</h1>
 
           <p>
-            Al completar este formulario se creará tu espacio privado, tu equipo
-            principal y tu usuario administrador.
+            Crea el espacio privado de tu equipo, registra tu administrador y
+            comienza a organizar jugadores, juegos y estadísticas desde un solo lugar.
           </p>
 
           <div className="register-info-card">
@@ -178,9 +187,11 @@ function RegisterTeamPage() {
               </ul>
             </div>
           </div>
+
         </div>
 
         <form className="register-form-card" onSubmit={handleSubmit}>
+
           <div className="register-form-header">
             <span>Paso 1</span>
             <h2>Datos del equipo</h2>
@@ -326,7 +337,9 @@ function RegisterTeamPage() {
           <button className="register-submit-btn" type="submit" disabled={loading}>
             {loading ? 'Registrando equipo...' : 'Registrar equipo'}
           </button>
+
         </form>
+
       </section>
     </main>
   )

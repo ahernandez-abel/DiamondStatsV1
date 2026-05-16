@@ -70,10 +70,10 @@
 }
 
 .pitching-table td {
-  height: 58px;
+  height: 70px;
   padding: 0 12px;
   color: #e5e7eb;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   text-align: right;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
@@ -99,7 +99,7 @@
 }
 
 .pitcher-column {
-  min-width: 300px;
+  min-width: 320px;
   text-align: left !important;
   border-right: 1px solid rgba(148, 163, 184, 0.16);
 }
@@ -114,34 +114,53 @@
 .pitcher-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 .pitcher-photo {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
+
   border: 2px solid rgba(249, 115, 22, 0.45);
+
   background: #020617;
 }
 
 .pitcher-name-box {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
 }
 
 .pitcher-name {
-  color: #fb923c;
-  font-size: 16px;
-  font-weight: 800;
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.3px;
 }
 
 .pitcher-team {
-  color: #94a3b8;
-  font-size: 13px;
+  width: fit-content;
+
+  padding: 4px 10px;
+
+  border-radius: 999px;
+
+  background: rgba(249, 115, 22, 0.12);
+
+  border: 1px solid rgba(249, 115, 22, 0.24);
+
+  color: #fb923c;
+
+  font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
 .highlight-column {
@@ -169,5 +188,18 @@ td.highlight-column {
 
   .pitching-table-wrapper {
     border-radius: 16px;
+  }
+
+  .pitcher-column {
+    min-width: 260px;
+  }
+
+  .pitcher-photo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .pitcher-name {
+    font-size: 14px;
   }
 }

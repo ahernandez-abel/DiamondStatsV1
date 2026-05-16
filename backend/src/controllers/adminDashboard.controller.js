@@ -2,11 +2,19 @@ import { pool } from '../config/db.js'
 
 export const getAdminDashboard = async (req, res) => {
   try {
-    const tenantId = req.tenantId
+    const tenantId = req.tenantId || req.user?.tenant_id
 
     const tenantResult = await pool.query(
       `
-      SELECT id, name, slug, status
+      SELECT
+        id,
+        name,
+        slug,
+        status,
+        access_code,
+        is_public,
+        plan,
+        logo_url
       FROM tenants
       WHERE id = $1
       LIMIT 1
@@ -102,9 +110,20 @@ export const getAdminDashboard = async (req, res) => {
       [tenantId]
     )
 
+    const tenant = tenantResult.rows[0] || null
+
     res.json({
       ok: true,
-      tenant: tenantResult.rows[0] || null,
+      tenant,
+      publicAccess: tenant
+        ? {
+            public_url: `/team/${tenant.slug}`,
+            access_code: tenant.access_code,
+            is_public: tenant.is_public,
+            status: tenant.status,
+            plan: tenant.plan,
+          }
+        : null,
       totals: totalsResult.rows[0],
       recentGames: recentGamesResult.rows,
       topBatters: topBattersResult.rows,

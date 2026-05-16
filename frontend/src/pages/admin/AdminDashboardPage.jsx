@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Copy,
+  ExternalLink,
+  KeyRound,
+} from 'lucide-react'
 
 import DashboardLayout from '../../layouts/DashboardLayout'
 import Loader from '../../components/ui/Loader'
@@ -11,6 +16,7 @@ import './AdminDashboardPage.css'
 function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState('')
 
   useEffect(() => {
     loadDashboard()
@@ -27,15 +33,36 @@ function AdminDashboardPage() {
     }
   }
 
+  const copyText = async (text, type) => {
+    try {
+      await navigator.clipboard.writeText(text)
+
+      setCopied(type)
+
+      setTimeout(() => {
+        setCopied('')
+      }, 1400)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   if (loading) {
     return <Loader />
   }
 
   const tenant = dashboard?.tenant
+  const publicAccess = dashboard?.publicAccess
   const totals = dashboard?.totals || {}
   const recentGames = dashboard?.recentGames || []
   const topBatters = dashboard?.topBatters || []
   const topPitchers = dashboard?.topPitchers || []
+
+  const siteUrl = window.location.origin
+
+  const publicUrl = publicAccess?.public_url
+    ? `${siteUrl}${publicAccess.public_url}`
+    : ''
 
   return (
     <DashboardLayout>
@@ -65,6 +92,86 @@ function AdminDashboardPage() {
             </Link>
           </div>
         </div>
+
+        {publicAccess && (
+          <div className="admin-public-access-card">
+            <div className="admin-public-access-top">
+              <div className="admin-public-access-icon">
+                <KeyRound size={28} />
+              </div>
+
+              <div>
+                <h2>Acceso público del equipo</h2>
+
+                <p>
+                  Comparte este enlace y código con jugadores o seguidores sin cerrar sesión.
+                </p>
+              </div>
+            </div>
+
+            <div className="admin-public-access-grid">
+              <div className="admin-public-access-box">
+                <span>Link público</span>
+
+                <div>
+                  <strong>{publicUrl}</strong>
+
+                  <button
+                    type="button"
+                    onClick={() => copyText(publicUrl, 'link')}
+                  >
+                    <Copy size={18} />
+                  </button>
+                </div>
+
+                {copied === 'link' && (
+                  <small>Link copiado</small>
+                )}
+              </div>
+
+              <div className="admin-public-access-box">
+                <span>Código privado</span>
+
+                <div>
+                  <strong>
+                    {publicAccess.access_code || 'Sin código'}
+                  </strong>
+
+                  <button
+                    type="button"
+                    disabled={!publicAccess.access_code}
+                    onClick={() =>
+                      copyText(publicAccess.access_code || '', 'code')
+                    }
+                  >
+                    <Copy size={18} />
+                  </button>
+                </div>
+
+                {copied === 'code' && (
+                  <small>Código copiado</small>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-public-access-actions">
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink size={18} />
+                Abrir página pública
+              </a>
+
+              <span>
+                {publicAccess.is_public
+                  ? 'Equipo público'
+                  : 'Equipo privado con código'}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="admin-dashboard-stats">
           <div className="admin-stat-card">
@@ -195,6 +302,16 @@ function AdminDashboardPage() {
               <Link to="/admin/teams/create">Crear equipo</Link>
               <Link to="/admin/games/create">Crear juego</Link>
               <Link to="/admin/games">Registrar estadísticas</Link>
+
+              {publicUrl && (
+                <a
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver página pública
+                </a>
+              )}
             </div>
           </div>
         </div>

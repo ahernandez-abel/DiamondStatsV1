@@ -172,15 +172,17 @@ function BattingStatsPage({ admin = false }) {
                         className="table-player-photo"
                       />
 
-                      <div>
-                        <strong>
-                          {player.full_name}
-                        </strong>
+                      <div className="player-details">
 
-                        <span>
-                          {player.team_name || 'Sin equipo'}
-                        </span>
-                      </div>
+  <strong className="player-name">
+    {player.full_name}
+  </strong>
+
+  <span className="player-team">
+    {player.team_name || 'Sin equipo'}
+  </span>
+
+</div>
 
                     </div>
                   </td>

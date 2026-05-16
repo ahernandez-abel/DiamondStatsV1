@@ -173,7 +173,8 @@ export const getBattingLeaders = async (req, res) => {
 
 export const getPitchingLeaders = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
+
+    const tenantId = getTenantId(req)
 
     const result = await pool.query(
       `
@@ -181,6 +182,9 @@ export const getPitchingLeaders = async (req, res) => {
         p.id,
         p.full_name,
         p.photo_url,
+        p.position,
+
+        t.name AS team_name,
 
         COALESCE(SUM(ps.outs_recorded), 0) AS outs_recorded,
 
@@ -259,36 +263,43 @@ export const getPitchingLeaders = async (req, res) => {
         ON p.id = ps.player_id
         AND p.tenant_id = ps.tenant_id
 
+      LEFT JOIN teams t
+        ON t.id = p.team_id
+
       WHERE ps.tenant_id = $1
 
       GROUP BY
         p.id,
         p.full_name,
-        p.photo_url
+        p.photo_url,
+        p.position,
+        t.name
 
       ORDER BY era ASC
       `,
       [tenantId]
-    );
+    )
 
     res.json({
       ok: true,
       leaders: result.rows,
-    });
+    })
 
   } catch (error) {
-    console.log(error);
+
+    console.log(error)
 
     res.status(500).json({
       ok: false,
       message: 'Error obteniendo líderes de pitcheo',
-    });
+    })
   }
 };
 
 export const getFieldingLeaders = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
+
+    const tenantId = getTenantId(req)
 
     const result = await pool.query(
       `
@@ -296,6 +307,9 @@ export const getFieldingLeaders = async (req, res) => {
         p.id,
         p.full_name,
         p.photo_url,
+        p.position,
+
+        t.name AS team_name,
 
         COALESCE(SUM(fs.putouts), 0) AS putouts,
         COALESCE(SUM(fs.assists), 0) AS assists,
@@ -358,33 +372,39 @@ export const getFieldingLeaders = async (req, res) => {
         ON p.id = fs.player_id
         AND p.tenant_id = fs.tenant_id
 
+      LEFT JOIN teams t
+        ON t.id = p.team_id
+
       WHERE fs.tenant_id = $1
 
       GROUP BY
         p.id,
         p.full_name,
-        p.photo_url
+        p.photo_url,
+        p.position,
+        t.name
 
       ORDER BY fielding_pct DESC
       `,
       [tenantId]
-    );
+    )
 
     res.json({
       ok: true,
       leaders: result.rows,
-    });
+    })
 
   } catch (error) {
 
-    console.log(error);
+    console.log(error)
 
     res.status(500).json({
       ok: false,
       message: 'Error obteniendo líderes defensivos',
-    });
+    })
   }
 };
+
 export const getMonthlyMVP = async (req, res) => {
   try {
     const tenantId = getTenantId(req);

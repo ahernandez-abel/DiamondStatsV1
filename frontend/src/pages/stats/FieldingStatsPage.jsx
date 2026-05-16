@@ -214,7 +214,7 @@ function FieldingStatsPage({ admin = false }) {
                         className="player-photo"
                       />
 
-                      <div className="player-name-box">
+                      <div className="player-details">
 
                         <span className="player-name">
                           {player.full_name}

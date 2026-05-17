@@ -33,9 +33,7 @@ const generateUniqueSlug = async (client, baseSlug) => {
       [slug]
     )
 
-    if (result.rows.length === 0) {
-      return slug
-    }
+    if (result.rows.length === 0) return slug
 
     counter += 1
     slug = `${baseSlug}-${counter}`
@@ -51,9 +49,7 @@ const generateUniqueAccessCode = async (client, tenantName) => {
       [accessCode]
     )
 
-    if (result.rows.length === 0) {
-      return accessCode
-    }
+    if (result.rows.length === 0) return accessCode
 
     accessCode = generateAccessCode(tenantName)
   }
@@ -68,7 +64,6 @@ export const createTenantOnboarding = async (req, res) => {
       tenant_slug,
       contact_email,
       whatsapp,
-      plan,
       logo_url,
       is_public,
 
@@ -128,6 +123,27 @@ export const createTenantOnboarding = async (req, res) => {
       })
     }
 
+    const freePlanResult = await client.query(
+      `
+      SELECT id, slug
+      FROM plans
+      WHERE slug = 'free'
+      AND is_active = true
+      LIMIT 1
+      `
+    )
+
+    const freePlan = freePlanResult.rows[0]
+
+    if (!freePlan) {
+      await client.query('ROLLBACK')
+
+      return res.status(500).json({
+        ok: false,
+        message: 'No existe un plan Free activo en la base de datos.',
+      })
+    }
+
     const slug = await generateUniqueSlug(client, baseSlug)
     const accessCode = await generateUniqueAccessCode(client, cleanTenantName)
 
@@ -144,7 +160,7 @@ export const createTenantOnboarding = async (req, res) => {
         plan,
         logo_url
       )
-      VALUES ($1, $2, $3, $4, 'active', $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, 'active', $5, $6, 'free', $7)
       RETURNING *
       `,
       [
@@ -154,7 +170,6 @@ export const createTenantOnboarding = async (req, res) => {
         whatsapp?.trim() || null,
         accessCode,
         is_public ?? false,
-        plan || 'basic',
         logo_url || null,
       ]
     )
@@ -214,6 +229,24 @@ export const createTenantOnboarding = async (req, res) => {
 
     const user = userResult.rows[0]
 
+    const subscriptionResult = await client.query(
+      `
+      INSERT INTO tenant_subscriptions (
+        tenant_id,
+        plan_id,
+        status,
+        started_at,
+        expires_at,
+        notes
+      )
+      VALUES ($1, $2, 'active', NOW(), NULL, 'Plan Free creado automáticamente en onboarding')
+      RETURNING *
+      `,
+      [tenant.id, freePlan.id]
+    )
+
+    const subscription = subscriptionResult.rows[0]
+
     await client.query('COMMIT')
 
     return res.status(201).json({
@@ -222,6 +255,7 @@ export const createTenantOnboarding = async (req, res) => {
       tenant,
       team,
       user,
+      subscription,
       access_code: tenant.access_code,
       public_url: `/team/${tenant.slug}`,
       admin_url: '/login',

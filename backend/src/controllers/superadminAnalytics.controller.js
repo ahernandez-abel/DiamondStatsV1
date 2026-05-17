@@ -10,7 +10,10 @@ export const getSuperadminOverview = async (req, res) => {
       SELECT
         (SELECT COUNT(*) FROM tenants)::int AS total_tenants,
         (SELECT COUNT(*) FROM tenants WHERE status = 'active')::int AS active_tenants,
+        (SELECT COUNT(*) FROM tenants WHERE status = 'inactive')::int AS inactive_tenants,
         (SELECT COUNT(*) FROM tenants WHERE status = 'suspended')::int AS suspended_tenants,
+        (SELECT COUNT(*) FROM users)::int AS total_users,
+        (SELECT COUNT(*) FROM teams)::int AS total_teams,
         (SELECT COUNT(*) FROM players)::int AS total_players,
         (SELECT COUNT(*) FROM games)::int AS total_games,
         (
@@ -54,11 +57,33 @@ export const getSuperadminOverview = async (req, res) => {
       LIMIT 10
     `)
 
+    const monthlyGrowthResult = await pool.query(`
+      SELECT
+        TO_CHAR(created_at, 'Mon YYYY') AS month,
+        COUNT(*)::int AS total
+      FROM tenants
+      WHERE created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', created_at), TO_CHAR(created_at, 'Mon YYYY')
+      ORDER BY DATE_TRUNC('month', created_at)
+    `)
+
+    const dailyActivityResult = await pool.query(`
+      SELECT
+        TO_CHAR(created_at, 'DD Mon') AS day,
+        COUNT(*)::int AS total
+      FROM tenant_activity_logs
+      WHERE created_at >= NOW() - INTERVAL '7 days'
+      GROUP BY DATE_TRUNC('day', created_at), TO_CHAR(created_at, 'DD Mon')
+      ORDER BY DATE_TRUNC('day', created_at)
+    `)
+
     res.json({
       ok: true,
       overview: totalsResult.rows[0],
       topTenants: topTenantsResult.rows,
       inactiveTenants: inactiveTenantsResult.rows,
+      monthlyGrowth: monthlyGrowthResult.rows,
+      dailyActivity: dailyActivityResult.rows,
     })
   } catch (error) {
     console.error('Error en getSuperadminOverview:', error)

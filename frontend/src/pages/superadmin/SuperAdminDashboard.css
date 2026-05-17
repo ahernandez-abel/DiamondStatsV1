@@ -2,65 +2,36 @@
   width: 100%;
 }
 
-.superadmin-page-header {
-  margin-bottom: 30px;
-}
-
-.superadmin-page-badge {
-  display: inline-flex;
-  padding: 7px 13px;
-  border-radius: 999px;
-  color: #86efac;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.superadmin-page-header h1 {
-  margin: 16px 0 8px;
-  color: #ffffff;
-  font-size: clamp(30px, 4vw, 46px);
-  letter-spacing: -0.04em;
-}
-
-.superadmin-page-header p {
-  margin: 0;
-  max-width: 760px;
-  color: #94a3b8;
-  line-height: 1.7;
-}
-
-.superadmin-loading {
-  padding: 26px;
-  border-radius: 24px;
-  color: #cbd5e1;
-  background: rgba(15, 23, 42, 0.78);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
 .superadmin-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
-.superadmin-stat-card {
-  padding: 22px;
+.superadmin-stat-card,
+.superadmin-chart-card,
+.superadmin-inactive-card {
   border-radius: 26px;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.92));
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.94));
   border: 1px solid rgba(148, 163, 184, 0.16);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
 }
 
+.superadmin-stat-card {
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .superadmin-stat-icon {
-  width: 54px;
-  height: 54px;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
-  margin-bottom: 18px;
+  border-radius: 20px;
 }
 
 .superadmin-stat-icon.green {
@@ -69,8 +40,8 @@
 }
 
 .superadmin-stat-icon.blue {
-  color: #7dd3fc;
-  background: rgba(14, 165, 233, 0.13);
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.13);
 }
 
 .superadmin-stat-icon.cyan {
@@ -83,28 +54,384 @@
   background: rgba(249, 115, 22, 0.13);
 }
 
+.superadmin-stat-icon.purple {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.13);
+}
+
+.superadmin-stat-icon.red {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.13);
+}
+
 .superadmin-stat-card span {
   display: block;
-  margin-bottom: 6px;
   color: #94a3b8;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .superadmin-stat-card strong {
+  display: block;
+  margin-top: 6px;
   color: #ffffff;
-  font-size: 38px;
-  line-height: 1;
+  font-size: 30px;
+  font-weight: 950;
 }
 
+.superadmin-analytics-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.superadmin-chart-card,
+.superadmin-inactive-card {
+  padding: 24px;
+}
+
+.superadmin-chart-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.superadmin-chart-header h2 {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: 21px;
+  font-weight: 950;
+}
+
+.superadmin-chart-header p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.superadmin-chart-header svg {
+  color: #86efac;
+  flex: 0 0 auto;
+}
+
+.chart-empty {
+  margin: 0;
+  padding: 20px;
+  color: #94a3b8;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+/* HORIZONTAL BAR CHART */
+
+.simple-bar-chart {
+  display: grid;
+  gap: 14px;
+}
+
+.simple-bar-row {
+  display: grid;
+  grid-template-columns: 82px 1fr 34px;
+  align-items: center;
+  gap: 12px;
+}
+
+.simple-bar-row span {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.simple-bar-row strong {
+  color: #ffffff;
+  font-size: 14px;
+  text-align: right;
+}
+
+.simple-bar-track {
+  height: 13px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.simple-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e, #06b6d4);
+}
+
+/* VERTICAL DAILY ACTIVITY */
+
+.vertical-chart {
+  height: 230px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vertical-chart-item {
+  height: 100%;
+  flex: 1;
+  min-width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.vertical-chart-bar-wrap {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  overflow: hidden;
+}
+
+.vertical-chart-bar {
+  width: 100%;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(180deg, #06b6d4, #22c55e);
+}
+
+.vertical-chart-item strong {
+  margin-top: 10px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.vertical-chart-item span {
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* TENANT STATUS */
+
+.tenant-status-visual {
+  display: grid;
+  gap: 20px;
+}
+
+.tenant-status-bar {
+  height: 24px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.tenant-status-active {
+  background: #22c55e;
+}
+
+.tenant-status-inactive {
+  background: #facc15;
+}
+
+.tenant-status-suspended {
+  background: #ef4444;
+}
+
+.tenant-status-list {
+  display: grid;
+  gap: 12px;
+}
+
+.tenant-status-list div {
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 18px;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  font-weight: 800;
+}
+
+.tenant-status-list strong {
+  margin-left: auto;
+  color: #ffffff;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+}
+
+.dot.active {
+  background: #22c55e;
+}
+
+.dot.inactive {
+  background: #facc15;
+}
+
+.dot.suspended {
+  background: #ef4444;
+}
+
+/* TOP TENANTS */
+
+.top-tenants-list {
+  display: grid;
+  gap: 14px;
+}
+
+.top-tenants-list article {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 48px 1fr 46px;
+  align-items: center;
+  gap: 14px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.top-tenant-rank {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.13);
+  font-weight: 950;
+}
+
+.top-tenant-info strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #ffffff;
+}
+
+.top-tenant-info span {
+  display: block;
+  margin-bottom: 10px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.top-tenant-track {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.85);
+}
+
+.top-tenant-track div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e, #06b6d4);
+}
+
+.top-tenant-total {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 950;
+  text-align: right;
+}
+
+/* INACTIVE */
+
+.superadmin-inactive-card {
+  margin-top: 22px;
+}
+
+.inactive-tenants-list {
+  display: grid;
+  gap: 12px;
+}
+
+.inactive-tenants-list article {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.inactive-tenants-list strong {
+  display: block;
+  color: #ffffff;
+}
+
+.inactive-tenants-list span {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.inactive-tenants-list p {
+  margin: 0;
+  color: #facc15;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: right;
+}
+
+/* RESPONSIVE */
+
 @media (max-width: 1100px) {
-  .superadmin-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .superadmin-stats-grid,
+  .superadmin-analytics-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 620px) {
-  .superadmin-stats-grid {
+@media (max-width: 760px) {
+  .superadmin-stats-grid,
+  .superadmin-analytics-grid {
     grid-template-columns: 1fr;
+  }
+
+  .superadmin-stat-card,
+  .superadmin-chart-card,
+  .superadmin-inactive-card {
+    padding: 18px;
+  }
+
+  .simple-bar-row {
+    grid-template-columns: 76px 1fr 28px;
+  }
+
+  .vertical-chart {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .vertical-chart-item {
+    min-width: 58px;
+  }
+
+  .inactive-tenants-list article {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inactive-tenants-list p {
+    text-align: left;
   }
 }

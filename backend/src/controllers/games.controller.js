@@ -1,14 +1,54 @@
-import { pool } from '../config/db.js';
+import { pool } from '../config/db.js'
 
-const DEFAULT_TENANT_ID = 1;
+const DEFAULT_TENANT_ID = 1
 
 const getTenantId = (req) => {
-  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
-};
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID
+}
+
+const getTenantPlanLimits = async (tenantId) => {
+  const result = await pool.query(
+    `
+    SELECT
+      t.id AS tenant_id,
+      COALESCE(p.slug, t.plan, 'free') AS plan_slug,
+      p.max_games
+    FROM tenants t
+    LEFT JOIN tenant_subscriptions ts
+      ON ts.tenant_id = t.id
+      AND ts.status = 'active'
+    LEFT JOIN plans p
+      ON p.id = ts.plan_id
+    WHERE t.id = $1
+    LIMIT 1
+    `,
+    [tenantId]
+  )
+
+  return result.rows[0]
+}
+
+const validateTeamsBelongToTenant = async ({
+  tenantId,
+  home_team_id,
+  away_team_id,
+}) => {
+  const result = await pool.query(
+    `
+    SELECT id
+    FROM teams
+    WHERE tenant_id = $1
+    AND id IN ($2, $3)
+    `,
+    [tenantId, home_team_id, away_team_id]
+  )
+
+  return result.rows.length === 2
+}
 
 export const getGames = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
+    const tenantId = getTenantId(req)
 
     const result = await pool.query(
       `
@@ -27,21 +67,22 @@ export const getGames = async (req, res) => {
       ORDER BY g.game_date DESC
       `,
       [tenantId]
-    );
+    )
 
-    res.json(result.rows);
+    res.json(result.rows)
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(500).json({
+      ok: false,
       message: 'Error obteniendo juegos',
-    });
+    })
   }
-};
+}
 
 export const getGameById = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const result = await pool.query(
       `
@@ -61,26 +102,28 @@ export const getGameById = async (req, res) => {
       LIMIT 1
       `,
       [id, tenantId]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
+        ok: false,
         message: 'Juego no encontrado',
-      });
+      })
     }
 
-    res.json(result.rows[0]);
+    res.json(result.rows[0])
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(500).json({
+      ok: false,
       message: 'Error obteniendo juego',
-    });
+    })
   }
-};
+}
 
 export const createGame = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
+    const tenantId = getTenantId(req)
 
     const {
       home_team_id,
@@ -91,7 +134,65 @@ export const createGame = async (req, res) => {
       innings_played,
       status,
       notes,
-    } = req.body;
+    } = req.body
+
+    if (!home_team_id || !away_team_id || !game_date) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Equipo local, equipo visitante y fecha son obligatorios.',
+      })
+    }
+
+    if (Number(home_team_id) === Number(away_team_id)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El equipo local y el rival no pueden ser el mismo.',
+      })
+    }
+
+    const teamsAreValid = await validateTeamsBelongToTenant({
+      tenantId,
+      home_team_id,
+      away_team_id,
+    })
+
+    if (!teamsAreValid) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Uno de los equipos no pertenece a este tenant.',
+      })
+    }
+
+    const plan = await getTenantPlanLimits(tenantId)
+
+    if (!plan) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tenant no encontrado.',
+      })
+    }
+
+    const maxGames = plan.max_games
+
+    if (maxGames !== null && maxGames !== undefined) {
+      const countResult = await pool.query(
+        `
+        SELECT COUNT(*)::int AS total
+        FROM games
+        WHERE tenant_id = $1
+        `,
+        [tenantId]
+      )
+
+      const totalGames = countResult.rows[0]?.total || 0
+
+      if (totalGames >= maxGames) {
+        return res.status(403).json({
+          ok: false,
+          message: `El plan ${plan.plan_slug.toUpperCase()} permite un máximo de ${maxGames} juegos.`,
+        })
+      }
+    }
 
     const result = await pool.query(
       `
@@ -122,24 +223,26 @@ export const createGame = async (req, res) => {
         notes || null,
         req.user?.id || null,
       ]
-    );
+    )
 
     res.status(201).json({
+      ok: true,
       message: 'Juego creado correctamente',
       game: result.rows[0],
-    });
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(500).json({
+      ok: false,
       message: 'Error creando juego',
-    });
+    })
   }
-};
+}
 
 export const updateGame = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const {
       home_team_id,
@@ -152,7 +255,34 @@ export const updateGame = async (req, res) => {
       innings_played,
       status,
       notes,
-    } = req.body;
+    } = req.body
+
+    if (!home_team_id || !away_team_id || !game_date) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Equipo local, equipo visitante y fecha son obligatorios.',
+      })
+    }
+
+    if (Number(home_team_id) === Number(away_team_id)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El equipo local y el rival no pueden ser el mismo.',
+      })
+    }
+
+    const teamsAreValid = await validateTeamsBelongToTenant({
+      tenantId,
+      home_team_id,
+      away_team_id,
+    })
+
+    if (!teamsAreValid) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Uno de los equipos no pertenece a este tenant.',
+      })
+    }
 
     const result = await pool.query(
       `
@@ -187,30 +317,33 @@ export const updateGame = async (req, res) => {
         id,
         tenantId,
       ]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
+        ok: false,
         message: 'Juego no encontrado',
-      });
+      })
     }
 
     res.json({
+      ok: true,
       message: 'Juego actualizado correctamente',
       game: result.rows[0],
-    });
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(500).json({
+      ok: false,
       message: 'Error actualizando juego',
-    });
+    })
   }
-};
+}
 
 export const deleteGame = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const result = await pool.query(
       `
@@ -220,36 +353,39 @@ export const deleteGame = async (req, res) => {
       RETURNING *
       `,
       [id, tenantId]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
+        ok: false,
         message: 'Juego no encontrado',
-      });
+      })
     }
 
     res.json({
+      ok: true,
       message: 'Juego eliminado correctamente',
-    });
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(500).json({
+      ok: false,
       message: 'Error eliminando juego',
-    });
+    })
   }
-};
+}
 
 export const updateGameResult = async (req, res) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const {
       home_score,
       away_score,
       status,
       notes,
-    } = req.body;
+    } = req.body
 
     const result = await pool.query(
       `
@@ -272,26 +408,26 @@ export const updateGameResult = async (req, res) => {
         id,
         tenantId,
       ]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         ok: false,
         message: 'Juego no encontrado',
-      });
+      })
     }
 
     res.json({
       ok: true,
       message: 'Resultado publicado correctamente',
       game: result.rows[0],
-    });
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
 
     res.status(500).json({
       ok: false,
       message: 'Error publicando resultado',
-    });
+    })
   }
-};
+}

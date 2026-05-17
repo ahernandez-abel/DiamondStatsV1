@@ -1,14 +1,36 @@
-import { pool } from '../config/db.js';
+import { pool } from '../config/db.js'
 
-const DEFAULT_TENANT_ID = 1;
+const DEFAULT_TENANT_ID = 1
 
 const getTenantId = (req) => {
-  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID;
-};
+  return req.tenantId || req.user?.tenant_id || DEFAULT_TENANT_ID
+}
+
+const getTenantPlanLimits = async (tenantId) => {
+  const result = await pool.query(
+    `
+    SELECT
+      t.id AS tenant_id,
+      COALESCE(p.slug, t.plan, 'free') AS plan_slug,
+      p.max_players
+    FROM tenants t
+    LEFT JOIN tenant_subscriptions ts
+      ON ts.tenant_id = t.id
+      AND ts.status = 'active'
+    LEFT JOIN plans p
+      ON p.id = ts.plan_id
+    WHERE t.id = $1
+    LIMIT 1
+    `,
+    [tenantId]
+  )
+
+  return result.rows[0]
+}
 
 export const getPlayers = async (req, res, next) => {
   try {
-    const tenantId = getTenantId(req);
+    const tenantId = getTenantId(req)
 
     const result = await pool.query(
       `
@@ -16,32 +38,28 @@ export const getPlayers = async (req, res, next) => {
         players.*,
         teams.name AS team_name,
         teams.primary_color
-
       FROM players
-
       LEFT JOIN teams
       ON players.team_id = teams.id
-
       WHERE players.tenant_id = $1
-
       ORDER BY players.full_name ASC
       `,
       [tenantId]
-    );
+    )
 
     res.json({
       ok: true,
       players: result.rows,
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const getPlayerById = async (req, res, next) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const playerResult = await pool.query(
       `
@@ -49,32 +67,27 @@ export const getPlayerById = async (req, res, next) => {
         players.*,
         teams.name AS team_name,
         teams.primary_color
-
       FROM players
-
       LEFT JOIN teams
       ON players.team_id = teams.id
-
       WHERE players.id = $1
       AND players.tenant_id = $2
-
       LIMIT 1
       `,
       [id, tenantId]
-    );
+    )
 
     if (playerResult.rows.length === 0) {
       return res.status(404).json({
         ok: false,
         message: 'Jugador no encontrado',
-      });
+      })
     }
 
     const battingResult = await pool.query(
       `
       SELECT
         COALESCE(SUM(ab), 0) AS ab,
-
         COALESCE(
           GREATEST(
             SUM(h),
@@ -82,7 +95,6 @@ export const getPlayerById = async (req, res, next) => {
           ),
           0
         ) AS hits,
-
         COALESCE(SUM(doubles), 0) AS doubles,
         COALESCE(SUM(triples), 0) AS triples,
         COALESCE(SUM(hr), 0) AS hr,
@@ -94,18 +106,18 @@ export const getPlayerById = async (req, res, next) => {
         COALESCE(SUM(cs), 0) AS cs,
         COALESCE(SUM(hbp), 0) AS hbp,
         COALESCE(SUM(sf), 0) AS sf,
-
         COALESCE(
-          GREATEST(
-            SUM(h),
-            SUM(doubles) + SUM(triples) + SUM(hr)
-          )
-          - COALESCE(SUM(doubles), 0)
-          - COALESCE(SUM(triples), 0)
-          - COALESCE(SUM(hr), 0),
+          (
+            GREATEST(
+              SUM(h),
+              SUM(doubles) + SUM(triples) + SUM(hr)
+            )
+            - COALESCE(SUM(doubles), 0)
+            - COALESCE(SUM(triples), 0)
+            - COALESCE(SUM(hr), 0)
+          ),
           0
         ) AS singles,
-
         COALESCE(
           (
             GREATEST(
@@ -121,7 +133,6 @@ export const getPlayerById = async (req, res, next) => {
           + (COALESCE(SUM(hr), 0) * 4),
           0
         ) AS tb,
-
         ROUND(
           CASE
             WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
@@ -133,7 +144,6 @@ export const getPlayerById = async (req, res, next) => {
           END,
           3
         ) AS avg,
-
         ROUND(
           CASE
             WHEN (
@@ -163,7 +173,6 @@ export const getPlayerById = async (req, res, next) => {
           END,
           3
         ) AS obp,
-
         ROUND(
           CASE
             WHEN COALESCE(SUM(ab), 0) = 0 THEN 0
@@ -184,32 +193,28 @@ export const getPlayerById = async (req, res, next) => {
           END,
           3
         ) AS slg
-
       FROM batting_stats
-
       WHERE player_id = $1
       AND tenant_id = $2
       `,
       [id, tenantId]
-    );
+    )
 
-    const batting = battingResult.rows[0];
+    const batting = battingResult.rows[0]
 
     batting.ops = (
       Number(batting.obp || 0) +
       Number(batting.slg || 0)
-    ).toFixed(3);
+    ).toFixed(3)
 
     const pitchingResult = await pool.query(
       `
       SELECT
         COALESCE(SUM(outs_recorded), 0) AS outs,
-
         ROUND(
           COALESCE(SUM(outs_recorded), 0)::numeric / 3,
           1
         ) AS ip,
-
         COALESCE(SUM(so), 0) AS strikeouts,
         COALESCE(SUM(bb), 0) AS walks,
         COALESCE(SUM(er), 0) AS earned_runs,
@@ -217,7 +222,6 @@ export const getPlayerById = async (req, res, next) => {
         COALESCE(SUM(hits_allowed), 0) AS hits_allowed,
         COALESCE(SUM(hr_allowed), 0) AS hr_allowed,
         COALESCE(SUM(hbp), 0) AS hbp,
-
         ROUND(
           CASE
             WHEN COALESCE(SUM(outs_recorded), 0) = 0 THEN 0
@@ -225,7 +229,6 @@ export const getPlayerById = async (req, res, next) => {
           END,
           2
         ) AS era,
-
         ROUND(
           CASE
             WHEN COALESCE(SUM(outs_recorded), 0) = 0 THEN 0
@@ -240,14 +243,12 @@ export const getPlayerById = async (req, res, next) => {
           END,
           2
         ) AS whip
-
       FROM pitching_stats
-
       WHERE player_id = $1
       AND tenant_id = $2
       `,
       [id, tenantId]
-    );
+    )
 
     const fieldingResult = await pool.query(
       `
@@ -256,12 +257,10 @@ export const getPlayerById = async (req, res, next) => {
         COALESCE(SUM(assists), 0) AS assists,
         COALESCE(SUM(errors), 0) AS errors,
         COALESCE(SUM(passed_balls), 0) AS passed_balls,
-
         COALESCE(
           SUM(putouts) + SUM(assists) + SUM(errors),
           0
         ) AS total_chances,
-
         ROUND(
           CASE
             WHEN (
@@ -285,14 +284,12 @@ export const getPlayerById = async (req, res, next) => {
           END,
           3
         ) AS fielding_pct
-
       FROM fielding_stats
-
       WHERE player_id = $1
       AND tenant_id = $2
       `,
       [id, tenantId]
-    );
+    )
 
     res.json({
       ok: true,
@@ -302,15 +299,15 @@ export const getPlayerById = async (req, res, next) => {
         pitching: pitchingResult.rows[0],
         fielding: fieldingResult.rows[0],
       },
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const createPlayer = async (req, res, next) => {
   try {
-    const tenantId = getTenantId(req);
+    const tenantId = getTenantId(req)
 
     const {
       full_name,
@@ -321,7 +318,45 @@ export const createPlayer = async (req, res, next) => {
       batting_hand,
       throwing_hand,
       team_id,
-    } = req.body;
+    } = req.body
+
+    if (!full_name || !full_name.trim()) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El nombre del jugador es obligatorio.',
+      })
+    }
+
+    const plan = await getTenantPlanLimits(tenantId)
+
+    if (!plan) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tenant no encontrado.',
+      })
+    }
+
+    const maxPlayers = plan.max_players
+
+    if (maxPlayers !== null && maxPlayers !== undefined) {
+      const countResult = await pool.query(
+        `
+        SELECT COUNT(*)::int AS total
+        FROM players
+        WHERE tenant_id = $1
+        `,
+        [tenantId]
+      )
+
+      const totalPlayers = countResult.rows[0]?.total || 0
+
+      if (totalPlayers >= maxPlayers) {
+        return res.status(403).json({
+          ok: false,
+          message: `El plan ${plan.plan_slug.toUpperCase()} permite un máximo de ${maxPlayers} jugadores.`,
+        })
+      }
+    }
 
     const result = await pool.query(
       `
@@ -341,30 +376,31 @@ export const createPlayer = async (req, res, next) => {
       `,
       [
         tenantId,
-        full_name,
-        nickname,
-        photo_url,
-        jersey_number,
-        position,
-        batting_hand,
-        throwing_hand,
-        team_id,
+        full_name.trim(),
+        nickname || null,
+        photo_url || null,
+        jersey_number || null,
+        position || null,
+        batting_hand || null,
+        throwing_hand || null,
+        team_id || null,
       ]
-    );
+    )
 
     res.status(201).json({
       ok: true,
+      message: 'Jugador creado correctamente.',
       player: result.rows[0],
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const updatePlayer = async (req, res, next) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const {
       full_name,
@@ -376,7 +412,7 @@ export const updatePlayer = async (req, res, next) => {
       throwing_hand,
       team_id,
       is_active,
-    } = req.body;
+    } = req.body
 
     const result = await pool.query(
       `
@@ -409,28 +445,28 @@ export const updatePlayer = async (req, res, next) => {
         id,
         tenantId,
       ]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         ok: false,
         message: 'Jugador no encontrado',
-      });
+      })
     }
 
     res.json({
       ok: true,
       player: result.rows[0],
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const deletePlayer = async (req, res, next) => {
   try {
-    const tenantId = getTenantId(req);
-    const { id } = req.params;
+    const tenantId = getTenantId(req)
+    const { id } = req.params
 
     const result = await pool.query(
       `
@@ -440,20 +476,20 @@ export const deletePlayer = async (req, res, next) => {
       RETURNING id
       `,
       [id, tenantId]
-    );
+    )
 
     if (result.rows.length === 0) {
       return res.status(404).json({
         ok: false,
         message: 'Jugador no encontrado',
-      });
+      })
     }
 
     res.json({
       ok: true,
       message: 'Jugador eliminado',
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}

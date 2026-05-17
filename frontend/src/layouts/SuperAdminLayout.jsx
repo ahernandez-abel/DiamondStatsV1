@@ -1,8 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 
 import {
+  Activity,
+  AlertTriangle,
   BarChart3,
   Building2,
+  ClipboardList,
   CreditCard,
   DollarSign,
   LogOut,
@@ -52,6 +55,10 @@ function SuperAdminLayout({ children }) {
 
         <nav className="superadmin-nav">
 
+          <div className="superadmin-nav-section">
+            General
+          </div>
+
           <NavLink
             to="/superadmin"
             end
@@ -78,6 +85,39 @@ function SuperAdminLayout({ children }) {
             <PlusCircle size={20} />
 
             Crear tenant
+          </NavLink>
+
+          <div className="superadmin-nav-divider"></div>
+
+          <div className="superadmin-nav-section">
+            Analytics
+          </div>
+
+          <NavLink
+            to="/superadmin/activity"
+            className={navClass}
+          >
+            <Activity size={20} />
+
+            Actividad
+          </NavLink>
+
+          <NavLink
+            to="/superadmin/audit"
+            className={navClass}
+          >
+            <ClipboardList size={20} />
+
+            Auditoría
+          </NavLink>
+
+          <NavLink
+            to="/superadmin/alerts"
+            className={navClass}
+          >
+            <AlertTriangle size={20} />
+
+            Alertas
           </NavLink>
 
           <div className="superadmin-nav-divider"></div>

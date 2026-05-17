@@ -15,6 +15,8 @@ import adminDashboardRoutes from './routes/adminDashboard.routes.js'
 import superadminRoutes from './routes/superadmin.routes.js';
 import billingRoutes from './routes/billing.routes.js';
 import adminBillingRoutes from './routes/adminBilling.routes.js';
+import superadminAnalyticsRoutes from './routes/superadminAnalytics.routes.js';
+import superadminTenantDetailsRoutes from './routes/superadminTenantDetails.routes.js';
 
 
 import { errorMiddleware } from './middlewares/error.middleware.js';
@@ -45,6 +47,8 @@ app.use('/api/admin', adminDashboardRoutes);
 app.use('/api/superadmin', superadminRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/admin/billing', adminBillingRoutes);
+app.use('/api/superadmin/analytics', superadminAnalyticsRoutes);
+app.use('/api/superadmin/tenants/details', superadminTenantDetailsRoutes);
 
 app.use(errorMiddleware);
 

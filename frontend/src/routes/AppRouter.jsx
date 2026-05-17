@@ -35,6 +35,10 @@ import AdminBillingPage from '../pages/adminBilling/AdminBillingPage'
 import SuperAdminDashboard from '../pages/superadmin/SuperAdminDashboard'
 import SuperAdminTenantsPage from '../pages/superadmin/SuperAdminTenantsPage'
 import CreateTenantPage from '../pages/superadmin/CreateTenantPage'
+import SuperAdminActivityPage from '../pages/superadmin/SuperAdminActivityPage'
+import SuperAdminAuditPage from '../pages/superadmin/SuperAdminAuditPage'
+import SuperAdminAlertsPage from '../pages/superadmin/SuperAdminAlertsPage'
+import SuperAdminTenantDetailPage from '../pages/superadmin/SuperAdminTenantDetailPage'
 
 import BillingPage from '../pages/billing/BillingPage'
 import PlansPage from '../pages/billing/PlansPage'
@@ -159,6 +163,41 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+  path="/superadmin/activity"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <SuperAdminActivityPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/superadmin/audit"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <SuperAdminAuditPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/superadmin/alerts"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <SuperAdminAlertsPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/superadmin/tenant/:tenantId"
+  element={
+    <ProtectedRoute allowedRoles={['superadmin']}>
+      <SuperAdminTenantDetailPage />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/superadmin/create-tenant"

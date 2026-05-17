@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Building2,
+  Eye,
   RefreshCcw,
 } from 'lucide-react'
 
@@ -54,6 +56,16 @@ function SuperAdminTenantsPage() {
     }
   }
 
+  const formatDate = (date) => {
+    if (!date) return '-'
+
+    return new Date(date).toLocaleDateString('es-DO', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    })
+  }
+
   return (
     <SuperAdminLayout>
       <section className="superadmin-tenants-page">
@@ -87,7 +99,9 @@ function SuperAdminTenantsPage() {
         ) : tenants.length === 0 ? (
           <div className="tenants-empty">
             <Building2 size={42} />
+
             <h3>No hay tenants registrados</h3>
+
             <p>
               Cuando registres equipos, aparecerán aquí.
             </p>
@@ -106,6 +120,7 @@ function SuperAdminTenantsPage() {
                     <th>Usuarios</th>
                     <th>Equipos</th>
                     <th>Creado</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
 
@@ -138,7 +153,7 @@ function SuperAdminTenantsPage() {
 
                       <td>
                         <select
-                          value={tenant.plan || 'free'}
+                          value={tenant.plan || tenant.plan_slug || 'free'}
                           onChange={(e) =>
                             handleChangePlan(
                               tenant.id,
@@ -181,14 +196,20 @@ function SuperAdminTenantsPage() {
                         </span>
                       </td>
 
-                      <td>{tenant.total_users}</td>
-                      <td>{tenant.total_teams}</td>
+                      <td>{tenant.total_users || 0}</td>
+
+                      <td>{tenant.total_teams || 0}</td>
+
+                      <td>{formatDate(tenant.created_at)}</td>
 
                       <td>
-                        {tenant.created_at
-                          ? new Date(tenant.created_at)
-                              .toLocaleDateString()
-                          : '-'}
+                        <Link
+                          to={`/superadmin/tenant/${tenant.id}`}
+                          className="tenant-detail-link"
+                        >
+                          <Eye size={16} />
+                          Ver detalle
+                        </Link>
                       </td>
                     </tr>
                   ))}

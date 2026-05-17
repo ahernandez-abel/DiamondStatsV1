@@ -1,9 +1,11 @@
-import { pool } from '../config/db.js';
-import { generateToken } from '../utils/generateToken.js';
+import { pool } from '../config/db.js'
+import { generateToken } from '../utils/generateToken.js'
+import { logTenantActivity } from '../helpers/activityLogger.js'
+import { logAudit } from '../helpers/auditLogger.js'
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body
 
     const result = await pool.query(
       `
@@ -25,22 +27,22 @@ export const login = async (req, res, next) => {
       LIMIT 1
       `,
       [email, password]
-    );
+    )
 
-    const user = result.rows[0];
+    const user = result.rows[0]
 
     if (!user) {
       return res.status(401).json({
         ok: false,
         message: 'Credenciales inválidas',
-      });
+      })
     }
 
     if (!user.is_active) {
       return res.status(403).json({
         ok: false,
         message: 'Usuario inactivo',
-      });
+      })
     }
 
     if (user.role !== 'superadmin') {
@@ -48,18 +50,55 @@ export const login = async (req, res, next) => {
         return res.status(403).json({
           ok: false,
           message: 'Este usuario no tiene equipo asignado',
-        });
+        })
       }
 
       if (user.tenant_status !== 'active') {
         return res.status(403).json({
           ok: false,
           message: 'El equipo no tiene acceso activo',
-        });
+        })
       }
     }
 
-    const token = generateToken(user);
+    await pool.query(
+      `
+      UPDATE users
+      SET
+        last_login_at = NOW(),
+        last_activity_at = NOW(),
+        updated_at = NOW()
+      WHERE id = $1
+      `,
+      [user.id]
+    )
+
+    if (user.tenant_id) {
+      await logTenantActivity({
+        tenant_id: user.tenant_id,
+        user_id: user.id,
+        activity_type: 'login',
+        description: `Inicio de sesión del usuario ${user.username}`,
+        entity_type: 'user',
+        entity_id: user.id,
+        ip_address: req.ip,
+        user_agent: req.headers['user-agent'] || null,
+      })
+    }
+
+    await logAudit({
+      tenant_id: user.tenant_id || null,
+      user_id: user.id,
+      action: 'login',
+      module: 'auth',
+      entity_type: 'user',
+      entity_id: user.id,
+      description: `Inicio de sesión de ${user.username}`,
+      ip_address: req.ip,
+      user_agent: req.headers['user-agent'] || null,
+    })
+
+    const token = generateToken(user)
 
     res.json({
       ok: true,
@@ -73,11 +112,11 @@ export const login = async (req, res, next) => {
         tenant_name: user.tenant_name,
         tenant_slug: user.tenant_slug,
       },
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 export const profile = async (req, res, next) => {
   try {
@@ -99,22 +138,22 @@ export const profile = async (req, res, next) => {
       LIMIT 1
       `,
       [req.user.id]
-    );
+    )
 
-    const user = result.rows[0];
+    const user = result.rows[0]
 
     if (!user) {
       return res.status(404).json({
         ok: false,
         message: 'Usuario no encontrado',
-      });
+      })
     }
 
     if (!user.is_active) {
       return res.status(403).json({
         ok: false,
         message: 'Usuario inactivo',
-      });
+      })
     }
 
     if (user.role !== 'superadmin') {
@@ -122,14 +161,14 @@ export const profile = async (req, res, next) => {
         return res.status(403).json({
           ok: false,
           message: 'No autorizado para este tenant',
-        });
+        })
       }
 
       if (user.tenant_status !== 'active') {
         return res.status(403).json({
           ok: false,
           message: 'El equipo no tiene acceso activo',
-        });
+        })
       }
     }
 
@@ -146,8 +185,8 @@ export const profile = async (req, res, next) => {
         tenant_slug: user.tenant_slug,
         tenant_status: user.tenant_status,
       },
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}

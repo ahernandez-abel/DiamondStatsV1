@@ -203,3 +203,56 @@ td.highlight-column {
     font-size: 14px;
   }
 }
+@media (max-width: 600px) {
+
+  .pitching-page {
+    padding: 18px 12px 36px;
+  }
+
+  .pitching-title {
+    font-size: 28px;
+  }
+
+  .pitching-subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .pitching-table {
+    min-width: 1180px;
+  }
+
+  .pitching-table th {
+    height: 48px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .pitching-table td {
+    height: 58px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .pitcher-column {
+    min-width: 230px;
+  }
+
+  .pitcher-info {
+    gap: 10px;
+  }
+
+  .pitcher-photo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pitcher-name {
+    font-size: 13px;
+  }
+
+  .pitcher-team {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}

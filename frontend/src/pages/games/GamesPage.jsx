@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
@@ -20,6 +20,12 @@ function GamesPage({ admin = false }) {
 
   const [games, setGames] = useState([])
   const [tenant, setTenant] = useState(null)
+
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(20)
 
   useEffect(() => {
     loadGames()
@@ -48,6 +54,37 @@ function GamesPage({ admin = false }) {
     }
   }
 
+  const filteredGames = useMemo(() => {
+    return games.filter((game) => {
+      const text = `
+        ${game.home_team_name || ''}
+        ${game.away_team_name || ''}
+        ${game.venue || ''}
+        ${game.status || ''}
+      `.toLowerCase()
+
+      const matchesSearch = text.includes(search.toLowerCase())
+
+      const matchesStatus =
+        !status || game.status === status
+
+      const matchesDate =
+        !dateFilter || game.game_date === dateFilter
+
+      return matchesSearch && matchesStatus && matchesDate
+    })
+  }, [games, search, status, dateFilter])
+
+  const totalPages = Math.max(
+    Math.ceil(filteredGames.length / limit),
+    1
+  )
+
+  const paginatedGames = filteredGames.slice(
+    (page - 1) * limit,
+    page * limit
+  )
+
   const handleDelete = async (id) => {
     const confirmDelete = confirm(
       '¿Seguro que deseas eliminar este juego? Esta acción no se puede deshacer.'
@@ -64,32 +101,111 @@ function GamesPage({ admin = false }) {
     }
   }
 
+  const clearFilters = () => {
+    setSearch('')
+    setStatus('')
+    setDateFilter('')
+    setLimit(20)
+    setPage(1)
+  }
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value)
+    setPage(1)
+  }
+
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value)
+    setPage(1)
+  }
+
+  const handleDateChange = (e) => {
+    setDateFilter(e.target.value)
+    setPage(1)
+  }
+
+  const handleLimitChange = (e) => {
+    setLimit(Number(e.target.value))
+    setPage(1)
+  }
+
   return (
     <Layout tenantSlug={tenantSlug}>
       <section className="games-page">
         <div className="games-header">
-          <span className="players-badge">
-            {tenant?.name || 'DiamondStats Games'}
-          </span>
+          <div>
+            <span className="players-badge">
+              {tenant?.name || 'DiamondStats Games'}
+            </span>
 
-          <h1 className="games-title">
-            {admin ? 'Partidos / Cargar Stats' : 'Juegos'}
-          </h1>
+            <h1 className="games-title">
+              {admin ? 'Partidos / Cargar Stats' : 'Juegos'}
+            </h1>
 
-          <p className="games-subtitle">
-            {admin
-              ? 'Selecciona el partido y luego carga las estadísticas de los jugadores que participaron'
-              : 'Calendario y resultados oficiales del equipo'}
-          </p>
+            <p className="games-subtitle">
+              {admin
+                ? 'Selecciona el partido y luego carga las estadísticas de los jugadores que participaron'
+                : 'Calendario y resultados oficiales del equipo'}
+            </p>
+          </div>
+
+          <div className="games-counter">
+            <span>Total Juegos</span>
+            <strong>{filteredGames.length}</strong>
+          </div>
+        </div>
+
+        <div className="games-filters">
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Buscar equipo, rival o estadio ..."
+            className="games-search"
+          />
+
+          <select
+            value={status}
+            onChange={handleStatusChange}
+            className="games-filter"
+          >
+            <option value="">Todos</option>
+<option value="final">Finalizados</option>
+          </select>
+
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={handleDateChange}
+            className="games-filter"
+          />
+
+          <select
+            value={limit}
+            onChange={handleLimitChange}
+            className="games-filter"
+          >
+            <option value={10}>10 por página</option>
+            <option value={20}>20 por página</option>
+            <option value={50}>50 por página</option>
+          </select>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="games-clear-btn"
+          >
+            Limpiar
+          </button>
         </div>
 
         <div className="games-list">
-          {games.length === 0 ? (
+          {paginatedGames.length === 0 ? (
             <div className="game-empty">
               No hay partidos registrados.
             </div>
           ) : (
-            games.map((game) => (
+            paginatedGames.map((game) => (
               <div
                 key={game.id}
                 className="game-card"
@@ -141,14 +257,14 @@ function GamesPage({ admin = false }) {
                         to={`/admin/games/${game.id}/stats`}
                         className="stats-button"
                       >
-                        Cargar Stats Jugadores
+                        Cargar Stats
                       </Link>
 
                       <Link
                         to={`/admin/games/${game.id}/result`}
                         className="result-button"
                       >
-                        Resultado del Juego
+                        Resultado
                       </Link>
 
                       <button
@@ -156,7 +272,7 @@ function GamesPage({ admin = false }) {
                         onClick={() => handleDelete(game.id)}
                         className="delete-game-button"
                       >
-                        Eliminar Juego
+                        Eliminar
                       </button>
                     </div>
                   )}
@@ -164,6 +280,28 @@ function GamesPage({ admin = false }) {
               </div>
             ))
           )}
+        </div>
+
+        <div className="games-pagination">
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            Anterior
+          </button>
+
+          <span>
+            Página {page} de {totalPages}
+          </span>
+
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Siguiente
+          </button>
         </div>
       </section>
     </Layout>

@@ -144,7 +144,7 @@ function TeamAccessPage() {
                   e.target.value.toUpperCase()
                 )
               }
-              placeholder="Ej: MAHANAIM4832"
+              placeholder="Ej: ABC123"
               autoFocus
             />
 

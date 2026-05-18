@@ -46,7 +46,7 @@
 
 .admin-dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 28px;
 }
@@ -328,5 +328,95 @@
 
   .admin-public-access-actions span {
     text-align: center;
+  }
+}
+
+
+.admin-stat-card,
+.admin-panel-card,
+.admin-public-access-card {
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.admin-stat-card:hover,
+.admin-panel-card:hover,
+.admin-public-access-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(34, 197, 94, 0.32);
+}
+
+@media (max-width: 640px) {
+
+  .admin-dashboard-page {
+    padding-bottom: 30px;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 1.9rem;
+  }
+
+  .admin-dashboard-actions {
+    width: 100%;
+  }
+
+  .admin-dashboard-actions a {
+    flex: 1;
+    text-align: center;
+  }
+
+  .admin-dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stat-card strong {
+    font-size: 1.9rem;
+  }
+
+  .admin-panel-card {
+    padding: 18px;
+  }
+
+  .admin-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-panel-header a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-game-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-score {
+    align-self: flex-end;
+  }
+
+  .admin-player-item {
+    align-items: center;
+  }
+
+  .admin-shortcuts a {
+    width: 100%;
+  }
+
+  .admin-public-access-top {
+    align-items: flex-start;
+  }
+
+  .admin-public-access-box div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-public-access-box button {
+    width: 100%;
   }
 }

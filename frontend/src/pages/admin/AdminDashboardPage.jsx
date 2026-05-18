@@ -188,11 +188,6 @@ function AdminDashboardPage() {
             <span>Juegos</span>
             <strong>{totals.total_games || 0}</strong>
           </div>
-
-          <div className="admin-stat-card">
-            <span>Completados</span>
-            <strong>{totals.completed_games || 0}</strong>
-          </div>
         </div>
 
         <div className="admin-dashboard-grid">
@@ -209,7 +204,10 @@ function AdminDashboardPage() {
             ) : (
               <div className="admin-game-list">
                 {recentGames.map((game) => (
-                  <div key={game.id} className="admin-game-item">
+                  <div
+                    key={game.id}
+                    className="admin-game-item"
+                  >
                     <div>
                       <strong>
                         {game.home_team || 'Local'} vs {game.away_team || 'Visitante'}
@@ -244,7 +242,10 @@ function AdminDashboardPage() {
             ) : (
               <div className="admin-player-list">
                 {topBatters.map((player, index) => (
-                  <div key={player.id} className="admin-player-item">
+                  <div
+                    key={player.id}
+                    className="admin-player-item"
+                  >
                     <span>{index + 1}</span>
 
                     <img
@@ -275,7 +276,10 @@ function AdminDashboardPage() {
             ) : (
               <div className="admin-player-list">
                 {topPitchers.map((player, index) => (
-                  <div key={player.id} className="admin-player-item">
+                  <div
+                    key={player.id}
+                    className="admin-player-item"
+                  >
                     <span>{index + 1}</span>
 
                     <img
@@ -299,6 +303,7 @@ function AdminDashboardPage() {
             <div className="admin-shortcuts">
               <Link to="/admin/players">Administrar jugadores</Link>
               <Link to="/admin/players/create">Crear jugador</Link>
+              <Link to="/admin/teams">Administrar equipos</Link>
               <Link to="/admin/teams/create">Crear equipo</Link>
               <Link to="/admin/games/create">Crear juego</Link>
               <Link to="/admin/games">Registrar estadísticas</Link>

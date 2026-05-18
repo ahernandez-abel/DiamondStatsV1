@@ -32,13 +32,6 @@ const initialForm = {
     sf: 0,
     sac: 0,
   },
-  fielding: {
-    position: '',
-    putouts: 0,
-    assists: 0,
-    errors: 0,
-    passed_balls: 0,
-  },
   pitching: {
     pitched: false,
     outs_recorded: 0,
@@ -54,7 +47,6 @@ const initialForm = {
 }
 
 function GameStatsPage() {
-
   const { id } = useParams()
 
   const [game, setGame] = useState(null)
@@ -98,7 +90,6 @@ function GameStatsPage() {
         setSelectedPlayer(playersData[0].id)
         setTeamId(playersData[0].team_id)
       }
-
     } catch (error) {
       console.log(error)
     }
@@ -127,10 +118,6 @@ function GameStatsPage() {
           ...initialForm.batting,
           ...(stats.batting || {}),
         },
-        fielding: {
-          ...initialForm.fielding,
-          ...(stats.fielding || {}),
-        },
         pitching: {
           ...initialForm.pitching,
           ...(stats.pitching || {}),
@@ -139,7 +126,6 @@ function GameStatsPage() {
       })
 
       setEditMode(true)
-
     } catch (error) {
       setForm(initialForm)
       setEditMode(false)
@@ -154,20 +140,6 @@ function GameStatsPage() {
       batting: {
         ...form.batting,
         [name]: cleanNumber(value),
-      },
-    })
-  }
-
-  const handleFieldingChange = (e) => {
-    const { name, value } = e.target
-
-    setForm({
-      ...form,
-      fielding: {
-        ...form.fielding,
-        [name]: name === 'position'
-          ? value
-          : cleanNumber(value),
       },
     })
   }
@@ -200,7 +172,6 @@ function GameStatsPage() {
         player_id: selectedPlayer,
         team_id: teamId,
         batting: form.batting,
-        fielding: form.fielding,
         pitching: form.pitching,
       })
 
@@ -212,7 +183,6 @@ function GameStatsPage() {
 
       setForm(initialForm)
       setEditMode(false)
-
     } catch (error) {
       console.log(error)
       alert('Error guardando estadísticas')
@@ -221,9 +191,7 @@ function GameStatsPage() {
 
   return (
     <DashboardLayout>
-
       <div className="game-stats-page">
-
         <PageHeader
           title="Registrar Estadísticas"
           subtitle="Selecciona un jugador, carga o modifica sus estadísticas del partido"
@@ -231,7 +199,6 @@ function GameStatsPage() {
 
         {game && (
           <div className="game-info-card">
-
             <h2 className="game-title">
               {game.home_team_name || 'Home'} vs {game.away_team_name || 'Away'}
             </h2>
@@ -239,7 +206,6 @@ function GameStatsPage() {
             <p className="game-subtitle">
               Fecha: {game.game_date} | Lugar: {game.venue || '-'}
             </p>
-
           </div>
         )}
 
@@ -247,9 +213,7 @@ function GameStatsPage() {
           onSubmit={handleSubmit}
           className="game-stats-form"
         >
-
           <div className="form-group">
-
             <label className="custom-label">
               Jugador
             </label>
@@ -260,7 +224,6 @@ function GameStatsPage() {
               className="custom-select"
               required
             >
-
               {players.map((player) => (
                 <option
                   key={player.id}
@@ -269,9 +232,7 @@ function GameStatsPage() {
                   #{player.jersey_number || '00'} - {player.full_name}
                 </option>
               ))}
-
             </select>
-
           </div>
 
           {editMode && (
@@ -281,19 +242,16 @@ function GameStatsPage() {
           )}
 
           <section className="stats-section">
-
             <h3 className="section-title batting">
               Bateo
             </h3>
 
             <div className="stats-grid">
-
               {Object.keys(form.batting).map((key) => (
                 <div
                   key={key}
                   className="form-group"
                 >
-
                   <label className="custom-label uppercase">
                     {key}
                   </label>
@@ -307,69 +265,13 @@ function GameStatsPage() {
                     onChange={handleBattingChange}
                     className="custom-input"
                   />
-
                 </div>
               ))}
-
             </div>
-
           </section>
 
           <section className="stats-section">
-
-            <h3 className="section-title fielding">
-              Defensa
-            </h3>
-
-            <div className="stats-grid">
-
-              <div className="form-group">
-
-                <label className="custom-label">
-                  Posición
-                </label>
-
-                <input
-                  type="text"
-                  name="position"
-                  value={form.fielding.position}
-                  onChange={handleFieldingChange}
-                  className="custom-input"
-                />
-
-              </div>
-
-              {['putouts', 'assists', 'errors', 'passed_balls'].map((key) => (
-                <div
-                  key={key}
-                  className="form-group"
-                >
-
-                  <label className="custom-label uppercase">
-                    {key}
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    name={key}
-                    value={form.fielding[key]}
-                    onChange={handleFieldingChange}
-                    className="custom-input"
-                  />
-
-                </div>
-              ))}
-
-            </div>
-
-          </section>
-
-          <section className="stats-section">
-
             <div className="pitching-header">
-
               <input
                 type="checkbox"
                 name="pitched"
@@ -381,12 +283,10 @@ function GameStatsPage() {
               <h3 className="section-title pitching">
                 Pitcher
               </h3>
-
             </div>
 
             {form.pitching.pitched && (
               <div className="stats-grid">
-
                 {[
                   'outs_recorded',
                   'hits_allowed',
@@ -401,7 +301,6 @@ function GameStatsPage() {
                     key={key}
                     className="form-group"
                   >
-
                     <label className="custom-label uppercase">
                       {key}
                     </label>
@@ -415,12 +314,10 @@ function GameStatsPage() {
                       onChange={handlePitchingChange}
                       className="custom-input"
                     />
-
                   </div>
                 ))}
 
                 <div className="form-group">
-
                   <label className="custom-label">
                     Resultado
                   </label>
@@ -431,7 +328,6 @@ function GameStatsPage() {
                     onChange={handlePitchingChange}
                     className="custom-select"
                   >
-
                     <option value="">
                       N/A
                     </option>
@@ -447,30 +343,21 @@ function GameStatsPage() {
                     <option value="S">
                       Salvó
                     </option>
-
                   </select>
-
                 </div>
-
               </div>
             )}
-
           </section>
 
           <div className="submit-container">
-
             <Button type="submit">
               {editMode
                 ? 'Actualizar estadísticas del jugador'
                 : 'Guardar estadísticas del jugador'}
             </Button>
-
           </div>
-
         </form>
-
       </div>
-
     </DashboardLayout>
   )
 }

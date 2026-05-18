@@ -25,7 +25,7 @@ import UpdateGameResultPage from '../pages/games/UpdateGameResultPage'
 
 import BattingStatsPage from '../pages/stats/BattingStatsPage'
 import PitchingStatsPage from '../pages/stats/PitchingStatsPage'
-import FieldingStatsPage from '../pages/stats/FieldingStatsPage'
+
 
 import ComparePlayersPage from '../pages/compare/ComparePlayersPage'
 
@@ -133,15 +133,7 @@ function AppRouter() {
         }
       />
 
-      <Route
-        path="/team/:tenantSlug/stats/fielding"
-        element={
-          <PublicTenantRoute>
-            <FieldingStatsPage />
-          </PublicTenantRoute>
-        }
-      />
-
+     
       {/* AUTH */}
       <Route path="/login" element={<LoginPage />} />
 
@@ -359,14 +351,7 @@ function AppRouter() {
         }
       />
 
-      <Route
-        path="/admin/stats/fielding"
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <FieldingStatsPage admin />
-          </ProtectedRoute>
-        }
-      />
+    
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />

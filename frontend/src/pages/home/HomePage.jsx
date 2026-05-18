@@ -15,7 +15,6 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
   const [tenant, setTenant] = useState(null)
   const [batting, setBatting] = useState([])
   const [pitching, setPitching] = useState([])
-  const [fielding, setFielding] = useState([])
   const [mvp, setMvp] = useState(null)
 
   useEffect(() => {
@@ -29,7 +28,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
       setTenant(res.data.tenant || null)
       setBatting(res.data.batting || [])
       setPitching(res.data.pitching || [])
-      setFielding(res.data.fielding || [])
+      
       setMvp(res.data.mvp || null)
     } catch (error) {
       console.log(error)
@@ -291,13 +290,7 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
             link={`${tenantBasePath}/stats/pitching`}
           />
 
-          <LeaderCard
-            title="Defensa"
-            label="FLD%"
-            players={fielding.slice(0, 5)}
-            field="fielding_pct"
-            link={`${tenantBasePath}/stats/fielding`}
-          />
+          
         </div>
       </section>
     </PublicLayout>

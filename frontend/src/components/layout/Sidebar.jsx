@@ -87,11 +87,7 @@ function Sidebar() {
     label: 'Ver Pitcher',
     icon: Activity,
   },
-  {
-    path: '/admin/stats/fielding',
-    label: 'Ver Defensa',
-    icon: Shield,
-  },
+ 
   {
   path: '/admin/dashboard',
   label: 'Dashboard',

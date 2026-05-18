@@ -123,13 +123,7 @@ function Navbar({ tenantSlug: tenantSlugProp }) {
           Pitcher
         </NavLink>
 
-        <NavLink
-          to={`${basePath}/stats/fielding`}
-          onClick={closeMenu}
-          className={navClass}
-        >
-          Defensa
-        </NavLink>
+       
 
         <Link
           to="/login"

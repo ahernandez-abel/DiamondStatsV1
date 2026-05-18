@@ -227,33 +227,7 @@ function PlayerDetailsPage() {
           </div>
         </div>
 
-        <div className="stats-section">
-          <h2 className="stats-title">
-            Estadísticas Defensivas
-          </h2>
-
-          <div className="stats-grid">
-            <div className="stat-card featured">
-              <span>FLD%</span>
-              <h3>{formatAverage(player.fielding?.fielding_pct)}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>PO</span>
-              <h3>{player.fielding?.putouts || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>AST</span>
-              <h3>{player.fielding?.assists || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>ERR</span>
-              <h3>{player.fielding?.errors || 0}</h3>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </PublicLayout>
   )

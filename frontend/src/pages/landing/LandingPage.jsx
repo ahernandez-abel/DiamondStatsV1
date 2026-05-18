@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   Layers,
   Star,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react'
 
 import logo from '../../assets/logo.png'
@@ -350,6 +352,41 @@ function LandingPage() {
         </div>
 
       </section>
+
+      <section className="landing-section landing-scorebook-section">
+
+  <div className="landing-scorebook-card">
+
+    <div className="landing-scorebook-icon">
+      <FileSpreadsheet size={34} />
+    </div>
+
+    <div className="landing-scorebook-content">
+      <span>Plantilla de anotación</span>
+
+      <h2>
+        Descarga la hoja para anotar juegos manualmente.
+      </h2>
+
+      <p>
+        Usa esta plantilla impresa durante el juego para registrar bateo,
+        carreras, errores, innings y datos importantes. Luego puedes pasar
+        los resultados al sistema DiamondStats.
+      </p>
+    </div>
+
+    <a
+      href="/downloads/DiamondStats_Softball_Scorebook_Final.xlsx"
+      download
+      className="landing-download-btn"
+    >
+      <Download size={18} />
+      Descargar plantilla
+    </a>
+
+  </div>
+
+</section>
 
       <section className="landing-final-cta">
 

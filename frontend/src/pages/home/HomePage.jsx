@@ -267,7 +267,9 @@ function HomePage({ defaultTenantSlug = 'team-mahanaim' }) {
           <LeaderCard
             title="Efectividad"
             label="ERA"
-            players={pitching.slice(0, 5)}
+            players={[...pitching]
+  .sort((a, b) => Number(a.era || 0) - Number(b.era || 0))
+  .slice(0, 5)}
             field="era"
             link={`${tenantBasePath}/stats/pitching`}
           />

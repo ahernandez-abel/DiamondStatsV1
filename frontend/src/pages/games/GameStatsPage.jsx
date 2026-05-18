@@ -29,7 +29,6 @@ const battingFields = [
   { key: 'cs', label: 'Atrapado robando (CS)' },
   { key: 'so', label: 'Ponches recibidos (SO)' },
   { key: 'bb', label: 'Bases por bolas (BB)' },
-  { key: 'hbp', label: 'Golpeado por lanzamiento (HBP)' },
   { key: 'sf', label: 'Elevado de sacrificio (SF)' },
   { key: 'sac', label: 'Toque de sacrificio (SAC)' },
 ]
@@ -42,7 +41,7 @@ const pitchingFields = [
   { key: 'bb', label: 'Bases por bolas (BB)' },
   { key: 'so', label: 'Ponches (SO)' },
   { key: 'hr_allowed', label: 'Jonrones permitidos (HR)' },
-  { key: 'hbp', label: 'Golpeados (HBP)' },
+  
 ]
 
 const initialForm = {
@@ -350,7 +349,6 @@ function GameStatsPage() {
                 <p><strong>CS:</strong> Atrapado robando.</p>
                 <p><strong>SO:</strong> Ponches recibidos.</p>
                 <p><strong>BB:</strong> Bases por bolas recibidas.</p>
-                <p><strong>HBP:</strong> Golpeado por lanzamiento.</p>
                 <p><strong>SF:</strong> Elevado de sacrificio.</p>
                 <p><strong>SAC:</strong> Toque de sacrificio.</p>
               </div>
@@ -443,7 +441,6 @@ function GameStatsPage() {
                     <p><strong>BB:</strong> Bases por bolas otorgadas.</p>
                     <p><strong>SO:</strong> Ponches realizados.</p>
                     <p><strong>HR:</strong> Jonrones permitidos.</p>
-                    <p><strong>HBP:</strong> Bateadores golpeados.</p>
                     <p><strong>W:</strong> Juego ganado.</p>
                     <p><strong>L:</strong> Juego perdido.</p>
                     <p><strong>S:</strong> Juego salvado.</p>

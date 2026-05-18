@@ -30,7 +30,7 @@ const battingFields = [
   { key: 'so', label: 'Ponches recibidos (SO)' },
   { key: 'bb', label: 'Bases por bolas (BB)' },
   { key: 'sf', label: 'Elevado de sacrificio (SF)' },
-  { key: 'sac', label: 'Toque de sacrificio (SAC)' },
+  
 ]
 
 const pitchingFields = [
@@ -350,7 +350,7 @@ function GameStatsPage() {
                 <p><strong>SO:</strong> Ponches recibidos.</p>
                 <p><strong>BB:</strong> Bases por bolas recibidas.</p>
                 <p><strong>SF:</strong> Elevado de sacrificio.</p>
-                <p><strong>SAC:</strong> Toque de sacrificio.</p>
+                
               </div>
             </div>
           </section>

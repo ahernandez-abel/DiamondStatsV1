@@ -377,12 +377,11 @@ function LandingPage() {
   <p>
     AbelDev
   </p>
-
-  <span>
-    © 2026 DiamondStats • Sistema desarrollado por AbelDev
-    <p>
+  <p>
     Contacto: 809-447-2022
     </p>
+  <span>
+    © 2026 DiamondStats • Sistema desarrollado por AbelDev
   </span>
 
 </footer>

@@ -173,7 +173,6 @@ export const getBattingLeaders = async (req, res) => {
 
 export const getPitchingLeaders = async (req, res) => {
   try {
-
     const tenantId = getTenantId(req)
 
     const result = await pool.query(
@@ -186,12 +185,17 @@ export const getPitchingLeaders = async (req, res) => {
 
         t.name AS team_name,
 
+        COUNT(DISTINCT ps.game_id) AS games_pitched,
+
         COALESCE(SUM(ps.outs_recorded), 0) AS outs_recorded,
 
-        ROUND(
-          COALESCE(SUM(ps.outs_recorded), 0)::numeric / 3,
-          1
-        ) AS ip,
+        CASE
+          WHEN COALESCE(SUM(ps.outs_recorded), 0) = 0 THEN '0.0'
+          ELSE
+            FLOOR(COALESCE(SUM(ps.outs_recorded), 0) / 3)::text
+            || '.' ||
+            MOD(COALESCE(SUM(ps.outs_recorded), 0), 3)::text
+        END AS ip,
 
         COALESCE(SUM(ps.so), 0) AS strikeouts,
         COALESCE(SUM(ps.bb), 0) AS walks,
@@ -201,8 +205,6 @@ export const getPitchingLeaders = async (req, res) => {
 
         COALESCE(SUM(ps.hits_allowed), 0) AS hits_allowed,
         COALESCE(SUM(ps.hr_allowed), 0) AS hr_allowed,
-
-        COALESCE(SUM(ps.hbp), 0) AS hbp,
 
         ROUND(
           CASE
@@ -286,7 +288,6 @@ export const getPitchingLeaders = async (req, res) => {
     })
 
   } catch (error) {
-
     console.log(error)
 
     res.status(500).json({
@@ -294,7 +295,7 @@ export const getPitchingLeaders = async (req, res) => {
       message: 'Error obteniendo líderes de pitcheo',
     })
   }
-};
+}
 
 export const getFieldingLeaders = async (req, res) => {
   try {

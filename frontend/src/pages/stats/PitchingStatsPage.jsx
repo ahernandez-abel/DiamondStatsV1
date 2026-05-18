@@ -91,20 +91,20 @@ function PitchingStatsPage({ admin = false }) {
   }, [leaders, sortConfig])
 
   const columns = [
-    { key: 'era', label: 'ERA', highlight: true },
-    { key: 'whip', label: 'WHIP' },
-    { key: 'ip', label: 'IP' },
-    { key: 'strikeouts', label: 'SO' },
-    { key: 'walks', label: 'BB' },
-    { key: 'hits_allowed', label: 'H' },
-    { key: 'earned_runs', label: 'ER' },
-    { key: 'runs_allowed', label: 'R' },
-    { key: 'hr_allowed', label: 'HR' },
-    { key: 'hbp', label: 'HBP' },
-    { key: 'k_per_7', label: 'K/7' },
-    { key: 'bb_per_7', label: 'BB/7' },
-    { key: 'h_per_7', label: 'H/7' },
-  ]
+  { key: 'games_pitched', label: 'J' },
+  { key: 'era', label: 'ERA', highlight: true },
+  { key: 'whip', label: 'WHIP' },
+  { key: 'ip', label: 'IP' },
+  { key: 'strikeouts', label: 'SO' },
+  { key: 'walks', label: 'BB' },
+  { key: 'hits_allowed', label: 'H' },
+  { key: 'earned_runs', label: 'ER' },
+  { key: 'runs_allowed', label: 'R' },
+  { key: 'hr_allowed', label: 'HR' },
+  { key: 'k_per_7', label: 'K/7' },
+  { key: 'bb_per_7', label: 'BB/7' },
+  { key: 'h_per_7', label: 'H/7' },
+]
 
   return (
     <Layout tenantSlug={tenantSlug}>

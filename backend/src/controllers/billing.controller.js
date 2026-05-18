@@ -180,6 +180,20 @@ export const updatePlan = async (req, res, next) => {
 export const getBillingTenants = async (req, res, next) => {
   try {
     const result = await pool.query(`
+      WITH latest_subscription AS (
+        SELECT DISTINCT ON (tenant_id)
+          *
+        FROM tenant_subscriptions
+        ORDER BY tenant_id, created_at DESC, id DESC
+      ),
+      payment_summary AS (
+        SELECT
+          tenant_id,
+          COALESCE(SUM(amount), 0)::numeric AS total_paid,
+          MAX(paid_at) AS last_payment_at
+        FROM payments
+        GROUP BY tenant_id
+      )
       SELECT
         tenants.id,
         tenants.name,
@@ -191,22 +205,18 @@ export const getBillingTenants = async (req, res, next) => {
         plans.slug AS plan_slug,
         plans.price_monthly,
         plans.currency,
-        tenant_subscriptions.status AS subscription_status,
-        tenant_subscriptions.started_at,
-        tenant_subscriptions.expires_at,
-        COALESCE(SUM(payments.amount), 0)::numeric AS total_paid,
-        MAX(payments.paid_at) AS last_payment_at
+        latest_subscription.status AS subscription_status,
+        latest_subscription.started_at,
+        latest_subscription.expires_at,
+        COALESCE(payment_summary.total_paid, 0)::numeric AS total_paid,
+        payment_summary.last_payment_at
       FROM tenants
-      LEFT JOIN tenant_subscriptions
-        ON tenant_subscriptions.tenant_id = tenants.id
+      LEFT JOIN latest_subscription
+        ON latest_subscription.tenant_id = tenants.id
       LEFT JOIN plans
-        ON plans.id = tenant_subscriptions.plan_id
-      LEFT JOIN payments
-        ON payments.tenant_id = tenants.id
-      GROUP BY
-        tenants.id,
-        plans.id,
-        tenant_subscriptions.id
+        ON plans.id = latest_subscription.plan_id
+      LEFT JOIN payment_summary
+        ON payment_summary.tenant_id = tenants.id
       ORDER BY tenants.created_at DESC
     `);
 

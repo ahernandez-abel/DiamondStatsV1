@@ -8,13 +8,17 @@ import {
   CheckCircle2,
   ClipboardList,
   CreditCard,
+  Edit3,
   Eye,
   EyeOff,
   KeyRound,
+  LockKeyhole,
   RefreshCcw,
   ShieldAlert,
   ShieldCheck,
+  Trash2,
   Users,
+  X,
 } from 'lucide-react'
 
 import SuperAdminLayout from '../../layouts/SuperAdminLayout'
@@ -23,6 +27,9 @@ import {
   regenerateSuperadminTenantAccessCode,
   updateSuperadminTenantPrivacy,
   updateSuperadminTenantStatus,
+  updateSuperadminTenantUser,
+  changeSuperadminTenantUserPassword,
+  deleteSuperadminTenantUser,
 } from '../../api/superadminTenantDetails.api'
 
 import './SuperAdminTenantDetailPage.css'
@@ -34,12 +41,24 @@ function SuperAdminTenantDetailPage() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
 
+  const [editingUser, setEditingUser] = useState(null)
+  const [passwordUser, setPasswordUser] = useState(null)
+  const [newPassword, setNewPassword] = useState('')
+
+  const [formUser, setFormUser] = useState({
+    username: '',
+    email: '',
+    role: 'admin',
+    is_active: true,
+  })
+
   useEffect(() => {
     loadTenantDetail()
   }, [tenantId])
 
   const loadTenantDetail = async () => {
     try {
+      setLoading(true)
       const res = await getSuperadminTenantDetail(tenantId)
       setData(res.data)
     } catch (error) {
@@ -70,6 +89,7 @@ function SuperAdminTenantDetailPage() {
       await loadTenantDetail()
     } catch (error) {
       console.log(error)
+      alert(error.response?.data?.message || 'Error al cambiar privacidad')
     } finally {
       setActionLoading(false)
     }
@@ -82,6 +102,7 @@ function SuperAdminTenantDetailPage() {
       await loadTenantDetail()
     } catch (error) {
       console.log(error)
+      alert(error.response?.data?.message || 'Error al regenerar código')
     } finally {
       setActionLoading(false)
     }
@@ -100,6 +121,118 @@ function SuperAdminTenantDetailPage() {
       await loadTenantDetail()
     } catch (error) {
       console.log(error)
+      alert(error.response?.data?.message || 'Error al cambiar estado')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const openEditUser = (user) => {
+    setEditingUser(user)
+
+    setFormUser({
+      username: user.username || '',
+      email: user.email || '',
+      role: user.role || 'admin',
+      is_active: Boolean(user.is_active),
+    })
+  }
+
+  const closeEditUser = () => {
+    setEditingUser(null)
+
+    setFormUser({
+      username: '',
+      email: '',
+      role: 'admin',
+      is_active: true,
+    })
+  }
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault()
+
+    if (!editingUser) return
+
+    if (!formUser.username || !formUser.email) {
+      alert('El nombre y el email son obligatorios')
+      return
+    }
+
+    try {
+      setActionLoading(true)
+
+      await updateSuperadminTenantUser(
+        tenantId,
+        editingUser.id,
+        formUser
+      )
+
+      closeEditUser()
+      await loadTenantDetail()
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || 'Error al actualizar administrador')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const openPasswordModal = (user) => {
+    setPasswordUser(user)
+    setNewPassword('')
+  }
+
+  const closePasswordModal = () => {
+    setPasswordUser(null)
+    setNewPassword('')
+  }
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault()
+
+    if (!passwordUser) return
+
+    if (!newPassword || newPassword.length < 6) {
+      alert('La contraseña debe tener mínimo 6 caracteres')
+      return
+    }
+
+    try {
+      setActionLoading(true)
+
+      await changeSuperadminTenantUserPassword(
+        tenantId,
+        passwordUser.id,
+        newPassword
+      )
+
+      closePasswordModal()
+      alert('Contraseña cambiada correctamente')
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || 'Error al cambiar contraseña')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (user) => {
+    const confirmDelete = window.confirm(
+      `¿Seguro que deseas eliminar al administrador ${user.username}?`
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      setActionLoading(true)
+
+      await deleteSuperadminTenantUser(tenantId, user.id)
+
+      await loadTenantDetail()
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.message || 'Error al eliminar administrador')
     } finally {
       setActionLoading(false)
     }
@@ -151,23 +284,16 @@ function SuperAdminTenantDetailPage() {
 
             <div>
               <h2>{tenant.name}</h2>
-
-              <p>
-                /{tenant.slug}
-              </p>
+              <p>/{tenant.slug}</p>
 
               <div className="tenant-detail-badges">
                 <span className={`status ${tenant.status}`}>
                   {tenant.status}
                 </span>
 
-                <span>
-                  {tenant.is_public ? 'Público' : 'Privado'}
-                </span>
+                <span>{tenant.is_public ? 'Público' : 'Privado'}</span>
 
-                <span>
-                  Plan: {tenant.plan_name || 'Sin plan'}
-                </span>
+                <span>Plan: {tenant.plan_name || 'Sin plan'}</span>
               </div>
             </div>
           </div>
@@ -325,6 +451,7 @@ function SuperAdminTenantDetailPage() {
                   <th>Rol</th>
                   <th>Estado</th>
                   <th>Última actividad</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
 
@@ -334,8 +461,49 @@ function SuperAdminTenantDetailPage() {
                     <td>{user.username}</td>
                     <td>{user.email}</td>
                     <td>{user.role}</td>
-                    <td>{user.is_active ? 'Activo' : 'Inactivo'}</td>
+                    <td>
+                      <span className={`tenant-user-status ${user.is_active ? 'active' : 'inactive'}`}>
+                        {user.is_active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
                     <td>{formatDate(user.last_activity_at)}</td>
+                    <td>
+                      {user.role === 'admin' ? (
+                        <div className="tenant-user-actions">
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => openEditUser(user)}
+                          >
+                            <Edit3 size={15} />
+                            Editar
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => openPasswordModal(user)}
+                          >
+                            <LockKeyhole size={15} />
+                            Contraseña
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            className="danger"
+                            onClick={() => handleDeleteUser(user)}
+                          >
+                            <Trash2 size={15} />
+                            Eliminar
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="tenant-detail-muted">
+                          Protegido
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -432,6 +600,109 @@ function SuperAdminTenantDetailPage() {
           </div>
         </div>
       </section>
+
+      {editingUser && (
+        <div className="tenant-modal-overlay">
+          <form className="tenant-modal" onSubmit={handleUpdateUser}>
+            <div className="tenant-modal-header">
+              <h3>Editar administrador</h3>
+
+              <button type="button" onClick={closeEditUser}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <label>Nombre de usuario</label>
+            <input
+              value={formUser.username}
+              onChange={(e) =>
+                setFormUser({ ...formUser, username: e.target.value })
+              }
+              placeholder="Nombre del administrador"
+            />
+
+            <label>Email</label>
+            <input
+              type="email"
+              value={formUser.email}
+              onChange={(e) =>
+                setFormUser({ ...formUser, email: e.target.value })
+              }
+              placeholder="correo@ejemplo.com"
+            />
+
+            <label>Rol</label>
+            <select
+              value={formUser.role}
+              onChange={(e) =>
+                setFormUser({ ...formUser, role: e.target.value })
+              }
+            >
+              <option value="admin">Admin</option>
+            </select>
+
+            <label>Estado</label>
+            <select
+              value={formUser.is_active ? 'true' : 'false'}
+              onChange={(e) =>
+                setFormUser({
+                  ...formUser,
+                  is_active: e.target.value === 'true',
+                })
+              }
+            >
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+
+            <div className="tenant-modal-actions">
+              <button type="button" onClick={closeEditUser}>
+                Cancelar
+              </button>
+
+              <button type="submit" disabled={actionLoading}>
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {passwordUser && (
+        <div className="tenant-modal-overlay">
+          <form className="tenant-modal" onSubmit={handleChangePassword}>
+            <div className="tenant-modal-header">
+              <h3>Cambiar contraseña</h3>
+
+              <button type="button" onClick={closePasswordModal}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="tenant-modal-description">
+              Administrador: <strong>{passwordUser.username}</strong>
+            </p>
+
+            <label>Nueva contraseña</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+            />
+
+            <div className="tenant-modal-actions">
+              <button type="button" onClick={closePasswordModal}>
+                Cancelar
+              </button>
+
+              <button type="submit" disabled={actionLoading}>
+                Cambiar contraseña
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </SuperAdminLayout>
   )
 }

@@ -295,3 +295,215 @@ export const updateTenantAdvancedStatus = async (req, res, next) => {
     next(error)
   }
 }
+
+export const updateTenantUserBySuperAdmin = async (req, res, next) => {
+  try {
+    const { tenantId, userId } = req.params
+    const { username, email, role = 'admin', is_active = true } = req.body
+
+    if (!username || !email) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El nombre y el email son obligatorios',
+      })
+    }
+
+    if (role !== 'admin') {
+      return res.status(400).json({
+        ok: false,
+        message: 'Solo se pueden editar usuarios administradores',
+      })
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET
+        username = $1,
+        email = $2,
+        role = 'admin',
+        is_active = $3
+      WHERE id = $4
+      AND tenant_id = $5
+      AND role = 'admin'
+      RETURNING
+        id,
+        username,
+        email,
+        role,
+        is_active,
+        tenant_id,
+        last_login_at,
+        last_activity_at,
+        created_at
+      `,
+      [username, email, is_active, userId, tenantId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Administrador no encontrado',
+      })
+    }
+
+    await logAudit({
+      tenant_id: tenantId,
+      user_id: req.user?.id || null,
+      action: 'update_admin_user',
+      module: 'superadmin_tenants',
+      entity_type: 'user',
+      entity_id: userId,
+      new_data: {
+        username,
+        email,
+        role: 'admin',
+        is_active,
+      },
+      description: `Administrador ${username} actualizado por superadmin`,
+      ip_address: req.ip,
+      user_agent: req.headers['user-agent'] || null,
+    })
+
+    res.json({
+      ok: true,
+      message: 'Administrador actualizado correctamente',
+      user: result.rows[0],
+    })
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        ok: false,
+        message: 'Ya existe un usuario con ese nombre o email',
+      })
+    }
+
+    next(error)
+  }
+}
+
+export const changeTenantUserPasswordBySuperAdmin = async (req, res, next) => {
+  try {
+    const { tenantId, userId } = req.params
+    const { password } = req.body
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        ok: false,
+        message: 'La contraseña debe tener mínimo 6 caracteres',
+      })
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET password = $1
+      WHERE id = $2
+      AND tenant_id = $3
+      AND role = 'admin'
+      RETURNING
+        id,
+        username,
+        email,
+        role,
+        is_active,
+        tenant_id
+      `,
+      [password, userId, tenantId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Administrador no encontrado',
+      })
+    }
+
+    await logAudit({
+      tenant_id: tenantId,
+      user_id: req.user?.id || null,
+      action: 'change_admin_password',
+      module: 'superadmin_tenants',
+      entity_type: 'user',
+      entity_id: userId,
+      description: `Contraseña cambiada al administrador ${result.rows[0].username}`,
+      ip_address: req.ip,
+      user_agent: req.headers['user-agent'] || null,
+    })
+
+    res.json({
+      ok: true,
+      message: 'Contraseña actualizada correctamente',
+      user: result.rows[0],
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteTenantUserBySuperAdmin = async (req, res, next) => {
+  try {
+    const { tenantId, userId } = req.params
+
+    const adminsResult = await pool.query(
+      `
+      SELECT COUNT(*)::int AS total_admins
+      FROM users
+      WHERE tenant_id = $1
+      AND role = 'admin'
+      `,
+      [tenantId]
+    )
+
+    if (adminsResult.rows[0].total_admins <= 1) {
+      return res.status(400).json({
+        ok: false,
+        message: 'No puedes eliminar el único administrador del tenant',
+      })
+    }
+
+    const result = await pool.query(
+      `
+      DELETE FROM users
+      WHERE id = $1
+      AND tenant_id = $2
+      AND role = 'admin'
+      RETURNING
+        id,
+        username,
+        email,
+        role,
+        tenant_id
+      `,
+      [userId, tenantId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Administrador no encontrado',
+      })
+    }
+
+    await logAudit({
+      tenant_id: tenantId,
+      user_id: req.user?.id || null,
+      action: 'delete_admin_user',
+      module: 'superadmin_tenants',
+      entity_type: 'user',
+      entity_id: userId,
+      old_data: result.rows[0],
+      description: `Administrador ${result.rows[0].username} eliminado por superadmin`,
+      ip_address: req.ip,
+      user_agent: req.headers['user-agent'] || null,
+    })
+
+    res.json({
+      ok: true,
+      message: 'Administrador eliminado correctamente',
+      user: result.rows[0],
+    })
+  } catch (error) {
+    next(error)
+  }
+}

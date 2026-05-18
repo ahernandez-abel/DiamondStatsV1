@@ -113,19 +113,23 @@ function PitchingStatsPage({ admin = false }) {
 
         <div className="pitching-header">
 
-          <span className="players-badge">
-            {admin ? 'Panel Administrativo' : tenant?.name || 'DiamondStats'}
-          </span>
+  <span className="players-badge">
+    {admin ? 'Panel Administrativo' : tenant?.name || 'DiamondStats'}
+  </span>
 
-          <h1 className="pitching-title">
-            Líderes de Pitcheo
-          </h1>
+  <div className="pitching-heading-block">
 
-          <p className="pitching-subtitle">
-            Estadísticas acumuladas de pitcheo
-          </p>
+    <h1 className="pitching-title">
+      Líderes de Pitcheo
+    </h1>
 
-        </div>
+    <p className="pitching-subtitle">
+      Estadísticas acumuladas de pitcheo
+    </p>
+
+  </div>
+
+</div>
 
         <div className="pitching-table-wrapper">
 

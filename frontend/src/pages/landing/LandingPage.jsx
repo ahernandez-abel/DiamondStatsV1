@@ -372,7 +372,22 @@ function LandingPage() {
 
       </section>
 
-    </main>
+<footer className="landing-footer">
+
+  <p>
+    AbelDev
+  </p>
+
+  <span>
+    © 2026 DiamondStats • Sistema desarrollado por AbelDev
+    <p>
+    Contacto: 809-447-2022
+    </p>
+  </span>
+
+</footer>
+
+</main>
   )
 }
 

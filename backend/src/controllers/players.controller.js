@@ -32,6 +32,60 @@ export const getPlayers = async (req, res, next) => {
   try {
     const tenantId = getTenantId(req)
 
+    const page = Math.max(Number(req.query.page) || 1, 1)
+    const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100)
+    const offset = (page - 1) * limit
+
+    const search = req.query.search?.trim() || ''
+    const position = req.query.position?.trim() || ''
+    const status = req.query.status?.trim() || ''
+
+    const values = [tenantId]
+    const conditions = ['players.tenant_id = $1']
+
+    if (search) {
+      values.push(`%${search}%`)
+      conditions.push(`
+        (
+          players.full_name ILIKE $${values.length}
+          OR players.nickname ILIKE $${values.length}
+          OR players.position ILIKE $${values.length}
+          OR teams.name ILIKE $${values.length}
+        )
+      `)
+    }
+
+    if (position) {
+      values.push(position)
+      conditions.push(`players.position = $${values.length}`)
+    }
+
+    if (status === 'active') {
+      conditions.push(`players.is_active = true`)
+    }
+
+    if (status === 'inactive') {
+      conditions.push(`players.is_active = false`)
+    }
+
+    const whereClause = conditions.join(' AND ')
+
+    const countResult = await pool.query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM players
+      LEFT JOIN teams
+      ON players.team_id = teams.id
+      WHERE ${whereClause}
+      `,
+      values
+    )
+
+    const total = countResult.rows[0]?.total || 0
+    const totalPages = Math.max(Math.ceil(total / limit), 1)
+
+    const dataValues = [...values, limit, offset]
+
     const result = await pool.query(
       `
       SELECT
@@ -41,15 +95,23 @@ export const getPlayers = async (req, res, next) => {
       FROM players
       LEFT JOIN teams
       ON players.team_id = teams.id
-      WHERE players.tenant_id = $1
+      WHERE ${whereClause}
       ORDER BY players.full_name ASC
+      LIMIT $${values.length + 1}
+      OFFSET $${values.length + 2}
       `,
-      [tenantId]
+      dataValues
     )
 
     res.json({
       ok: true,
       players: result.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     })
   } catch (error) {
     next(error)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/PublicLayout'
@@ -15,6 +15,7 @@ function PlayerDetailsPage() {
 
   const [player, setPlayer] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [statSearch, setStatSearch] = useState('')
 
   useEffect(() => {
     loadPlayer()
@@ -42,6 +43,51 @@ function PlayerDetailsPage() {
       .toFixed(3)
       .replace(/^0/, '')
   }
+
+  const battingStats = useMemo(() => {
+    if (!player) return []
+
+    return [
+      { key: 'AVG', label: 'AVG', value: formatAverage(player.batting?.avg), featured: true },
+      { key: 'OPS', label: 'OPS', value: formatAverage(player.batting?.ops), featured: true },
+      { key: 'OBP', label: 'OBP', value: formatAverage(player.batting?.obp) },
+      { key: 'SLG', label: 'SLG', value: formatAverage(player.batting?.slg) },
+      { key: 'AB', label: 'AB', value: player.batting?.ab || 0 },
+      { key: 'H', label: 'H', value: player.batting?.hits || 0 },
+      { key: 'HR', label: 'HR', value: player.batting?.hr || 0 },
+      { key: 'RBI', label: 'RBI', value: player.batting?.rbi || 0 },
+      { key: 'R', label: 'R', value: player.batting?.runs || 0 },
+      { key: 'BB', label: 'BB', value: player.batting?.bb || 0 },
+      { key: 'SO', label: 'SO', value: player.batting?.so || 0 },
+      { key: 'SB', label: 'SB', value: player.batting?.sb || 0 },
+    ]
+  }, [player])
+
+  const pitchingStats = useMemo(() => {
+    if (!player) return []
+
+    return [
+      { key: 'ERA', label: 'ERA', value: player.pitching?.era || '0.00', featured: true },
+      { key: 'WHIP', label: 'WHIP', value: player.pitching?.whip || '0.00', featured: true },
+      { key: 'IP', label: 'IP', value: player.pitching?.ip || 0 },
+      { key: 'SO', label: 'SO', value: player.pitching?.strikeouts || 0 },
+      { key: 'BB', label: 'BB', value: player.pitching?.walks || 0 },
+      { key: 'ER', label: 'ER', value: player.pitching?.earned_runs || 0 },
+    ]
+  }, [player])
+
+  const filterStats = (stats) => {
+    const query = statSearch.trim().toLowerCase()
+
+    if (!query) return stats
+
+    return stats.filter((stat) =>
+      `${stat.key} ${stat.label}`.toLowerCase().includes(query)
+    )
+  }
+
+  const filteredBattingStats = filterStats(battingStats)
+  const filteredPitchingStats = filterStats(pitchingStats)
 
   if (loading) {
     return <Loader />
@@ -119,6 +165,26 @@ function PlayerDetailsPage() {
           </div>
         </div>
 
+        <div className="player-stats-tools">
+          <input
+            type="text"
+            value={statSearch}
+            onChange={(e) => setStatSearch(e.target.value)}
+            placeholder="Buscar estadística: AVG, HR, ERA, WHIP..."
+            className="player-stat-search"
+          />
+
+          {statSearch && (
+            <button
+              type="button"
+              onClick={() => setStatSearch('')}
+              className="clear-stat-search-btn"
+            >
+              Limpiar
+            </button>
+          )}
+        </div>
+
         <div className="stats-section">
           <div className="section-header">
             <h2 className="stats-title">
@@ -126,67 +192,23 @@ function PlayerDetailsPage() {
             </h2>
           </div>
 
-          <div className="stats-grid">
-            <div className="stat-card featured">
-              <span>AVG</span>
-              <h3>{formatAverage(player.batting?.avg)}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>OPS</span>
-              <h3>{formatAverage(player.batting?.ops)}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>OBP</span>
-              <h3>{formatAverage(player.batting?.obp)}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>SLG</span>
-              <h3>{formatAverage(player.batting?.slg)}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>H</span>
-              <h3>{player.batting?.hits || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>HR</span>
-              <h3>{player.batting?.hr || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>RBI</span>
-              <h3>{player.batting?.rbi || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>R</span>
-              <h3>{player.batting?.runs || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>AB</span>
-              <h3>{player.batting?.ab || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>BB</span>
-              <h3>{player.batting?.bb || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>SO</span>
-              <h3>{player.batting?.so || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>SB</span>
-              <h3>{player.batting?.sb || 0}</h3>
-            </div>
+          <div className="stats-grid compact">
+            {filteredBattingStats.map((stat) => (
+              <div
+                key={`batting-${stat.key}`}
+                className={stat.featured ? 'stat-card featured' : 'stat-card'}
+              >
+                <span>{stat.label}</span>
+                <h3>{stat.value}</h3>
+              </div>
+            ))}
           </div>
+
+          {filteredBattingStats.length === 0 && (
+            <div className="stats-empty">
+              No hay estadísticas ofensivas con ese filtro.
+            </div>
+          )}
         </div>
 
         <div className="stats-section">
@@ -194,40 +216,24 @@ function PlayerDetailsPage() {
             Estadísticas de Pitcheo
           </h2>
 
-          <div className="stats-grid">
-            <div className="stat-card featured">
-              <span>ERA</span>
-              <h3>{player.pitching?.era || '0.00'}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>WHIP</span>
-              <h3>{player.pitching?.whip || '0.00'}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>IP</span>
-              <h3>{player.pitching?.ip || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>SO</span>
-              <h3>{player.pitching?.strikeouts || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>BB</span>
-              <h3>{player.pitching?.walks || 0}</h3>
-            </div>
-
-            <div className="stat-card">
-              <span>ER</span>
-              <h3>{player.pitching?.earned_runs || 0}</h3>
-            </div>
+          <div className="stats-grid compact">
+            {filteredPitchingStats.map((stat) => (
+              <div
+                key={`pitching-${stat.key}`}
+                className={stat.featured ? 'stat-card featured' : 'stat-card'}
+              >
+                <span>{stat.label}</span>
+                <h3>{stat.value}</h3>
+              </div>
+            ))}
           </div>
-        </div>
 
-        
+          {filteredPitchingStats.length === 0 && (
+            <div className="stats-empty">
+              No hay estadísticas de pitcheo con ese filtro.
+            </div>
+          )}
+        </div>
       </div>
     </PublicLayout>
   )

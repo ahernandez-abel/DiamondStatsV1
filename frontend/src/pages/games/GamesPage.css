@@ -285,3 +285,43 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+
+.delete-game-button {
+  border: none;
+
+  padding: 12px 18px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #dc2626 0%,
+    #991b1b 100%
+  );
+
+  color: #ffffff;
+
+  font-size: 0.92rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+
+  box-shadow:
+    0 10px 24px rgba(220, 38, 38, 0.25);
+}
+
+.delete-game-button:hover {
+  transform: translateY(-2px);
+
+  opacity: 0.92;
+}
+
+.delete-game-button:active {
+  transform: scale(0.98);
+}

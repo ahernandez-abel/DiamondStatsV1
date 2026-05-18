@@ -1,48 +1,68 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
-import PublicLayout from '../../layouts/PublicLayout';
-import DashboardLayout from '../../layouts/DashboardLayout';
+import PublicLayout from '../../layouts/PublicLayout'
+import DashboardLayout from '../../layouts/DashboardLayout'
 
-import { getGames } from '../../api/games.api';
-import { getPublicHome } from '../../api/public.api';
+import {
+  getGames,
+  deleteGame,
+} from '../../api/games.api'
 
-import './GamesPage.css';
+import { getPublicHome } from '../../api/public.api'
+
+import './GamesPage.css'
 
 function GamesPage({ admin = false }) {
-  const { tenantSlug } = useParams();
+  const { tenantSlug } = useParams()
 
-  const Layout = admin ? DashboardLayout : PublicLayout;
+  const Layout = admin ? DashboardLayout : PublicLayout
 
-  const [games, setGames] = useState([]);
-  const [tenant, setTenant] = useState(null);
+  const [games, setGames] = useState([])
+  const [tenant, setTenant] = useState(null)
 
   useEffect(() => {
-    loadGames();
-  }, [tenantSlug]);
+    loadGames()
+  }, [tenantSlug])
 
   const loadGames = async () => {
     try {
       if (tenantSlug && !admin) {
-        const res = await getPublicHome(tenantSlug);
+        const res = await getPublicHome(tenantSlug)
 
-        setTenant(res.data.tenant || null);
-        setGames(res.data.games || []);
+        setTenant(res.data.tenant || null)
+        setGames(res.data.games || [])
 
-        return;
+        return
       }
 
-      const res = await getGames();
+      const res = await getGames()
 
       const data = Array.isArray(res.data)
         ? res.data
-        : res.data.games || [];
+        : res.data.games || []
 
-      setGames(data);
+      setGames(data)
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
+
+  const handleDelete = async (id) => {
+    const confirmDelete = confirm(
+      '¿Seguro que deseas eliminar este juego? Esta acción no se puede deshacer.'
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      await deleteGame(id)
+      await loadGames()
+    } catch (error) {
+      console.log(error)
+      alert('Error eliminando juego')
+    }
+  }
 
   return (
     <Layout tenantSlug={tenantSlug}>
@@ -70,7 +90,10 @@ function GamesPage({ admin = false }) {
             </div>
           ) : (
             games.map((game) => (
-              <div key={game.id} className="game-card">
+              <div
+                key={game.id}
+                className="game-card"
+              >
                 <div className="game-card-content">
                   <div className="game-info">
                     <h2 className="game-match">
@@ -127,6 +150,14 @@ function GamesPage({ admin = false }) {
                       >
                         Resultado del Juego
                       </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(game.id)}
+                        className="delete-game-button"
+                      >
+                        Eliminar Juego
+                      </button>
                     </div>
                   )}
                 </div>
@@ -136,7 +167,7 @@ function GamesPage({ admin = false }) {
         </div>
       </section>
     </Layout>
-  );
+  )
 }
 
-export default GamesPage;
+export default GamesPage

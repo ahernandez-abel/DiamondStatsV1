@@ -71,12 +71,7 @@ function AdminPlayersPage() {
               className="admin-player-search"
             />
 
-            <Link
-              to="/players/create"
-              className="admin-create-player-btn"
-            >
-              + Crear Jugador
-            </Link>
+          
 
           </div>
 

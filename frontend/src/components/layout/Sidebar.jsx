@@ -28,81 +28,110 @@ import logo from '../../assets/logo.png'
 import './Sidebar.css'
 
 function Sidebar() {
-
   const navigate = useNavigate()
-
   const { logout } = useAuth()
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleLogout = () => {
-
-  logout()
-
-  navigate('/login', { replace: true })
-}
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   const closeSidebar = () => {
     setMobileOpen(false)
   }
 
-  const links = [
-  {
-    path: '/admin/players',
-    label: 'Administrar Jugadores',
-    icon: Users,
-  },
-  {
-    path: '/admin/comparar',
-    label: 'Comparar Jugadores',
-    icon: Swords,
-  },
-  {
-    path: '/admin/players/create',
-    label: 'Crear Jugador',
-    icon: UserPlus,
-  },
-  {
-    path: '/admin/teams/create',
-    label: 'Crear Equipo',
-    icon: Shield,
-  },
-  {
-    path: '/admin/games/create',
-    label: 'Crear Juego',
-    icon: CalendarDays,
-  },
-  {
-    path: '/admin/games',
-    label: 'Partidos / Stats',
-    icon: Trophy,
-  },
-  {
-    path: '/admin/stats/batting',
-    label: 'Ver Bateo',
-    icon: Target,
-  },
-  {
-    path: '/admin/stats/pitching',
-    label: 'Ver Pitcher',
-    icon: Activity,
-  },
- 
-  {
-  path: '/admin/dashboard',
-  label: 'Dashboard',
-  icon: LayoutDashboard,
-},
-{
-  path: '/admin/billing',
-  label: 'Mi Plan',
-  icon: CreditCard,
-},
-]
+  const sections = [
+    {
+      title: 'Panel',
+      links: [
+        {
+          path: '/admin/dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      title: 'Juegos',
+      links: [
+        {
+          path: '/admin/games/create',
+          label: 'Crear Juego',
+          icon: CalendarDays,
+        },
+        {
+          path: '/admin/games',
+          label: 'Partidos / Stats',
+          icon: Trophy,
+        },
+      ],
+    },
+    {
+      title: 'Jugadores',
+      links: [
+        {
+          path: '/admin/players',
+          label: 'Administrar Jugadores',
+          icon: Users,
+        },
+        {
+          path: '/admin/players/create',
+          label: 'Crear Jugador',
+          icon: UserPlus,
+        },
+        {
+          path: '/admin/comparar',
+          label: 'Comparar Jugadores',
+          icon: Swords,
+        },
+      ],
+    },
+    {
+      title: 'Equipos',
+      links: [
+        {
+          path: '/admin/teams',
+          label: 'Administrar Equipos',
+          icon: Shield,
+        },
+        {
+          path: '/admin/teams/create',
+          label: 'Crear Equipo',
+          icon: Shield,
+        },
+      ],
+    },
+    {
+      title: 'Estadísticas',
+      links: [
+        {
+          path: '/admin/stats/batting',
+          label: 'Ver Bateo',
+          icon: Target,
+        },
+        {
+          path: '/admin/stats/pitching',
+          label: 'Ver Pitcher',
+          icon: Activity,
+        },
+      ],
+    },
+    {
+      title: 'Cuenta',
+      links: [
+        {
+          path: '/admin/billing',
+          label: 'Mi Plan',
+          icon: CreditCard,
+        },
+      ],
+    },
+  ]
 
   return (
     <>
-
       <button
         className="sidebar-mobile-toggle"
         onClick={() => setMobileOpen(true)}
@@ -117,16 +146,8 @@ function Sidebar() {
         />
       )}
 
-      <aside
-        className={
-          mobileOpen
-            ? 'sidebar mobile-open'
-            : 'sidebar'
-        }
-      >
-
+      <aside className={mobileOpen ? 'sidebar mobile-open' : 'sidebar'}>
         <div className="sidebar-top">
-
           <button
             className="sidebar-close-btn"
             onClick={closeSidebar}
@@ -147,46 +168,50 @@ function Sidebar() {
           <p className="sidebar-subtitle">
             Panel Administrativo
           </p>
-
         </div>
 
         <nav className="sidebar-menu">
+          {sections.map((section) => (
+            <div
+              key={section.title}
+              className="sidebar-section"
+            >
+              <span className="sidebar-section-title">
+                {section.title}
+              </span>
 
-          {links.map((link) => {
+              {section.links.map((link) => {
+                const Icon = link.icon
 
-            const Icon = link.icon
+                return (
+                  <NavLink
+  key={link.path}
+  to={link.path}
+  end
+  onClick={closeSidebar}
+  className={({ isActive }) =>
+    isActive
+      ? 'sidebar-link active'
+      : 'sidebar-link'
+  }
+>
+                    <Icon
+                      size={20}
+                      className="sidebar-icon"
+                    />
 
-            return (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                onClick={closeSidebar}
-                className={({ isActive }) =>
-                  isActive
-                    ? 'sidebar-link active'
-                    : 'sidebar-link'
-                }
-              >
-
-                <Icon
-                  size={20}
-                  className="sidebar-icon"
-                />
-
-                <span>
-                  {link.label}
-                </span>
-
-              </NavLink>
-            )
-          })}
-
+                    <span>
+                      {link.label}
+                    </span>
+                  </NavLink>
+                )
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-footer">
-
           <div className="abeldev-badge">
-
             <span className="abeldev-title">
               AbelDev
             </span>
@@ -194,26 +219,20 @@ function Sidebar() {
             <span className="abeldev-subtitle">
               DiamondStats System
             </span>
-
           </div>
 
           <button
             onClick={handleLogout}
             className="sidebar-logout-btn"
           >
-
             <LogOut size={18} />
 
             <span>
               Cerrar Sesión
             </span>
-
           </button>
-
         </div>
-
       </aside>
-
     </>
   )
 }

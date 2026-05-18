@@ -1,8 +1,14 @@
 // src/pages/teams/CreateTeamPage.jsx
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import { createTeam } from '../../api/teams.api'
+import {
+  createTeam,
+  getTeamById,
+  updateTeam,
+  deleteTeam,
+} from '../../api/teams.api'
 
 import DashboardLayout from '../../layouts/DashboardLayout'
 
@@ -13,6 +19,11 @@ import PageHeader from '../../components/layout/PageHeader'
 import './CreateTeamPage.css'
 
 function CreateTeamPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+
+  const isEditMode = Boolean(id)
+
   const initialForm = {
     name: '',
     short_name: '',
@@ -24,12 +35,50 @@ function CreateTeamPage() {
   const [form, setForm] = useState(initialForm)
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    if (isEditMode) {
+      loadTeam()
+    }
+  }, [id])
+
+  const loadTeam = async () => {
+    try {
+      const res = await getTeamById(id)
+
+      const team = res.data.team || res.data
+
+      setForm({
+        name: team.name || '',
+        short_name: team.short_name || '',
+        city: team.city || '',
+        manager_name: team.manager_name || '',
+        logo_url: team.logo_url || '',
+      })
+    } catch (error) {
+      console.log(error)
+      alert('Error cargando equipo rival')
+    }
+  }
+
+  const resetForm = () => {
+    setForm(initialForm)
+  }
+
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     })
   }
+
+  const buildPayload = () => ({
+    name: form.name.trim(),
+    short_name: form.short_name.trim() || null,
+    city: form.city.trim() || null,
+    manager_name: form.manager_name.trim() || null,
+    logo_url: form.logo_url.trim() || null,
+    is_main: false,
+  })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -42,25 +91,54 @@ function CreateTeamPage() {
     try {
       setLoading(true)
 
-      await createTeam({
-        ...form,
-        name: form.name.trim(),
-        short_name: form.short_name.trim() || null,
-        city: form.city.trim() || null,
-        manager_name: form.manager_name.trim() || null,
-        logo_url: form.logo_url.trim() || null,
-        is_main: false,
-      })
+      const payload = buildPayload()
+
+      if (isEditMode) {
+        await updateTeam(id, payload)
+        alert('Equipo rival actualizado correctamente')
+        return
+      }
+
+      await createTeam(payload)
 
       alert('Equipo rival registrado correctamente')
-
-      setForm(initialForm)
+      resetForm()
     } catch (error) {
       console.log(error)
 
       const message =
         error.response?.data?.message ||
-        'Error registrando equipo rival'
+        (isEditMode
+          ? 'Error actualizando equipo rival'
+          : 'Error registrando equipo rival')
+
+      alert(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    const confirmed = confirm(
+      '¿Seguro que deseas eliminar este equipo rival? Esta acción no se puede deshacer.'
+    )
+
+    if (!confirmed) return
+
+    try {
+      setLoading(true)
+
+      await deleteTeam(id)
+
+      alert('Equipo rival eliminado correctamente')
+
+      navigate('/admin/teams')
+    } catch (error) {
+      console.log(error)
+
+      const message =
+        error.response?.data?.message ||
+        'Error eliminando equipo rival'
 
       alert(message)
     } finally {
@@ -72,8 +150,12 @@ function CreateTeamPage() {
     <DashboardLayout>
       <div className="create-team-page">
         <PageHeader
-          title="Registrar Equipo Rival"
-          subtitle="Agrega los equipos contrarios que enfrentarás en tus juegos"
+          title={isEditMode ? 'Editar Equipo Rival' : 'Registrar Equipo Rival'}
+          subtitle={
+            isEditMode
+              ? 'Modifica o elimina el equipo rival seleccionado'
+              : 'Agrega los equipos contrarios que enfrentarás en tus juegos'
+          }
         />
 
         <div className="create-team-container">
@@ -135,8 +217,23 @@ function CreateTeamPage() {
 
             <div className="team-button-container">
               <Button type="submit" disabled={loading}>
-                {loading ? 'Registrando...' : 'Guardar Equipo Rival'}
+                {loading
+                  ? 'Guardando...'
+                  : isEditMode
+                    ? 'Actualizar Equipo Rival'
+                    : 'Guardar Equipo Rival'}
               </Button>
+
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="delete-team-form-btn"
+                  disabled={loading}
+                >
+                  Eliminar Equipo Rival
+                </button>
+              )}
             </div>
           </form>
         </div>

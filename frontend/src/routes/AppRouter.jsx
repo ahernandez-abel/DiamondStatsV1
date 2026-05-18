@@ -17,6 +17,7 @@ import AdminPlayersPage from '../pages/players/AdminPlayersPage'
 
 import TeamsPage from '../pages/teams/TeamsPage'
 import CreateTeamPage from '../pages/teams/CreateTeamPage'
+import AdminTeamsPage from '../pages/teams/AdminTeamsPage'
 
 import GamesPage from '../pages/games/GamesPage'
 import CreateGamePage from '../pages/games/CreateGamePage'
@@ -276,14 +277,33 @@ function AppRouter() {
       />
 
       {/* ADMIN TEAMS */}
-      <Route
-        path="/admin/teams/create"
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <CreateTeamPage />
-          </ProtectedRoute>
-        }
-      />
+
+<Route
+  path="/admin/teams"
+  element={
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminTeamsPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/teams/create"
+  element={
+    <ProtectedRoute allowedRoles={['admin']}>
+      <CreateTeamPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin/teams/:id/edit"
+  element={
+    <ProtectedRoute allowedRoles={['admin']}>
+      <CreateTeamPage />
+    </ProtectedRoute>
+  }
+/>
 
       {/* ADMIN GAMES */}
       <Route

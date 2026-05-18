@@ -79,3 +79,24 @@
     width: 100%;
   }
 }
+
+.delete-team-form-btn {
+  border: none;
+  padding: 13px 22px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.22);
+}
+
+.delete-team-form-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.delete-team-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

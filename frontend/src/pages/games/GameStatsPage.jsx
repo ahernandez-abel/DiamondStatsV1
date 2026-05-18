@@ -1,3 +1,5 @@
+// src/pages/games/GameStatsPage.jsx
+
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -14,6 +16,34 @@ import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 
 import './GameStatsPage.css'
+
+const battingFields = [
+  { key: 'ab', label: 'Turnos oficiales (AB)' },
+  { key: 'h', label: 'Hits (H)' },
+  { key: 'doubles', label: 'Dobles (2B)' },
+  { key: 'triples', label: 'Triples (3B)' },
+  { key: 'hr', label: 'Jonrones (HR)' },
+  { key: 'rbi', label: 'Carreras impulsadas (RBI)' },
+  { key: 'r', label: 'Carreras anotadas (R)' },
+  { key: 'sb', label: 'Bases robadas (SB)' },
+  { key: 'cs', label: 'Atrapado robando (CS)' },
+  { key: 'so', label: 'Ponches recibidos (SO)' },
+  { key: 'bb', label: 'Bases por bolas (BB)' },
+  { key: 'hbp', label: 'Golpeado por lanzamiento (HBP)' },
+  { key: 'sf', label: 'Elevado de sacrificio (SF)' },
+  { key: 'sac', label: 'Toque de sacrificio (SAC)' },
+]
+
+const pitchingFields = [
+  { key: 'ip', label: 'Entradas lanzadas (IP)', step: '0.1' },
+  { key: 'hits_allowed', label: 'Hits permitidos (H)' },
+  { key: 'er', label: 'Carreras limpias (ER)' },
+  { key: 'r_allowed', label: 'Carreras permitidas (R)' },
+  { key: 'bb', label: 'Bases por bolas (BB)' },
+  { key: 'so', label: 'Ponches (SO)' },
+  { key: 'hr_allowed', label: 'Jonrones permitidos (HR)' },
+  { key: 'hbp', label: 'Golpeados (HBP)' },
+]
 
 const initialForm = {
   batting: {
@@ -34,6 +64,7 @@ const initialForm = {
   },
   pitching: {
     pitched: false,
+    ip: 0,
     outs_recorded: 0,
     hits_allowed: 0,
     er: 0,
@@ -44,6 +75,32 @@ const initialForm = {
     hbp: 0,
     result: '',
   },
+}
+
+const convertIpToOuts = (ipValue) => {
+  const value = String(ipValue || 0).trim()
+
+  if (!value) return 0
+
+  const [inningsValue, outsValue = '0'] = value.split('.')
+
+  const innings = Number(inningsValue) || 0
+  const outs = Number(outsValue) || 0
+
+  if (outs > 2) {
+    return (innings * 3)
+  }
+
+  return (innings * 3) + outs
+}
+
+const convertOutsToIp = (outsValue) => {
+  const totalOuts = Number(outsValue) || 0
+
+  const innings = Math.floor(totalOuts / 3)
+  const outs = totalOuts % 3
+
+  return Number(`${innings}.${outs}`)
 }
 
 function GameStatsPage() {
@@ -112,6 +169,7 @@ function GameStatsPage() {
       }
 
       const stats = res.data.stats
+      const pitchingStats = stats.pitching || null
 
       setForm({
         batting: {
@@ -120,8 +178,9 @@ function GameStatsPage() {
         },
         pitching: {
           ...initialForm.pitching,
-          ...(stats.pitching || {}),
-          pitched: Boolean(stats.pitching),
+          ...(pitchingStats || {}),
+          pitched: Boolean(pitchingStats),
+          ip: convertOutsToIp(pitchingStats?.outs_recorded || 0),
         },
       })
 
@@ -167,12 +226,19 @@ function GameStatsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    const pitchingPayload = {
+      ...form.pitching,
+      outs_recorded: convertIpToOuts(form.pitching.ip),
+    }
+
+    delete pitchingPayload.ip
+
     try {
       await savePlayerGameStats(id, {
         player_id: selectedPlayer,
         team_id: teamId,
         batting: form.batting,
-        pitching: form.pitching,
+        pitching: pitchingPayload,
       })
 
       alert(
@@ -247,26 +313,47 @@ function GameStatsPage() {
             </h3>
 
             <div className="stats-grid">
-              {Object.keys(form.batting).map((key) => (
+              {battingFields.map((field) => (
                 <div
-                  key={key}
+                  key={field.key}
                   className="form-group"
                 >
-                  <label className="custom-label uppercase">
-                    {key}
+                  <label className="custom-label">
+                    {field.label}
                   </label>
 
                   <input
                     type="number"
                     min="0"
                     inputMode="numeric"
-                    name={key}
-                    value={form.batting[key]}
+                    name={field.key}
+                    value={form.batting[field.key]}
                     onChange={handleBattingChange}
                     className="custom-input"
                   />
                 </div>
               ))}
+            </div>
+
+            <div className="stats-glossary">
+              <h4>Glosario de bateo</h4>
+
+              <div className="stats-glossary-grid">
+                <p><strong>AB:</strong> Turnos oficiales al bate.</p>
+                <p><strong>H:</strong> Hits conectados.</p>
+                <p><strong>2B:</strong> Dobles.</p>
+                <p><strong>3B:</strong> Triples.</p>
+                <p><strong>HR:</strong> Jonrones.</p>
+                <p><strong>RBI:</strong> Carreras impulsadas.</p>
+                <p><strong>R:</strong> Carreras anotadas.</p>
+                <p><strong>SB:</strong> Bases robadas.</p>
+                <p><strong>CS:</strong> Atrapado robando.</p>
+                <p><strong>SO:</strong> Ponches recibidos.</p>
+                <p><strong>BB:</strong> Bases por bolas recibidas.</p>
+                <p><strong>HBP:</strong> Golpeado por lanzamiento.</p>
+                <p><strong>SF:</strong> Elevado de sacrificio.</p>
+                <p><strong>SAC:</strong> Toque de sacrificio.</p>
+              </div>
             </div>
           </section>
 
@@ -281,71 +368,90 @@ function GameStatsPage() {
               />
 
               <h3 className="section-title pitching">
-                Pitcher
+                Pitcheo
               </h3>
             </div>
 
             {form.pitching.pitched && (
-              <div className="stats-grid">
-                {[
-                  'outs_recorded',
-                  'hits_allowed',
-                  'er',
-                  'r_allowed',
-                  'bb',
-                  'so',
-                  'hr_allowed',
-                  'hbp',
-                ].map((key) => (
-                  <div
-                    key={key}
-                    className="form-group"
-                  >
-                    <label className="custom-label uppercase">
-                      {key}
+              <>
+                <div className="pitching-note">
+                  Para entradas lanzadas usa este formato: 1.0 = una entrada completa,
+                  1.1 = una entrada y un out, 1.2 = una entrada y dos outs.
+                </div>
+
+                <div className="stats-grid">
+                  {pitchingFields.map((field) => (
+                    <div
+                      key={field.key}
+                      className="form-group"
+                    >
+                      <label className="custom-label">
+                        {field.label}
+                      </label>
+
+                      <input
+                        type="number"
+                        min="0"
+                        step={field.step || '1'}
+                        inputMode="decimal"
+                        name={field.key}
+                        value={form.pitching[field.key]}
+                        onChange={handlePitchingChange}
+                        className="custom-input"
+                      />
+                    </div>
+                  ))}
+
+                  <div className="form-group">
+                    <label className="custom-label">
+                      Resultado
                     </label>
 
-                    <input
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
-                      name={key}
-                      value={form.pitching[key]}
+                    <select
+                      name="result"
+                      value={form.pitching.result}
                       onChange={handlePitchingChange}
-                      className="custom-input"
-                    />
+                      className="custom-select"
+                    >
+                      <option value="">
+                        N/A
+                      </option>
+
+                      <option value="W">
+                        Ganó
+                      </option>
+
+                      <option value="L">
+                        Perdió
+                      </option>
+
+                      <option value="S">
+                        Salvó
+                      </option>
+                    </select>
                   </div>
-                ))}
-
-                <div className="form-group">
-                  <label className="custom-label">
-                    Resultado
-                  </label>
-
-                  <select
-                    name="result"
-                    value={form.pitching.result}
-                    onChange={handlePitchingChange}
-                    className="custom-select"
-                  >
-                    <option value="">
-                      N/A
-                    </option>
-
-                    <option value="W">
-                      Ganó
-                    </option>
-
-                    <option value="L">
-                      Perdió
-                    </option>
-
-                    <option value="S">
-                      Salvó
-                    </option>
-                  </select>
                 </div>
-              </div>
+
+                <div className="stats-glossary">
+                  <h4>Glosario de pitcheo</h4>
+
+                  <div className="stats-glossary-grid">
+                    <p><strong>IP:</strong> Entradas lanzadas.</p>
+                    <p><strong>H:</strong> Hits permitidos.</p>
+                    <p><strong>ER:</strong> Carreras limpias permitidas.</p>
+                    <p><strong>R:</strong> Carreras totales permitidas.</p>
+                    <p><strong>BB:</strong> Bases por bolas otorgadas.</p>
+                    <p><strong>SO:</strong> Ponches realizados.</p>
+                    <p><strong>HR:</strong> Jonrones permitidos.</p>
+                    <p><strong>HBP:</strong> Bateadores golpeados.</p>
+                    <p><strong>W:</strong> Juego ganado.</p>
+                    <p><strong>L:</strong> Juego perdido.</p>
+                    <p><strong>S:</strong> Juego salvado.</p>
+                    <p><strong>ERA:</strong> Carreras limpias por cada 7 entradas.</p>
+                    <p><strong>WHIP:</strong> Bases por bolas más hits por entrada lanzada.</p>
+                  </div>
+                </div>
+              </>
             )}
           </section>
 

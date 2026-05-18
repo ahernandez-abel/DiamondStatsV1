@@ -186,13 +186,7 @@ function UpdateGameResultPage() {
               className="custom-select"
             >
 
-              <option value="pending">
-                Pendiente
-              </option>
-
-              <option value="live">
-                En Vivo
-              </option>
+              
 
               <option value="final">
   Finalizado

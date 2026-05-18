@@ -204,15 +204,6 @@ function CreateGamePage() {
                 onChange={handleChange}
                 className="game-select"
               >
-
-                <option value="pending">
-                  Pendiente
-                </option>
-
-                <option value="live">
-                  En Vivo
-                </option>
-
                 <option value="final">
                   Finalizado
                 </option>

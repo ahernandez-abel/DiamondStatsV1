@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import api from '../../api/axios'
+import { getBillingPlans } from '../../api/billing.api'
 import logo from '../../assets/logo.png'
 
 import './RegisterTeamPage.css'
@@ -17,8 +18,10 @@ import './RegisterTeamPage.css'
 function RegisterTeamPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loadingPlans, setLoadingPlans] = useState(true)
   const [error, setError] = useState('')
   const [createdData, setCreatedData] = useState(null)
+  const [plans, setPlans] = useState([])
 
   const [form, setForm] = useState({
     tenant_name: '',
@@ -30,9 +33,68 @@ function RegisterTeamPage() {
     admin_username: '',
     admin_email: '',
     admin_password: '',
-    plan: 'free',
+    plan: '',
     is_public: false,
   })
+
+  useEffect(() => {
+    loadPlans()
+  }, [])
+
+  const loadPlans = async () => {
+    try {
+      setLoadingPlans(true)
+
+      const res = await getBillingPlans()
+
+      const activePlans = (res.data.plans || []).filter(
+        (plan) => plan.is_active && plan.is_public
+      )
+
+      setPlans(activePlans)
+
+      if (activePlans.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          plan: activePlans[0].slug,
+        }))
+      }
+    } catch (error) {
+      console.log(error)
+
+      setPlans([
+        {
+          id: 1,
+          name: 'Free',
+          slug: 'free',
+          description: 'Plan inicial para probar DiamondStats.',
+          price_monthly: 0,
+          currency: 'DOP',
+          max_players: 15,
+          max_games: 5,
+          max_rival_teams: 5,
+        },
+        {
+          id: 2,
+          name: 'Pro',
+          slug: 'pro',
+          description: 'Plan para equipos que quieren más control.',
+          price_monthly: 700,
+          currency: 'DOP',
+          max_players: null,
+          max_games: null,
+          max_rival_teams: null,
+        },
+      ])
+
+      setForm((prev) => ({
+        ...prev,
+        plan: 'free',
+      }))
+    } finally {
+      setLoadingPlans(false)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -43,11 +105,29 @@ function RegisterTeamPage() {
     }))
   }
 
-  const selectPlan = (plan) => {
+  const selectPlan = (planSlug) => {
     setForm((prev) => ({
       ...prev,
-      plan,
+      plan: planSlug,
     }))
+  }
+
+  const formatLimit = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return 'Ilimitado'
+    }
+
+    return value
+  }
+
+  const formatPrice = (plan) => {
+    const price = Number(plan.price_monthly || 0)
+
+    if (price <= 0) {
+      return 'Gratis'
+    }
+
+    return `${plan.currency || 'DOP'} ${price.toLocaleString('es-DO')} / mes`
   }
 
   const handleSubmit = async (e) => {
@@ -84,6 +164,8 @@ function RegisterTeamPage() {
       console.log(error)
     }
   }
+
+  const selectedPlan = plans.find((plan) => plan.slug === form.plan)
 
   const siteUrl = window.location.origin
 
@@ -201,10 +283,7 @@ function RegisterTeamPage() {
             <ShieldCheck size={28} />
 
             <div>
-
-              <h3>
-                ¿Qué se crea automáticamente?
-              </h3>
+              <h3>¿Qué se crea automáticamente?</h3>
 
               <ul>
                 <li>Cuenta del equipo</li>
@@ -212,7 +291,6 @@ function RegisterTeamPage() {
                 <li>Usuario administrador</li>
                 <li>Código privado de acceso</li>
               </ul>
-
             </div>
 
           </div>
@@ -235,65 +313,68 @@ function RegisterTeamPage() {
             </div>
           )}
 
-          <div className="register-plans-grid">
+          {loadingPlans ? (
+            <div className="register-plans-loading">
+              Cargando planes disponibles...
+            </div>
+          ) : (
+            <div className="register-plans-grid">
+              {plans.map((plan) => (
+                <button
+                  key={plan.id}
+                  type="button"
+                  className={`register-plan-card ${
+                    form.plan === plan.slug ? 'active' : ''
+                  }`}
+                  onClick={() => selectPlan(plan.slug)}
+                >
+                  <span className="register-plan-badge">
+                    {plan.slug === 'pro' ? 'Recomendado' : 'Disponible'}
+                  </span>
 
-            <button
-              type="button"
-              className={`register-plan-card ${
-                form.plan === 'free' ? 'active' : ''
-              }`}
-              onClick={() => selectPlan('free')}
-            >
-              <span className="register-plan-badge">
-                Para comenzar
-              </span>
+                  <h3>{plan.name}</h3>
 
-              <h3>Free</h3>
+                  <p className="register-plan-price">
+                    {formatPrice(plan)}
+                  </p>
 
-              <p className="register-plan-price">
-                Gratis
-              </p>
+                  {plan.description && (
+                    <p className="register-plan-description">
+                      {plan.description}
+                    </p>
+                  )}
 
-              <ul>
-                <li>Registro del equipo</li>
-                <li>Jugadores limitados</li>
-                <li>Juegos limitados</li>
-                <li>Estadísticas básicas</li>
-                <li>Acceso privado con código</li>
-              </ul>
-            </button>
+                  <ul>
+                    <li>
+                      Jugadores: {formatLimit(plan.max_players)}
+                    </li>
 
-            <button
-              type="button"
-              className={`register-plan-card featured ${
-                form.plan === 'pro' ? 'active' : ''
-              }`}
-              onClick={() => selectPlan('pro')}
-            >
-              <span className="register-plan-badge">
-                Recomendado
-              </span>
+                    <li>
+                      Juegos: {formatLimit(plan.max_games)}
+                    </li>
 
-              <h3>Pro</h3>
+                    <li>
+                      Equipos rivales: {formatLimit(plan.max_rival_teams)}
+                    </li>
 
-              <p className="register-plan-price">
-                Para equipos que quieren más control
-              </p>
+                    <li>
+                      Acceso completo al sistema
+                    </li>
 
-              <ul>
-                <li>Más jugadores disponibles</li>
-                <li>Más juegos registrados</li>
-                <li>Estadísticas avanzadas</li>
-                <li>Ranking, líderes y comparaciones</li>
-                <li>Vista pública del equipo</li>
-              </ul>
-            </button>
+                    <li>
+                      Estadísticas, rankings y comparaciones
+                    </li>
+                  </ul>
+                </button>
+              ))}
+            </div>
+          )}
 
-          </div>
-
-          <div className="register-selected-plan">
-            Plan seleccionado: <strong>{form.plan === 'free' ? 'Free' : 'Pro'}</strong>
-          </div>
+          {selectedPlan && (
+            <div className="register-selected-plan">
+              Plan seleccionado: <strong>{selectedPlan.name}</strong>
+            </div>
+          )}
 
           <div className="register-form-header second">
             <span>Paso 2</span>
@@ -452,11 +533,11 @@ function RegisterTeamPage() {
           <button
             className="register-submit-btn"
             type="submit"
-            disabled={loading}
+            disabled={loading || !form.plan}
           >
             {loading
               ? 'Registrando equipo...'
-              : `Registrar equipo en plan ${form.plan === 'free' ? 'Free' : 'Pro'}`}
+              : `Registrar equipo${selectedPlan ? ` en plan ${selectedPlan.name}` : ''}`}
           </button>
 
         </form>

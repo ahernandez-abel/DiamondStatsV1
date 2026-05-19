@@ -15,10 +15,20 @@ import { onlySuperAdmin } from '../middlewares/role.middleware.js';
 
 const router = Router();
 
+/*
+  Ruta pública:
+  Se usa en el registro para mostrar los planes disponibles.
+*/
+router.get('/plans', getPlans);
+
+/*
+  Rutas protegidas:
+  Solo superadmin puede crear, editar planes,
+  ver tenants, cambiar planes y registrar pagos.
+*/
 router.use(authMiddleware);
 router.use(onlySuperAdmin);
 
-router.get('/plans', getPlans);
 router.post('/plans', createPlan);
 router.patch('/plans/:planId', updatePlan);
 

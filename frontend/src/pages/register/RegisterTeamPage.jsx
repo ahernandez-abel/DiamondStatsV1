@@ -43,6 +43,13 @@ function RegisterTeamPage() {
     }))
   }
 
+  const selectPlan = (plan) => {
+    setForm((prev) => ({
+      ...prev,
+      plan,
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -219,7 +226,7 @@ function RegisterTeamPage() {
 
           <div className="register-form-header">
             <span>Paso 1</span>
-            <h2>Datos del equipo</h2>
+            <h2>Elige el plan de tu equipo</h2>
           </div>
 
           {error && (
@@ -227,6 +234,71 @@ function RegisterTeamPage() {
               {error}
             </div>
           )}
+
+          <div className="register-plans-grid">
+
+            <button
+              type="button"
+              className={`register-plan-card ${
+                form.plan === 'free' ? 'active' : ''
+              }`}
+              onClick={() => selectPlan('free')}
+            >
+              <span className="register-plan-badge">
+                Para comenzar
+              </span>
+
+              <h3>Free</h3>
+
+              <p className="register-plan-price">
+                Gratis
+              </p>
+
+              <ul>
+                <li>Registro del equipo</li>
+                <li>Jugadores limitados</li>
+                <li>Juegos limitados</li>
+                <li>Estadísticas básicas</li>
+                <li>Acceso privado con código</li>
+              </ul>
+            </button>
+
+            <button
+              type="button"
+              className={`register-plan-card featured ${
+                form.plan === 'pro' ? 'active' : ''
+              }`}
+              onClick={() => selectPlan('pro')}
+            >
+              <span className="register-plan-badge">
+                Recomendado
+              </span>
+
+              <h3>Pro</h3>
+
+              <p className="register-plan-price">
+                Para equipos que quieren más control
+              </p>
+
+              <ul>
+                <li>Más jugadores disponibles</li>
+                <li>Más juegos registrados</li>
+                <li>Estadísticas avanzadas</li>
+                <li>Ranking, líderes y comparaciones</li>
+                <li>Vista pública del equipo</li>
+              </ul>
+            </button>
+
+          </div>
+
+          <div className="register-selected-plan">
+            Plan seleccionado: <strong>{form.plan === 'free' ? 'Free' : 'Pro'}</strong>
+          </div>
+
+          <div className="register-form-header second">
+            <span>Paso 2</span>
+            <h2>Datos del equipo</h2>
+          </div>
 
           <div className="register-grid">
 
@@ -298,24 +370,6 @@ function RegisterTeamPage() {
               />
             </div>
 
-            <div className="register-field">
-              <label>Plan</label>
-
-              <select
-                name="plan"
-                value={form.plan}
-                onChange={handleChange}
-              >
-                <option value="free">
-                  Free
-                </option>
-
-                <option value="pro">
-                  Pro
-                </option>
-              </select>
-            </div>
-
             <label className="register-check">
 
               <input
@@ -334,7 +388,7 @@ function RegisterTeamPage() {
           </div>
 
           <div className="register-form-header second">
-            <span>Paso 2</span>
+            <span>Paso 3</span>
             <h2>Usuario administrador</h2>
           </div>
 
@@ -402,7 +456,7 @@ function RegisterTeamPage() {
           >
             {loading
               ? 'Registrando equipo...'
-              : 'Registrar equipo'}
+              : `Registrar equipo en plan ${form.plan === 'free' ? 'Free' : 'Pro'}`}
           </button>
 
         </form>
